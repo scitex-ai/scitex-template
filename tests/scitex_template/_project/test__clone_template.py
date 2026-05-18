@@ -2,9 +2,22 @@
 # Timestamp: 2026-02-08
 # File: tests/scitex/template/test_clone_template.py
 
-"""Tests for the unified clone_template dispatcher."""
+"""Tests for the unified clone_template dispatcher.
 
-from unittest.mock import MagicMock, patch
+PA-306 no-mocks. We swap the production ``TEMPLATES`` dict entry
+for a hand-rolled callable that records its kwargs; restore at
+teardown. No ``unittest.mock`` / ``monkeypatch`` — the dispatcher's
+own dict IS the documented seam.
+
+The "xfail" suites that targeted non-existent
+``scitex.scholar.ensure`` / ``scitex.writer.ensure`` APIs (and
+needed heavy mocking to pretend they existed) are removed — they
+asserted nothing real about production code.
+"""
+
+from __future__ import annotations
+
+from typing import Any, Dict, List
 
 import pytest
 
@@ -17,517 +30,708 @@ from scitex_template._project._clone_template import (
 )
 
 
+# ---------------------------------------------------------------------------
+# Hand-rolled fake callable + _swap_template helper
+# ---------------------------------------------------------------------------
+
+
+class _RecordingClone:
+    """Callable that records every kwargs and returns ``return_value``."""
+
+    def __init__(self, return_value: bool = True) -> None:
+        self.return_value = return_value
+        self.calls: List[Dict[str, Any]] = []
+
+    def __call__(self, **kwargs: Any) -> bool:
+        self.calls.append(kwargs)
+        return self.return_value
+
+
+def _swap_template(template_id: str, fake: Any):
+    """Replace ``TEMPLATES[template_id]`` with ``fake``; return restore fn."""
+    saved = TEMPLATES.get(template_id, _MISSING)
+    TEMPLATES[template_id] = fake
+
+    def _restore():
+        if saved is _MISSING:
+            TEMPLATES.pop(template_id, None)
+        else:
+            TEMPLATES[template_id] = saved
+
+    return _restore
+
+
+_MISSING = object()
+
+
+# ---------------------------------------------------------------------------
+# Dispatch — canonical IDs
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def fake_research():
+    """Swap TEMPLATES['research'] for a recording fake; restore on teardown."""
+    fake = _RecordingClone(return_value=True)
+    restore = _swap_template("research", fake)
+    try:
+        yield fake
+    finally:
+        restore()
+
+
 class TestCloneTemplateDispatch:
-    """Test that clone_template dispatches to correct functions."""
+    """Canonical template IDs dispatch to their function."""
 
     @pytest.mark.parametrize("template_id", list(TEMPLATES.keys()))
-    def test_canonical_ids_dispatch(self, template_id):
-        """Each canonical template ID dispatches to its function."""
-        mock_func = MagicMock(return_value=True)
-        with patch.dict(TEMPLATES, {template_id: mock_func}):
+    def test_canonical_id_returns_true_when_clone_returns_true(self, template_id):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template(template_id, fake)
+        try:
+            # Act
             result = clone_template(
                 template_id=template_id,
                 project_dir="/tmp/test-project",
             )
+            # Assert
             assert result is True
-            mock_func.assert_called_once_with(
-                project_dir="/tmp/test-project",
-                git_strategy="child",
-                branch=None,
-                tag=None,
-            )
+        finally:
+            restore()
 
-    @pytest.mark.parametrize(
-        "alias,canonical",
-        list(ALIASES.items()),
-    )
-    def test_aliases_resolve(self, alias, canonical):
-        """Aliases resolve to canonical IDs."""
-        mock_func = MagicMock(return_value=True)
-        with patch.dict(TEMPLATES, {canonical: mock_func}):
-            result = clone_template(
-                template_id=alias,
-                project_dir="/tmp/test-alias",
-            )
+    @pytest.mark.parametrize("template_id", list(TEMPLATES.keys()))
+    def test_canonical_id_invokes_clone_exactly_once(self, template_id):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template(template_id, fake)
+        try:
+            # Act
+            clone_template(template_id=template_id, project_dir="/tmp/test-project")
+            # Assert
+            assert len(fake.calls) == 1
+        finally:
+            restore()
+
+    @pytest.mark.parametrize("template_id", list(TEMPLATES.keys()))
+    def test_canonical_id_forwards_project_dir(self, template_id):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template(template_id, fake)
+        try:
+            # Act
+            clone_template(template_id=template_id, project_dir="/tmp/test-project")
+            # Assert
+            assert fake.calls[0]["project_dir"] == "/tmp/test-project"
+        finally:
+            restore()
+
+    @pytest.mark.parametrize("template_id", list(TEMPLATES.keys()))
+    def test_canonical_id_defaults_git_strategy_to_child(self, template_id):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template(template_id, fake)
+        try:
+            # Act
+            clone_template(template_id=template_id, project_dir="/tmp/test-project")
+            # Assert
+            assert fake.calls[0]["git_strategy"] == "child"
+        finally:
+            restore()
+
+
+# ---------------------------------------------------------------------------
+# Alias resolution
+# ---------------------------------------------------------------------------
+
+
+class TestAliasResolution:
+    """Aliases resolve to canonical IDs."""
+
+    @pytest.mark.parametrize("alias,canonical", list(ALIASES.items()))
+    def test_alias_dispatches_to_canonical_clone_function(self, alias, canonical):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template(canonical, fake)
+        try:
+            # Act
+            clone_template(template_id=alias, project_dir="/tmp/test-alias")
+            # Assert
+            assert len(fake.calls) == 1
+        finally:
+            restore()
+
+    @pytest.mark.parametrize("alias,canonical", list(ALIASES.items()))
+    def test_alias_returns_clone_return_value(self, alias, canonical):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template(canonical, fake)
+        try:
+            # Act
+            result = clone_template(template_id=alias, project_dir="/tmp/test-alias")
+            # Assert
             assert result is True
-            mock_func.assert_called_once()
+        finally:
+            restore()
 
-    def test_unknown_template_raises(self):
-        """Unknown template ID raises ValueError."""
+
+# ---------------------------------------------------------------------------
+# Error paths and kwargs forwarding
+# ---------------------------------------------------------------------------
+
+
+class TestCloneTemplateErrors:
+    def test_unknown_template_id_raises_value_error(self):
+        # Arrange
+        bogus_id = "nonexistent"
+
+        # Act
+        def _call():
+            clone_template(template_id=bogus_id, project_dir="/tmp/test")
+
+        # Assert
         with pytest.raises(ValueError, match="Unknown template"):
-            clone_template(
-                template_id="nonexistent",
-                project_dir="/tmp/test",
-            )
+            _call()
 
-    def test_kwargs_forwarded(self):
-        """git_strategy, branch, tag are forwarded."""
-        mock_func = MagicMock(return_value=True)
-        with patch.dict(TEMPLATES, {"research": mock_func}):
-            clone_template(
-                template_id="research",
-                project_dir="/tmp/test",
-                git_strategy="origin",
-                branch="develop",
-                tag=None,
-            )
-            mock_func.assert_called_once_with(
-                project_dir="/tmp/test",
-                git_strategy="origin",
-                branch="develop",
-                tag=None,
-            )
 
-    def test_git_strategy_none(self):
-        """git_strategy=None is forwarded correctly."""
-        mock_func = MagicMock(return_value=True)
-        with patch.dict(TEMPLATES, {"research": mock_func}):
-            clone_template(
-                template_id="research",
-                project_dir="/tmp/test",
-                git_strategy=None,
-            )
-            mock_func.assert_called_once_with(
-                project_dir="/tmp/test",
-                git_strategy=None,
-                branch=None,
-                tag=None,
-            )
+class TestKwargsForwarding:
+    def test_git_strategy_origin_is_forwarded(self, fake_research):
+        # Arrange
+        # (fixture provides recording fake at TEMPLATES['research'])
+        # Act
+        clone_template(
+            template_id="research",
+            project_dir="/tmp/test",
+            git_strategy="origin",
+            branch="develop",
+            tag=None,
+        )
+        # Assert
+        assert fake_research.calls[0]["git_strategy"] == "origin"
 
-    def test_return_false_propagated(self):
-        """False return from clone function is propagated."""
-        mock_func = MagicMock(return_value=False)
-        with patch.dict(TEMPLATES, {"research": mock_func}):
-            result = clone_template(
-                template_id="research",
-                project_dir="/tmp/test",
-            )
+    def test_branch_is_forwarded(self, fake_research):
+        # Arrange
+        # Act
+        clone_template(
+            template_id="research",
+            project_dir="/tmp/test",
+            git_strategy="origin",
+            branch="develop",
+        )
+        # Assert
+        assert fake_research.calls[0]["branch"] == "develop"
+
+    def test_tag_is_forwarded(self, fake_research):
+        # Arrange
+        # Act
+        clone_template(
+            template_id="research",
+            project_dir="/tmp/test",
+            tag="v1.2.3",
+        )
+        # Assert
+        assert fake_research.calls[0]["tag"] == "v1.2.3"
+
+    def test_git_strategy_none_is_forwarded_as_none(self, fake_research):
+        # Arrange
+        # Act
+        clone_template(
+            template_id="research",
+            project_dir="/tmp/test",
+            git_strategy=None,
+        )
+        # Assert
+        assert fake_research.calls[0]["git_strategy"] is None
+
+
+class TestReturnValuePropagation:
+    def test_false_return_from_clone_function_is_propagated(self):
+        # Arrange
+        fake = _RecordingClone(return_value=False)
+        restore = _swap_template("research", fake)
+        try:
+            # Act
+            result = clone_template(template_id="research", project_dir="/tmp/test")
+            # Assert
             assert result is False
+        finally:
+            restore()
+
+
+# ---------------------------------------------------------------------------
+# Template-id helpers
+# ---------------------------------------------------------------------------
 
 
 class TestTemplateIdHelpers:
-    """Test helper functions for template IDs."""
+    """Helper functions for template IDs."""
 
-    def test_get_template_ids(self):
-        """get_template_ids returns canonical IDs only."""
+    def test_get_template_ids_includes_research(self):
+        # Arrange
+        # Act
         ids = get_template_ids()
+        # Assert
         assert "research" in ids
+
+    def test_get_template_ids_includes_research_minimal(self):
+        # Arrange
+        # Act
+        ids = get_template_ids()
+        # Assert
         assert "research_minimal" in ids
+
+    def test_get_template_ids_includes_scitex_minimal(self):
+        # Arrange
+        # Act
+        ids = get_template_ids()
+        # Assert
         assert "scitex_minimal" in ids
+
+    def test_get_template_ids_includes_pip_project(self):
+        # Arrange
+        # Act
+        ids = get_template_ids()
+        # Assert
         assert "pip_project" in ids
+
+    def test_get_template_ids_includes_singularity(self):
+        # Arrange
+        # Act
+        ids = get_template_ids()
+        # Assert
         assert "singularity" in ids
+
+    def test_get_template_ids_includes_paper_directory(self):
+        # Arrange
+        # Act
+        ids = get_template_ids()
+        # Assert
         assert "paper_directory" in ids
+
+    def test_get_template_ids_excludes_alias_minimal(self):
+        # Arrange
+        # Act
+        ids = get_template_ids()
+        # Assert
         assert "minimal" not in ids
 
-    def test_get_all_template_ids(self):
-        """get_all_template_ids includes aliases."""
+    def test_get_all_template_ids_includes_canonical_research(self):
+        # Arrange
+        # Act
         ids = get_all_template_ids()
+        # Assert
         assert "research" in ids
+
+    def test_get_all_template_ids_includes_alias_minimal(self):
+        # Arrange
+        # Act
+        ids = get_all_template_ids()
+        # Assert
         assert "minimal" in ids
+
+    def test_get_all_template_ids_includes_alias_pip_project_hyphenated(self):
+        # Arrange
+        # Act
+        ids = get_all_template_ids()
+        # Assert
         assert "pip-project" in ids
+
+    def test_get_all_template_ids_includes_alias_paper(self):
+        # Arrange
+        # Act
+        ids = get_all_template_ids()
+        # Assert
         assert "paper" in ids
 
     def test_minimal_alias_resolves_to_scitex_minimal(self):
-        """The 'minimal' alias resolves to scitex_minimal."""
-        assert ALIASES["minimal"] == "scitex_minimal"
+        # Arrange
+        # Act
+        target = ALIASES["minimal"]
+        # Assert
+        assert target == "scitex_minimal"
+
+
+# ---------------------------------------------------------------------------
+# include_dirs / extra kwargs forwarding
+# ---------------------------------------------------------------------------
 
 
 class TestIncludeDirsForwarding:
-    """Test include_dirs parameter forwarding."""
+    """``include_dirs`` and other extra kwargs flow through the dispatcher."""
 
-    def test_include_dirs_forwarded_to_minimal(self):
-        """include_dirs kwarg is forwarded to clone function."""
-        mock_func = MagicMock(return_value=True)
-        with patch.dict(TEMPLATES, {"research_minimal": mock_func}):
+    def test_include_dirs_kwarg_is_forwarded_to_research_minimal(self):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template("research_minimal", fake)
+        try:
+            # Act
             clone_template(
                 template_id="research_minimal",
                 project_dir="/tmp/test",
                 include_dirs=["00_shared", "01_manuscript"],
             )
-            mock_func.assert_called_once()
-            _, kwargs = mock_func.call_args
-            assert kwargs["include_dirs"] == ["00_shared", "01_manuscript"]
+            # Assert
+            assert fake.calls[0]["include_dirs"] == ["00_shared", "01_manuscript"]
+        finally:
+            restore()
 
-    def test_extra_kwargs_forwarded(self):
-        """Extra kwargs are forwarded through dispatcher."""
-        mock_func = MagicMock(return_value=True)
-        with patch.dict(TEMPLATES, {"research": mock_func}):
-            clone_template(
-                template_id="research",
-                project_dir="/tmp/test",
-                use_cache=False,
-            )
-            mock_func.assert_called_once()
-            _, kwargs = mock_func.call_args
-            assert kwargs["use_cache"] is False
+    def test_use_cache_kwarg_is_forwarded_to_research(self, fake_research):
+        # Arrange
+        # Act
+        clone_template(
+            template_id="research",
+            project_dir="/tmp/test",
+            use_cache=False,
+        )
+        # Assert
+        assert fake_research.calls[0]["use_cache"] is False
+
+
+# ---------------------------------------------------------------------------
+# _filter_to_include_dirs — pure filesystem behaviour
+# ---------------------------------------------------------------------------
 
 
 class TestFilterToIncludeDirs:
-    """Test the _filter_to_include_dirs helper."""
+    """The ``_filter_to_include_dirs`` helper prunes a real directory tree."""
 
-    def test_removes_unlisted_dirs(self, tmp_path):
-        """Directories not in include_dirs are removed."""
+    def test_removes_dir_not_in_include_list(self, tmp_path):
+        # Arrange
         from scitex_template._project._clone_project import _filter_to_include_dirs
 
         (tmp_path / "00_shared").mkdir()
         (tmp_path / "01_manuscript").mkdir()
         (tmp_path / "02_supplementary").mkdir()
-        (tmp_path / "03_revision").mkdir()
-        (tmp_path / "README.md").write_text("test")
-
+        # Act
         _filter_to_include_dirs(tmp_path, ["00_shared", "01_manuscript"])
-
-        assert (tmp_path / "00_shared").exists()
-        assert (tmp_path / "01_manuscript").exists()
+        # Assert
         assert not (tmp_path / "02_supplementary").exists()
-        assert not (tmp_path / "03_revision").exists()
 
-    def test_preserves_readme_and_license(self, tmp_path):
-        """README.md and LICENSE are always preserved."""
+    def test_keeps_dir_listed_in_include(self, tmp_path):
+        # Arrange
+        from scitex_template._project._clone_project import _filter_to_include_dirs
+
+        (tmp_path / "00_shared").mkdir()
+        (tmp_path / "01_manuscript").mkdir()
+        (tmp_path / "02_supplementary").mkdir()
+        # Act
+        _filter_to_include_dirs(tmp_path, ["00_shared", "01_manuscript"])
+        # Assert
+        assert (tmp_path / "00_shared").exists()
+
+    def test_preserves_readme_even_when_not_listed(self, tmp_path):
+        # Arrange
         from scitex_template._project._clone_project import _filter_to_include_dirs
 
         (tmp_path / "00_shared").mkdir()
         (tmp_path / "README.md").write_text("readme")
-        (tmp_path / "LICENSE").write_text("license")
-        (tmp_path / "extra").mkdir()
-
+        # Act
         _filter_to_include_dirs(tmp_path, ["00_shared"])
-
+        # Assert
         assert (tmp_path / "README.md").exists()
-        assert (tmp_path / "LICENSE").exists()
-        assert not (tmp_path / "extra").exists()
 
-    def test_preserves_dotfiles(self, tmp_path):
-        """Dotfiles like .gitignore are always preserved."""
+    def test_preserves_license_even_when_not_listed(self, tmp_path):
+        # Arrange
+        from scitex_template._project._clone_project import _filter_to_include_dirs
+
+        (tmp_path / "00_shared").mkdir()
+        (tmp_path / "LICENSE").write_text("license")
+        # Act
+        _filter_to_include_dirs(tmp_path, ["00_shared"])
+        # Assert
+        assert (tmp_path / "LICENSE").exists()
+
+    def test_preserves_dotfile_gitignore(self, tmp_path):
+        # Arrange
         from scitex_template._project._clone_project import _filter_to_include_dirs
 
         (tmp_path / "00_shared").mkdir()
         (tmp_path / ".gitignore").write_text("*.pyc")
-        (tmp_path / ".git").mkdir()
-        (tmp_path / "extra_dir").mkdir()
-        (tmp_path / "extra_file.txt").write_text("x")
-
+        # Act
         _filter_to_include_dirs(tmp_path, ["00_shared"])
-
+        # Assert
         assert (tmp_path / ".gitignore").exists()
-        assert (tmp_path / ".git").exists()
-        assert not (tmp_path / "extra_dir").exists()
-        assert not (tmp_path / "extra_file.txt").exists()
 
-    def test_removes_unlisted_files(self, tmp_path):
-        """Files not in include_dirs are also removed."""
+    def test_preserves_dot_git_dir(self, tmp_path):
+        # Arrange
+        from scitex_template._project._clone_project import _filter_to_include_dirs
+
+        (tmp_path / "00_shared").mkdir()
+        (tmp_path / ".git").mkdir()
+        # Act
+        _filter_to_include_dirs(tmp_path, ["00_shared"])
+        # Assert
+        assert (tmp_path / ".git").exists()
+
+    def test_removes_unlisted_top_level_file(self, tmp_path):
+        # Arrange
+        from scitex_template._project._clone_project import _filter_to_include_dirs
+
+        (tmp_path / "00_shared").mkdir()
+        (tmp_path / "pyproject.toml").write_text("[project]")
+        # Act
+        _filter_to_include_dirs(tmp_path, ["00_shared"])
+        # Assert
+        assert not (tmp_path / "pyproject.toml").exists()
+
+    def test_keeps_top_level_file_when_listed(self, tmp_path):
+        # Arrange
         from scitex_template._project._clone_project import _filter_to_include_dirs
 
         (tmp_path / "00_shared").mkdir()
         (tmp_path / "compile.sh").write_text("#!/bin/bash")
-        (tmp_path / "pyproject.toml").write_text("[project]")
-
+        # Act
         _filter_to_include_dirs(tmp_path, ["00_shared", "compile.sh"])
-
+        # Assert
         assert (tmp_path / "compile.sh").exists()
-        assert not (tmp_path / "pyproject.toml").exists()
+
+
+# ---------------------------------------------------------------------------
+# MINIMAL_INCLUDE_DIRS constant
+# ---------------------------------------------------------------------------
 
 
 class TestMinimalIncludeDirs:
-    """Test MINIMAL_INCLUDE_DIRS constant."""
+    """MINIMAL_INCLUDE_DIRS exports the documented minimal layout."""
 
-    def test_minimal_dirs_defined(self):
-        """MINIMAL_INCLUDE_DIRS is exported and contains expected dirs."""
+    @pytest.mark.parametrize(
+        "expected_dir",
+        ["00_shared", "01_manuscript", "scripts", "compile.sh", "Makefile", "config"],
+    )
+    def test_minimal_include_dirs_contains_expected_entry(self, expected_dir):
+        # Arrange
         from scitex_template import MINIMAL_INCLUDE_DIRS
 
-        assert "00_shared" in MINIMAL_INCLUDE_DIRS
-        assert "01_manuscript" in MINIMAL_INCLUDE_DIRS
-        assert "scripts" in MINIMAL_INCLUDE_DIRS
-        assert "compile.sh" in MINIMAL_INCLUDE_DIRS
-        assert "Makefile" in MINIMAL_INCLUDE_DIRS
-        assert "config" in MINIMAL_INCLUDE_DIRS
+        # Act
+        present = expected_dir in MINIMAL_INCLUDE_DIRS
+        # Assert
+        assert present
 
-    def test_minimal_includes_supplementary_and_revision(self):
-        """Minimal template includes supplementary and revision."""
+    def test_minimal_include_dirs_contains_supplementary(self):
+        # Arrange
         from scitex_template import MINIMAL_INCLUDE_DIRS
 
-        assert "02_supplementary" in MINIMAL_INCLUDE_DIRS
-        assert "03_revision" in MINIMAL_INCLUDE_DIRS
+        # Act
+        present = "02_supplementary" in MINIMAL_INCLUDE_DIRS
+        # Assert
+        assert present
 
-    def test_minimal_excludes_dev_dirs(self):
-        """Minimal template excludes dev-only directories."""
+    def test_minimal_include_dirs_contains_revision(self):
+        # Arrange
         from scitex_template import MINIMAL_INCLUDE_DIRS
 
-        assert "src" not in MINIMAL_INCLUDE_DIRS
-        assert "tests" not in MINIMAL_INCLUDE_DIRS
+        # Act
+        present = "03_revision" in MINIMAL_INCLUDE_DIRS
+        # Assert
+        assert present
 
-    def test_clone_research_minimal_uses_include_dirs(self):
-        """clone_research_minimal passes include_dirs to clone_project."""
-        with patch(
-            "scitex_template._project.clone_research_minimal.clone_project"
-        ) as mock:
-            mock.return_value = True
-            from scitex_template._project.clone_research_minimal import (
-                MINIMAL_INCLUDE_DIRS,
-                clone_research_minimal,
-            )
+    def test_minimal_include_dirs_excludes_src(self):
+        # Arrange
+        from scitex_template import MINIMAL_INCLUDE_DIRS
 
+        # Act
+        present = "src" in MINIMAL_INCLUDE_DIRS
+        # Assert
+        assert not present
+
+    def test_minimal_include_dirs_excludes_tests(self):
+        # Arrange
+        from scitex_template import MINIMAL_INCLUDE_DIRS
+
+        # Act
+        present = "tests" in MINIMAL_INCLUDE_DIRS
+        # Assert
+        assert not present
+
+
+# ---------------------------------------------------------------------------
+# clone_research_minimal passes include_dirs through clone_project
+# ---------------------------------------------------------------------------
+
+
+class _RecordingCloneProject:
+    """Callable that records kwargs and returns True."""
+
+    def __init__(self) -> None:
+        self.calls: List[Dict[str, Any]] = []
+
+    def __call__(self, *args: Any, **kwargs: Any) -> bool:
+        self.calls.append(kwargs)
+        return True
+
+
+def _swap_clone_project_in_module(module, fake):
+    """Replace ``module.clone_project`` with ``fake``; return restore fn."""
+    saved = module.clone_project
+    module.clone_project = fake
+
+    def _restore():
+        module.clone_project = saved
+
+    return _restore
+
+
+class TestCloneResearchMinimalIncludeDirsForwarding:
+    """``clone_research_minimal`` forwards ``include_dirs`` to ``clone_project``."""
+
+    def test_clone_research_minimal_passes_minimal_include_dirs(self):
+        # Arrange
+        from scitex_template._project import clone_research_minimal as crm
+        from scitex_template._project.clone_research_minimal import (
+            MINIMAL_INCLUDE_DIRS,
+            clone_research_minimal,
+        )
+
+        fake = _RecordingCloneProject()
+        restore = _swap_clone_project_in_module(crm, fake)
+        try:
+            # Act
             clone_research_minimal("/tmp/test-minimal")
-            mock.assert_called_once()
-            _, kwargs = mock.call_args
-            assert kwargs["include_dirs"] == MINIMAL_INCLUDE_DIRS
+            # Assert
+            assert fake.calls[0]["include_dirs"] == MINIMAL_INCLUDE_DIRS
+        finally:
+            restore()
+
+
+# ---------------------------------------------------------------------------
+# customize_minimal_template — real filesystem
+# ---------------------------------------------------------------------------
 
 
 class TestCustomizeMinimalPaths:
-    """Test that customize_minimal_template finds files in direct clone layout."""
+    """customize_minimal_template finds files in both flat and nested layouts."""
 
-    def test_direct_clone_layout(self, tmp_path):
-        """customize_minimal_template works with direct 00_shared/ layout."""
+    def test_direct_clone_layout_writes_project_name_to_title(self, tmp_path):
+        # Arrange
         from scitex_template._project._customize import customize_minimal_template
 
         shared = tmp_path / "00_shared"
         shared.mkdir()
         (shared / "title.tex").write_text("\\title{Old Title}")
         (shared / "authors.tex").write_text("\\author{Old Author}")
-
+        # Act
         customize_minimal_template(
             str(tmp_path),
             {"name": "My Project", "owner": "testuser", "owner_full_name": "Test User"},
         )
+        # Assert
+        assert "My Project" in (shared / "title.tex").read_text()
 
-        title = (shared / "title.tex").read_text()
-        assert "My Project" in title
-        authors = (shared / "authors.tex").read_text()
-        assert "Test User" in authors
+    def test_direct_clone_layout_writes_owner_full_name_to_authors(self, tmp_path):
+        # Arrange
+        from scitex_template._project._customize import customize_minimal_template
 
-    def test_nested_layout_still_works(self, tmp_path):
-        """customize_minimal_template also works with scitex/writer/ layout."""
+        shared = tmp_path / "00_shared"
+        shared.mkdir()
+        (shared / "title.tex").write_text("\\title{Old Title}")
+        (shared / "authors.tex").write_text("\\author{Old Author}")
+        # Act
+        customize_minimal_template(
+            str(tmp_path),
+            {"name": "My Project", "owner": "testuser", "owner_full_name": "Test User"},
+        )
+        # Assert
+        assert "Test User" in (shared / "authors.tex").read_text()
+
+    def test_nested_scitex_writer_layout_writes_project_name_to_title(self, tmp_path):
+        # Arrange
         from scitex_template._project._customize import customize_minimal_template
 
         nested = tmp_path / "scitex" / "writer" / "00_shared"
         nested.mkdir(parents=True)
         (nested / "title.tex").write_text("\\title{Old}")
+        # Act
+        customize_minimal_template(str(tmp_path), {"name": "Nested Project"})
+        # Assert
+        assert "Nested Project" in (nested / "title.tex").read_text()
 
-        customize_minimal_template(
-            str(tmp_path),
-            {"name": "Nested Project"},
-        )
 
-        title = (nested / "title.tex").read_text()
-        assert "Nested Project" in title
+# ---------------------------------------------------------------------------
+# Package re-exports
+# ---------------------------------------------------------------------------
 
 
 class TestImportFromPackage:
-    """Test that clone_template is importable from scitex_template."""
+    """clone_template + friends are importable from ``scitex_template``."""
 
-    def test_import_from_template(self):
-        """clone_template is importable from scitex_template."""
+    def test_clone_template_is_importable_from_scitex_template(self):
+        # Arrange
         from scitex_template import clone_template as ct
 
-        assert callable(ct)
+        # Act
+        is_callable = callable(ct)
+        # Assert
+        assert is_callable
 
-    def test_in_all(self):
-        """clone_template is in __all__."""
+    def test_clone_template_is_in_scitex_template_dunder_all(self):
+        # Arrange
         import scitex_template
 
-        assert "clone_template" in scitex_template.__all__
+        # Act
+        present = "clone_template" in scitex_template.__all__
+        # Assert
+        assert present
 
-    def test_minimal_include_dirs_in_all(self):
-        """MINIMAL_INCLUDE_DIRS is in __all__."""
+    def test_minimal_include_dirs_is_in_scitex_template_dunder_all(self):
+        # Arrange
         import scitex_template
 
-        assert "MINIMAL_INCLUDE_DIRS" in scitex_template.__all__
+        # Act
+        present = "MINIMAL_INCLUDE_DIRS" in scitex_template.__all__
+        # Assert
+        assert present
 
-    def test_clone_scitex_minimal_in_all(self):
-        """clone_scitex_minimal is in __all__."""
+    def test_clone_scitex_minimal_is_in_scitex_template_dunder_all(self):
+        # Arrange
         import scitex_template
 
-        assert "clone_scitex_minimal" in scitex_template.__all__
+        # Act
+        present = "clone_scitex_minimal" in scitex_template.__all__
+        # Assert
+        assert present
+
+
+# ---------------------------------------------------------------------------
+# scitex_minimal dispatch
+# ---------------------------------------------------------------------------
 
 
 class TestScitexMinimalDispatch:
-    """Test scitex_minimal template dispatching."""
+    def test_scitex_minimal_is_registered_in_TEMPLATES(self):
+        # Arrange
+        # Act
+        present = "scitex_minimal" in TEMPLATES
+        # Assert
+        assert present
 
-    def test_scitex_minimal_in_templates(self):
-        """scitex_minimal is registered in TEMPLATES."""
-        assert "scitex_minimal" in TEMPLATES
-
-    def test_scitex_minimal_dispatches(self):
-        """scitex_minimal dispatches to its clone function."""
-        mock_func = MagicMock(return_value=True)
-        with patch.dict(TEMPLATES, {"scitex_minimal": mock_func}):
+    def test_scitex_minimal_dispatches_to_its_clone_function(self):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template("scitex_minimal", fake)
+        try:
+            # Act
             result = clone_template(
                 template_id="scitex_minimal",
                 project_dir="/tmp/test-scitex-minimal",
             )
+            # Assert
             assert result is True
-            mock_func.assert_called_once()
+        finally:
+            restore()
 
-    def test_minimal_alias_dispatches_to_scitex_minimal(self):
-        """'minimal' alias dispatches to scitex_minimal function."""
-        mock_func = MagicMock(return_value=True)
-        with patch.dict(TEMPLATES, {"scitex_minimal": mock_func}):
-            result = clone_template(
+    def test_minimal_alias_dispatches_to_scitex_minimal_clone_function(self):
+        # Arrange
+        fake = _RecordingClone(return_value=True)
+        restore = _swap_template("scitex_minimal", fake)
+        try:
+            # Act
+            clone_template(
                 template_id="minimal",
                 project_dir="/tmp/test-minimal-alias",
             )
-            assert result is True
-            mock_func.assert_called_once()
-
-
-@pytest.mark.xfail(
-    reason=(
-        "Tests target scitex.scholar.ensure / scitex.writer.ensure — neither "
-        "exists on the standalone packages or their umbrella shims. The actual "
-        "codepath in clone_scitex_minimal.py uses ensure_workspace (which is "
-        "also missing from scitex.scholar). Rewrite when the workspace-ensure "
-        "API lands in scitex-scholar / scitex-writer."
-    ),
-    strict=False,
-)
-class TestScitexMinimalComposition:
-    """Test clone_scitex_minimal composes ensure calls."""
-
-    @patch("scitex_template._project._scholar_writer_integration.ensure_integration")
-    @patch("scitex.scholar.ensure")
-    @patch("scitex.writer.ensure")
-    def test_calls_writer_ensure(self, mock_writer, mock_scholar, mock_int, tmp_path):
-        """clone_scitex_minimal calls writer.ensure."""
-        from scitex_template._project.clone_scitex_minimal import clone_scitex_minimal
-
-        clone_scitex_minimal(str(tmp_path / "proj"))
-        mock_writer.assert_called_once()
-
-    @patch("scitex_template._project._scholar_writer_integration.ensure_integration")
-    @patch("scitex.scholar.ensure")
-    @patch("scitex.writer.ensure")
-    def test_calls_scholar_ensure(self, mock_writer, mock_scholar, mock_int, tmp_path):
-        """clone_scitex_minimal calls scholar.ensure."""
-        from scitex_template._project.clone_scitex_minimal import clone_scitex_minimal
-
-        clone_scitex_minimal(str(tmp_path / "proj"))
-        mock_scholar.assert_called_once()
-
-    @patch("scitex_template._project._scholar_writer_integration.ensure_integration")
-    @patch("scitex.scholar.ensure")
-    @patch("scitex.writer.ensure")
-    def test_calls_ensure_integration(
-        self, mock_writer, mock_scholar, mock_int, tmp_path
-    ):
-        """clone_scitex_minimal sets up integration."""
-        from scitex_template._project.clone_scitex_minimal import clone_scitex_minimal
-
-        clone_scitex_minimal(str(tmp_path / "proj"))
-        mock_int.assert_called_once()
-
-    @patch("scitex_template._project._scholar_writer_integration.ensure_integration")
-    @patch("scitex.scholar.ensure")
-    @patch("scitex.writer.ensure")
-    def test_forwards_git_strategy(self, mock_writer, mock_scholar, mock_int, tmp_path):
-        """git_strategy is forwarded to writer.ensure."""
-        from scitex_template._project.clone_scitex_minimal import clone_scitex_minimal
-
-        clone_scitex_minimal(str(tmp_path / "proj"), git_strategy="origin")
-        _, kwargs = mock_writer.call_args
-        assert kwargs["git_strategy"] == "origin"
-
-    @patch("scitex_template._project._scholar_writer_integration.ensure_integration")
-    @patch("scitex.scholar.ensure")
-    @patch("scitex.writer.ensure")
-    def test_returns_true_on_success(
-        self, mock_writer, mock_scholar, mock_int, tmp_path
-    ):
-        """Returns True on successful creation."""
-        from scitex_template._project.clone_scitex_minimal import clone_scitex_minimal
-
-        result = clone_scitex_minimal(str(tmp_path / "proj"))
-        assert result is True
-
-
-@pytest.mark.xfail(
-    reason=(
-        "scitex.scholar.ensure module is not shipped by the standalone "
-        "scitex-scholar package; these tests should be moved there once the "
-        "ensure API is published."
-    ),
-    strict=False,
-)
-class TestScholarEnsure:
-    """Test scitex.scholar.ensure creates workspace scaffold."""
-
-    def test_creates_scaffold(self, tmp_path):
-        """ensure creates bib_files, library, prompts."""
-        from scitex.scholar.ensure import ensure
-
-        result = ensure(str(tmp_path))
-        assert result == tmp_path / "scitex" / "scholar"
-        assert (tmp_path / "scitex" / "scholar" / "bib_files").is_dir()
-        assert (tmp_path / "scitex" / "scholar" / "library").is_dir()
-        assert (tmp_path / "scitex" / "scholar" / "prompts").is_dir()
-
-    def test_noop_if_exists(self, tmp_path):
-        """ensure is a no-op if scholar directory already exists."""
-        from scitex.scholar.ensure import ensure
-
-        scholar_dir = tmp_path / "scitex" / "scholar"
-        scholar_dir.mkdir(parents=True)
-        (scholar_dir / "existing_file.txt").write_text("keep me")
-
-        result = ensure(str(tmp_path))
-        assert result == scholar_dir
-        assert (scholar_dir / "existing_file.txt").exists()
-
-    def test_importable_from_package(self):
-        """ensure is importable from scitex.scholar."""
-        from scitex.scholar import ensure
-
-        assert callable(ensure)
-
-
-@pytest.mark.xfail(
-    reason=(
-        "scitex.writer.ensure does not exist — scitex.writer only exports "
-        "ensure_workspace (a different API). These tests target a planned "
-        "API; rewrite when it lands."
-    ),
-    strict=False,
-)
-class TestWriterEnsure:
-    """Test scitex.writer.ensure function signature and behavior."""
-
-    def test_noop_if_exists(self, tmp_path):
-        """ensure returns existing path without calling Writer."""
-        from scitex.writer import ensure
-
-        writer_dir = tmp_path / "scitex" / "writer"
-        writer_dir.mkdir(parents=True)
-
-        result = ensure(str(tmp_path))
-        assert result == writer_dir
-
-    @patch("scitex.writer.Writer")
-    def test_calls_writer_constructor(self, mock_writer_cls, tmp_path):
-        """ensure calls Writer constructor for new workspace."""
-        from scitex.writer import ensure
-
-        result = ensure(str(tmp_path))
-        expected_path = tmp_path / "scitex" / "writer"
-        mock_writer_cls.assert_called_once_with(
-            str(expected_path), git_strategy="child"
-        )
-
-    @patch("scitex.writer.Writer")
-    def test_forwards_kwargs(self, mock_writer_cls, tmp_path):
-        """ensure forwards git_strategy and other kwargs."""
-        from scitex.writer import ensure
-
-        ensure(str(tmp_path), git_strategy="origin", branch="develop")
-        mock_writer_cls.assert_called_once_with(
-            str(tmp_path / "scitex" / "writer"),
-            git_strategy="origin",
-            branch="develop",
-        )
-
-    def test_importable_from_package(self):
-        """ensure is importable from scitex.writer."""
-        from scitex.writer import ensure
-
-        assert callable(ensure)
+            # Assert
+            assert len(fake.calls) == 1
+        finally:
+            restore()
 
 
 if __name__ == "__main__":

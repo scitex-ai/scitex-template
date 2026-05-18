@@ -12,27 +12,54 @@ from scitex_template._project._directory_structure import (
 
 
 class TestProjectStructure:
-    def test_has_expected_dirs(self):
+    def test_top_level_keys_match_expected_set(self):
+        # Arrange
         expected = {"config", "data", "scripts", "docs", "results", "temp"}
-        assert expected == set(PROJECT_STRUCTURE.keys())
+        # Act
+        actual = set(PROJECT_STRUCTURE.keys())
+        # Assert
+        assert actual == expected
 
 
 class TestBuildDirectoryTree:
-    def test_creates_top_level_dirs(self, tmp_path):
+    @pytest.mark.parametrize("dirname", list(PROJECT_STRUCTURE.keys()))
+    def test_default_creates_top_level_dir(self, tmp_path, dirname):
+        # Arrange
+        # Act
         build_directory_tree(str(tmp_path))
-        for d in PROJECT_STRUCTURE:
-            assert (tmp_path / d).is_dir()
+        # Assert
+        assert (tmp_path / dirname).is_dir()
 
-    def test_custom_structure(self, tmp_path):
+    def test_custom_structure_creates_src_dir(self, tmp_path):
+        # Arrange
         custom = {"src": [], "tests": [], "docs": []}
+        # Act
         build_directory_tree(str(tmp_path), structure=custom)
+        # Assert
         assert (tmp_path / "src").is_dir()
+
+    def test_custom_structure_creates_tests_dir(self, tmp_path):
+        # Arrange
+        custom = {"src": [], "tests": [], "docs": []}
+        # Act
+        build_directory_tree(str(tmp_path), structure=custom)
+        # Assert
         assert (tmp_path / "tests").is_dir()
 
-    def test_nested_structure(self, tmp_path):
+    def test_nested_structure_creates_data_raw_csv(self, tmp_path):
+        # Arrange
         nested = {"data": {"raw": ["csv", "json"]}}
+        # Act
         build_directory_tree(str(tmp_path), structure=nested)
+        # Assert
         assert (tmp_path / "data" / "raw" / "csv").is_dir()
+
+    def test_nested_structure_creates_data_raw_json(self, tmp_path):
+        # Arrange
+        nested = {"data": {"raw": ["csv", "json"]}}
+        # Act
+        build_directory_tree(str(tmp_path), structure=nested)
+        # Assert
         assert (tmp_path / "data" / "raw" / "json").is_dir()
 
 

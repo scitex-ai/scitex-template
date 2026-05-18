@@ -3,6 +3,8 @@
 # File: tests/scitex/template/_project/test__customize.py
 """Tests for scitex_template._project._customize."""
 
+import pathlib
+
 import pytest
 
 from scitex_template._project._customize import (
@@ -45,50 +47,68 @@ def metadata():
 
 
 class TestCustomizeTemplate:
-    def test_updates_readme(self, project_dir, metadata):
+    def test_updates_readme_title_to_project_name(self, project_dir, metadata):
+        # Arrange
+        # (fixtures provide project tree + metadata)
+        # Act
         customize_template(project_dir, metadata)
-        import pathlib
-
+        # Assert
         readme = (pathlib.Path(project_dir) / "README.md").read_text()
         assert "# My Research" in readme
+
+    def test_updates_readme_body_to_description(self, project_dir, metadata):
+        # Arrange
+        # Act
+        customize_template(project_dir, metadata)
+        # Assert
+        readme = (pathlib.Path(project_dir) / "README.md").read_text()
         assert "A test project" in readme
 
-    def test_updates_title_tex(self, project_dir, metadata):
+    def test_updates_title_tex_to_project_name(self, project_dir, metadata):
+        # Arrange
+        # Act
         customize_template(project_dir, metadata)
-        import pathlib
-
+        # Assert
         title = (
             pathlib.Path(project_dir) / "paper" / "manuscript" / "src" / "title.tex"
         ).read_text()
         assert "My Research" in title
 
-    def test_updates_authors_tex(self, project_dir, metadata):
+    def test_updates_authors_tex_to_owner_full_name(self, project_dir, metadata):
+        # Arrange
+        # Act
         customize_template(project_dir, metadata)
-        import pathlib
-
+        # Assert
         authors = (
             pathlib.Path(project_dir) / "paper" / "manuscript" / "src" / "authors.tex"
         ).read_text()
         assert "Jane Doe" in authors
 
-    def test_missing_files_no_error(self, tmp_path, metadata):
-        customize_template(str(tmp_path), metadata)
+    def test_missing_files_does_not_raise(self, tmp_path, metadata):
+        # Arrange
+        empty_dir = str(tmp_path)
+        # Act
+        customize_template(empty_dir, metadata)
+        # Assert
+        assert (tmp_path).exists()
 
 
 class TestCustomizeMinimalTemplate:
-    def test_updates_title(self, minimal_dir, metadata):
+    def test_updates_title_to_project_name(self, minimal_dir, metadata):
+        # Arrange
+        # Act
         customize_minimal_template(minimal_dir, metadata)
-        import pathlib
-
+        # Assert
         title = (
             pathlib.Path(minimal_dir) / "scitex" / "writer" / "00_shared" / "title.tex"
         ).read_text()
         assert "My Research" in title
 
-    def test_updates_author(self, minimal_dir, metadata):
+    def test_updates_authors_to_owner_full_name(self, minimal_dir, metadata):
+        # Arrange
+        # Act
         customize_minimal_template(minimal_dir, metadata)
-        import pathlib
-
+        # Assert
         authors = (
             pathlib.Path(minimal_dir)
             / "scitex"
@@ -98,10 +118,12 @@ class TestCustomizeMinimalTemplate:
         ).read_text()
         assert "Jane Doe" in authors
 
-    def test_uses_username_fallback(self, minimal_dir):
-        customize_minimal_template(minimal_dir, {"name": "Test", "owner": "jdoe"})
-        import pathlib
-
+    def test_uses_owner_username_when_no_full_name_provided(self, minimal_dir):
+        # Arrange
+        meta = {"name": "Test", "owner": "jdoe"}
+        # Act
+        customize_minimal_template(minimal_dir, meta)
+        # Assert
         authors = (
             pathlib.Path(minimal_dir)
             / "scitex"

@@ -27,41 +27,63 @@ def metadata():
 
 
 class TestCreateMinimalReadme:
-    def test_creates_file(self, tmp_path, metadata):
+    def test_minimal_readme_file_is_created_on_disk(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_minimal_readme(str(tmp_path), metadata)
+        # Assert
         assert out.exists()
+
+    def test_minimal_readme_filename_is_README_md(self, tmp_path, metadata):
+        # Arrange
+        # Act
+        out = create_minimal_readme(str(tmp_path), metadata)
+        # Assert
         assert out.name == "README.md"
 
-    def test_contains_project_name(self, tmp_path, metadata):
+    def test_minimal_readme_body_contains_project_name(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_minimal_readme(str(tmp_path), metadata)
-        content = out.read_text()
-        assert "# My Research" in content
+        # Assert
+        assert "# My Research" in out.read_text()
 
-    def test_contains_owner(self, tmp_path, metadata):
+    def test_minimal_readme_body_contains_owner_full_name(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_minimal_readme(str(tmp_path), metadata)
-        content = out.read_text()
-        assert "Jane Doe" in content
+        # Assert
+        assert "Jane Doe" in out.read_text()
 
 
 class TestCreateProjectReadme:
-    def test_creates_file(self, tmp_path, metadata):
+    def test_project_readme_file_is_created_on_disk(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_project_readme(str(tmp_path), metadata)
+        # Assert
         assert out.exists()
 
-    def test_contains_hypotheses(self, tmp_path, metadata):
+    def test_project_readme_body_contains_hypotheses(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_project_readme(str(tmp_path), metadata)
-        content = out.read_text()
-        assert "H1: X > Y" in content
+        # Assert
+        assert "H1: X > Y" in out.read_text()
 
-    def test_contains_progress(self, tmp_path, metadata):
+    def test_project_readme_body_contains_progress_percentage(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_project_readme(str(tmp_path), metadata)
-        content = out.read_text()
-        assert "75%" in content
+        # Assert
+        assert "75%" in out.read_text()
 
-    def test_contains_project_id(self, tmp_path, metadata):
+    def test_project_readme_body_contains_project_id(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_project_readme(str(tmp_path), metadata)
-        content = out.read_text()
-        assert "42" in content
+        # Assert
+        assert "42" in out.read_text()
 
 
 # EOF
