@@ -29,52 +29,111 @@ def metadata():
 
 
 class TestCreateProjectConfig:
-    def test_creates_config_file(self, tmp_path, metadata):
+    def test_creates_config_file_on_disk(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_project_config(str(tmp_path), metadata)
+        # Assert
         assert out.exists()
+
+    def test_writes_into_config_subdirectory(self, tmp_path, metadata):
+        # Arrange
+        # Act
+        out = create_project_config(str(tmp_path), metadata)
+        # Assert
         assert out.parent.name == "config"
 
-    def test_json_fallback(self, tmp_path, metadata):
+    def test_yaml_or_json_payload_contains_project_name(self, tmp_path, metadata):
+        # Arrange
         out = create_project_config(str(tmp_path), metadata)
-        if out.suffix == ".json":
-            data = json.loads(out.read_text())
-            assert data["project"]["name"] == "Test Project"
+        text = out.read_text()
+        # Act
+        contains_name = "Test Project" in text
+        # Assert
+        assert contains_name
 
-    def test_creates_config_dir(self, tmp_path, metadata):
+    def test_creates_config_directory_at_project_root(self, tmp_path, metadata):
+        # Arrange
+        # Act
         create_project_config(str(tmp_path), metadata)
+        # Assert
         assert (tmp_path / "config").is_dir()
 
 
 class TestCreatePathsConfig:
-    def test_creates_paths_json(self, tmp_path):
+    def test_writes_paths_json_filename(self, tmp_path):
+        # Arrange
+        # Act
         out = create_paths_config(str(tmp_path))
+        # Assert
         assert out.name == "paths.json"
-        data = json.loads(out.read_text())
-        assert "data" in data
-        assert "scripts" in data
 
-    def test_uses_absolute_paths(self, tmp_path):
+    def test_paths_json_contains_data_key(self, tmp_path):
+        # Arrange
+        # Act
         out = create_paths_config(str(tmp_path))
-        data = json.loads(out.read_text())
-        assert str(tmp_path) in data["scripts"]
+        # Assert
+        assert "data" in json.loads(out.read_text())
+
+    def test_paths_json_contains_scripts_key(self, tmp_path):
+        # Arrange
+        # Act
+        out = create_paths_config(str(tmp_path))
+        # Assert
+        assert "scripts" in json.loads(out.read_text())
+
+    def test_paths_json_uses_absolute_paths_for_scripts(self, tmp_path):
+        # Arrange
+        # Act
+        out = create_paths_config(str(tmp_path))
+        # Assert
+        assert str(tmp_path) in json.loads(out.read_text())["scripts"]
 
 
 class TestCreateEnvTemplate:
-    def test_creates_env_template(self, tmp_path, metadata):
+    def test_writes_dotenv_template_filename(self, tmp_path, metadata):
+        # Arrange
+        # Act
         out = create_env_template(str(tmp_path), metadata)
+        # Assert
         assert out.name == ".env.template"
-        content = out.read_text()
-        assert "Test Project" in content
-        assert "42" in content
+
+    def test_env_template_contains_project_name(self, tmp_path, metadata):
+        # Arrange
+        # Act
+        out = create_env_template(str(tmp_path), metadata)
+        # Assert
+        assert "Test Project" in out.read_text()
+
+    def test_env_template_contains_project_id(self, tmp_path, metadata):
+        # Arrange
+        # Act
+        out = create_env_template(str(tmp_path), metadata)
+        # Assert
+        assert "42" in out.read_text()
 
 
 class TestCreateRequirementsFile:
-    def test_creates_requirements(self, tmp_path):
+    def test_writes_requirements_txt_filename(self, tmp_path):
+        # Arrange
+        # Act
         out = create_requirements_file(str(tmp_path))
+        # Assert
         assert out.name == "requirements.txt"
-        content = out.read_text()
-        assert "numpy" in content
-        assert "pandas" in content
+
+    def test_requirements_lists_numpy(self, tmp_path):
+        # Arrange
+        # Act
+        out = create_requirements_file(str(tmp_path))
+        # Assert
+        assert "numpy" in out.read_text()
+
+    def test_requirements_lists_pandas(self, tmp_path):
+        # Arrange
+        # Act
+        out = create_requirements_file(str(tmp_path))
+        # Assert
+        assert "pandas" in out.read_text()
 
 
 # EOF

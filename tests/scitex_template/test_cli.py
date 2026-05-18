@@ -13,43 +13,90 @@ def runner():
     return CliRunner()
 
 
-class TestList:
-    def test_human_output(self, runner):
+class TestListHumanOutput:
+    def test_list_templates_exits_zero(self, runner):
+        # Arrange
+        # Act
         result = runner.invoke(main, ["list-templates"])
+        # Assert
         assert result.exit_code == 0
-        for tid in (
-            "pip-project",
-            "minimal",
-            "cloud-module",
-            "research",
-            "singularity",
-            "paper",
-        ):
-            assert tid in result.output
 
-    def test_json_output(self, runner):
+    @pytest.mark.parametrize(
+        "tid",
+        ["pip-project", "minimal", "cloud-module", "research", "singularity", "paper"],
+    )
+    def test_list_templates_human_output_contains_template_id(self, runner, tid):
+        # Arrange
+        # Act
+        result = runner.invoke(main, ["list-templates"])
+        # Assert
+        assert tid in result.output
+
+
+class TestListJsonOutput:
+    def test_list_templates_json_exits_zero(self, runner):
+        # Arrange
+        # Act
         result = runner.invoke(main, ["list-templates", "--json"])
+        # Assert
         assert result.exit_code == 0
+
+    def test_list_templates_json_payload_includes_pip_project_and_research(
+        self, runner
+    ):
+        # Arrange
+        result = runner.invoke(main, ["list-templates", "--json"])
         data = json.loads(result.output)
         ids = {row["id"] for row in data}
-        assert {"pip-project", "research"}.issubset(ids)
+        # Act
+        is_superset = {"pip-project", "research"}.issubset(ids)
+        # Assert
+        assert is_superset
 
 
 class TestInfo:
-    def test_known_id(self, runner):
+    def test_show_info_for_known_id_exits_zero(self, runner):
+        # Arrange
+        # Act
         result = runner.invoke(main, ["show-info", "pip-project"])
+        # Assert
         assert result.exit_code == 0
-        assert "pip-project" in result.output
-        assert "version" in result.output.lower() or "0.1.0" in result.output
 
-    def test_unknown_id(self, runner):
+    def test_show_info_for_known_id_mentions_template_id_in_output(self, runner):
+        # Arrange
+        # Act
+        result = runner.invoke(main, ["show-info", "pip-project"])
+        # Assert
+        assert "pip-project" in result.output
+
+    def test_show_info_for_known_id_mentions_version_in_output(self, runner):
+        # Arrange
+        result = runner.invoke(main, ["show-info", "pip-project"])
+        text = result.output.lower()
+        # Act
+        mentions_version = "version" in text or "0.1.0" in text
+        # Assert
+        assert mentions_version
+
+    def test_show_info_for_unknown_id_exits_nonzero(self, runner):
+        # Arrange
+        # Act
         result = runner.invoke(main, ["show-info", "does-not-exist"])
+        # Assert
         assert result.exit_code == 1
 
 
 class TestVersion:
-    def test_v_flag(self, runner):
+    def test_v_flag_exits_zero(self, runner):
+        # Arrange
+        # Act
         result = runner.invoke(main, ["-V"])
+        # Assert
         assert result.exit_code == 0
-        # accept any of: a real version string, or "unknown"
+
+    def test_v_flag_emits_non_empty_output(self, runner):
+        # Arrange
+        # Act
+        result = runner.invoke(main, ["-V"])
+        # Assert
         assert result.output.strip()
