@@ -23,7 +23,7 @@ This enables:
 
 import os
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Dict
 
 import logging
 
@@ -40,6 +40,7 @@ def setup_scholar_writer_integration(
     Set up scholar-writer integration structure with symlinks.
 
     Handles two project layouts:
+
     1. Standalone writer (flat): 00_shared/ at project root
        Creates: scholar/bib_files/
        Symlink: 00_shared/bib_files/merged_scholar.bib
@@ -72,7 +73,9 @@ def setup_scholar_writer_integration(
         project_path = Path(project_path)
 
         # Detect project layout
-        nested_writer_bib = project_path / "scitex" / "writer" / "00_shared" / "bib_files"
+        nested_writer_bib = (
+            project_path / "scitex" / "writer" / "00_shared" / "bib_files"
+        )
         standalone_writer_bib = project_path / "00_shared" / "bib_files"
 
         if nested_writer_bib.exists():
@@ -101,9 +104,8 @@ def setup_scholar_writer_integration(
 
         # Create symlink from writer to scholar
         writer_scholar_link = writer_bib_dir / "merged_scholar.bib"
-        should_create = (
-            force
-            or (not writer_scholar_link.exists() and not writer_scholar_link.is_symlink())
+        should_create = force or (
+            not writer_scholar_link.exists() and not writer_scholar_link.is_symlink()
         )
 
         if should_create:

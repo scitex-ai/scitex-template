@@ -1,0 +1,14 @@
+# scitex-dev project-type config
+# scitex-template's whole purpose is vending the `templates/` tree.
+# pyproject.toml explicitly excludes it from the wheel; runtime fetches
+# via shallow clone into ~/.scitex/template/cache/.
+
+project-type:
+  - pip
+
+audit:
+  root-whitelist:
+    dirs:
+      - templates
+    files:
+      - codecov.yml

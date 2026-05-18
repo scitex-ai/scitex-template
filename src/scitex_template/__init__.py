@@ -5,6 +5,8 @@
 Template management for SciTeX projects.
 """
 
+from __future__ import annotations
+
 try:
     from importlib.metadata import version as _v, PackageNotFoundError
     try:
@@ -17,17 +19,19 @@ except ImportError:  # pragma: no cover — only on ancient Pythons
 
 from pathlib import Path
 
-# scitex.git is an optional dep (install via `scitex-template[legacy]`) —
-# re-export when available, otherwise expose stubs that raise a clear
-# ImportError if called. Keeps the standalone install import-clean.
-try:
-    from scitex.git import (  # type: ignore[import-not-found]
-        create_child_git,
-        find_parent_git,
-        init_git_repo,
-        remove_child_git,
-    )
-except ImportError:  # pragma: no cover
+# scitex_git is an optional dep (install via `scitex-template[legacy]`,
+# alongside `pip install scitex`) — re-export when available, otherwise
+# expose stubs that raise a clear ImportError if called. Keeps the
+# standalone install import-clean.
+from scitex_dev import try_import_optional
+
+_scitex_git = try_import_optional("scitex_git", pkg="scitex-git")
+if _scitex_git is not None:  # pragma: no cover
+    create_child_git = _scitex_git.create_child_git
+    find_parent_git = _scitex_git.find_parent_git
+    init_git_repo = _scitex_git.init_git_repo
+    remove_child_git = _scitex_git.remove_child_git
+else:
 
     def _missing_scitex_git(name):
         def _stub(*_a, **_k):
@@ -106,7 +110,7 @@ def get_template_tree(template_id):
     import tempfile
 
     try:
-        from scitex.scholar.ensure_workspace import SCHOLAR_SUBDIRS  # type: ignore[import-not-found]
+        from scitex_scholar.ensure_workspace import SCHOLAR_SUBDIRS  # type: ignore[import-not-found]
     except ImportError:
         # scitex.scholar is optional (scitex-template[legacy]) — fall back
         # to a hardcoded list matching the scholar workspace convention.
@@ -217,6 +221,7 @@ def get_available_templates_info():
 
 
 __all__ = [
+    "__version__",
     "clone_template",
     "clone_module",
     "clone_research",

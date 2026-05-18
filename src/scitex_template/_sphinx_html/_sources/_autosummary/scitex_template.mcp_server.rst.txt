@@ -1,0 +1,18 @@
+scitex\_template.mcp\_server
+============================
+
+.. automodule:: scitex_template.mcp_server
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      main
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      TemplateServer
+   

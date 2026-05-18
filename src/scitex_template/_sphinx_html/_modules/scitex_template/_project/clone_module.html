@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_template._project.clone_module &mdash; scitex-template 0.6.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=e059a73d"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            scitex-template
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">scitex-template</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../scitex_template.html">scitex_template</a></li>
+      <li class="breadcrumb-item active">scitex_template._project.clone_module</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scitex_template._project.clone_module</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Timestamp: 2026-02-23</span>
+<span class="c1"># File: src/scitex/template/_project/clone_module.py</span>
+
+<span class="sd">&quot;&quot;&quot;Create a scitex module project template.</span>
+
+<span class="sd">Clones from the scitex-template-cloud-module GitHub template repository.</span>
+<span class="sd">Falls back to inline scaffold if the repo is not accessible.</span>
+
+<span class="sd">Structure:</span>
+<span class="sd">    &lt;project_dir&gt;/</span>
+<span class="sd">    ├── module.py          # @stx.module decorated function</span>
+<span class="sd">    ├── manifest.yaml      # Module metadata (label, icon, category)</span>
+<span class="sd">    ├── requirements.txt   # Python dependencies</span>
+<span class="sd">    ├── README.md          # Usage instructions</span>
+<span class="sd">    └── tests/</span>
+<span class="sd">        └── test_module.py # Basic smoke test</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">getLogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">TEMPLATE_REPO_URL</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/ywatanabe1989/scitex-template-cloud-module.git&quot;</span>
+
+
+<div class="viewcode-block" id="clone_module">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.clone_module">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">clone_module</span><span class="p">(</span>
+    <span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">git_strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span>
+    <span class="n">branch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">tag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a module project template.</span>
+
+<span class="sd">    Tries to clone from the GitHub template repo first.</span>
+<span class="sd">    Falls back to inline scaffold if clone fails.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Path to project directory (will be created).</span>
+<span class="sd">    git_strategy : str, optional</span>
+<span class="sd">        Git initialization strategy.</span>
+<span class="sd">    branch : str, optional</span>
+<span class="sd">        Specific branch of the template repository to clone.</span>
+<span class="sd">    tag : str, optional</span>
+<span class="sd">        Specific tag/release of the template repository to clone.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments forwarded to clone_project.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if successful, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Try git clone from template repo first</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">._clone_project</span><span class="w"> </span><span class="kn">import</span> <span class="n">clone_project</span>
+
+        <span class="k">return</span> <span class="n">clone_project</span><span class="p">(</span>
+            <span class="n">project_dir</span><span class="p">,</span>
+            <span class="n">TEMPLATE_REPO_URL</span><span class="p">,</span>
+            <span class="s2">&quot;scitex-template-cloud-module&quot;</span><span class="p">,</span>
+            <span class="n">git_strategy</span><span class="p">,</span>
+            <span class="n">branch</span><span class="p">,</span>
+            <span class="n">tag</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Git clone failed (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">), using inline scaffold&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Fallback: generate files inline</span>
+    <span class="k">return</span> <span class="n">_scaffold_inline</span><span class="p">(</span><span class="n">project_dir</span><span class="p">,</span> <span class="n">git_strategy</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_scaffold_inline</span><span class="p">(</span><span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">git_strategy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate module template files inline (fallback).&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">project_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span>
+        <span class="n">project_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;module.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">_MODULE_PY</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;manifest.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">_MANIFEST_YAML</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;requirements.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">_REQUIREMENTS_TXT</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;README.md&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">_README_MD</span><span class="p">)</span>
+
+        <span class="n">tests_dir</span> <span class="o">=</span> <span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span>
+        <span class="n">tests_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tests_dir</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">tests_dir</span> <span class="o">/</span> <span class="s2">&quot;test_module.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">_TEST_MODULE_PY</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">git_strategy</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">scitex_git</span><span class="w"> </span><span class="kn">import</span> <span class="n">init_git_repo</span>
+
+            <span class="n">init_git_repo</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">project_path</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created module template at </span><span class="si">{</span><span class="n">project_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to create module template: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Inline template content (used when GitHub repo is not accessible)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="n">_MODULE_PY</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="s1">#!/usr/bin/env python3</span>
+<span class="s1">&quot;&quot;&quot;Example SciTeX module — replace with your own logic.&quot;&quot;&quot;</span>
+
+<span class="s1">import scitex as stx</span>
+
+
+<span class="s1">@stx.module(</span>
+<span class="s1">    label=&quot;My Module&quot;,</span>
+<span class="s1">    icon=&quot;fa-puzzle-piece&quot;,</span>
+<span class="s1">    category=&quot;utility&quot;,</span>
+<span class="s1">    description=&quot;A custom SciTeX module.&quot;,</span>
+<span class="s1">)</span>
+<span class="s1">def main(project=stx.module.INJECTED, plt=stx.module.INJECTED):</span>
+<span class="s1">    &quot;&quot;&quot;Main entry point for the module.&quot;&quot;&quot;</span>
+<span class="s1">    # --- Your module logic here ---</span>
+
+<span class="s1">    stx.module.output(&quot;Hello from My Module!&quot;, title=&quot;Greeting&quot;)</span>
+
+<span class="s1">    fig, ax = plt.subplots()</span>
+<span class="s1">    ax.plot([1, 2, 3, 4], [1, 4, 2, 3])</span>
+<span class="s1">    ax.set_xlabel(&quot;X&quot;)</span>
+<span class="s1">    ax.set_ylabel(&quot;Y&quot;)</span>
+<span class="s1">    stx.module.output(fig, title=&quot;Example Plot&quot;)</span>
+
+<span class="s1">    return 0</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+<span class="n">_MANIFEST_YAML</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2"># SciTeX Module Manifest</span>
+<span class="s2"># See: https://scitex.ai/docs/modules</span>
+
+<span class="s2">name: my-module</span>
+<span class="s2">label: My Module</span>
+<span class="s2">icon: fa-puzzle-piece</span>
+<span class="s2">category: utility</span>
+<span class="s2">description: A custom SciTeX module.</span>
+<span class="s2">version: 0.1.0</span>
+<span class="s2">min_scitex_version: &quot;0.8.0&quot;</span>
+
+<span class="s2">dependencies:</span>
+<span class="s2">  - numpy</span>
+<span class="s2">  - matplotlib</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">_REQUIREMENTS_TXT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">numpy</span>
+<span class="s2">matplotlib</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">_README_MD</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2"># My Module</span>
+
+<span class="s2">A custom SciTeX workspace module.</span>
+
+<span class="s2">## Quick Start</span>
+
+<span class="s2">1. Write your module logic in `module.py`</span>
+<span class="s2">2. Update `manifest.yaml` with your module&#39;s metadata</span>
+<span class="s2">3. Import into SciTeX: **Module Maker** &gt; **Import from GitHub**</span>
+
+<span class="s2">## Structure</span>
+
+<span class="s2">| File | Purpose |</span>
+<span class="s2">|------|---------|</span>
+<span class="s2">| `module.py` | Main module code with `@stx.module` decorator |</span>
+<span class="s2">| `manifest.yaml` | Module metadata (name, icon, category, version) |</span>
+<span class="s2">| `requirements.txt` | Python package dependencies |</span>
+<span class="s2">| `tests/test_module.py` | Basic smoke tests |</span>
+
+<span class="s2">## Import into SciTeX</span>
+
+<span class="s2">1. Push this repo to GitHub</span>
+<span class="s2">2. In SciTeX, go to **Module Maker** tab</span>
+<span class="s2">3. Click **Import from GitHub**</span>
+<span class="s2">4. Paste your repository URL</span>
+
+<span class="s2">## License</span>
+
+<span class="s2">MIT</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">_TEST_MODULE_PY</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="s1">#!/usr/bin/env python3</span>
+<span class="s1">&quot;&quot;&quot;Basic tests for the module.&quot;&quot;&quot;</span>
+
+
+<span class="s1">def test_module_has_decorator():</span>
+<span class="s1">    &quot;&quot;&quot;module.py should have @stx.module decorator.&quot;&quot;&quot;</span>
+<span class="s1">    from pathlib import Path</span>
+
+<span class="s1">    source = (Path(__file__).parent.parent / &quot;module.py&quot;).read_text()</span>
+<span class="s1">    assert &quot;@stx.module&quot; in source</span>
+
+
+<span class="s1">def test_manifest_exists():</span>
+<span class="s1">    &quot;&quot;&quot;manifest.yaml should exist.&quot;&quot;&quot;</span>
+<span class="s1">    from pathlib import Path</span>
+
+<span class="s1">    manifest = Path(__file__).parent.parent / &quot;manifest.yaml&quot;</span>
+<span class="s1">    assert manifest.exists()</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Command-line interface for clone_module.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Usage: python -m scitex clone_module &lt;project-dir&gt;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creates a SciTeX module template project.&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">success</span> <span class="o">=</span> <span class="n">clone_module</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">success</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+<span class="c1"># EOF</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

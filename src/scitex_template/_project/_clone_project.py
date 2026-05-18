@@ -27,15 +27,16 @@ from typing import List, Optional
 
 import logging
 
-# scitex.git is an optional dep (install scitex-template[legacy]).
-# The cache fast-path for registered templates doesn't need it at all.
-# The remote-clone fallback does — when unavailable, that path raises
-# a clear error via _require_scitex_git() below.
-try:
-    import scitex.git  # type: ignore[import-not-found]
-    import scitex  # type: ignore[import-not-found]
-except ImportError:  # pragma: no cover
-    scitex = None  # type: ignore[assignment]
+# scitex (umbrella) is an optional dep (install alongside
+# scitex-template[legacy]). The cache fast-path for registered templates
+# doesn't need it at all. The remote-clone fallback does — when
+# unavailable, that path raises a clear error via _require_scitex_git()
+# below.
+from scitex_dev import try_import_optional
+
+scitex = try_import_optional("scitex", pkg="scitex")
+if scitex is not None:  # pragma: no cover
+    try_import_optional("scitex.git", pkg="scitex")
 
 
 getLogger = logging.getLogger

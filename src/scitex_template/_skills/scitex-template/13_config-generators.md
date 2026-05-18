@@ -1,5 +1,9 @@
 ---
-description: Generate project.yaml, paths.json, .env.template, requirements.txt, README.md, and standard directory trees for newly created SciTeX projects.
+description: |
+  [TOPIC] Config Generators
+  [DETAILS] Generate project.yaml, paths.json, .env.template, requirements.txt,
+  README.md, and standard directory trees for newly created SciTeX projects.
+tags: [scitex-template-config-generators, scitex-template, scitex-package]
 ---
 
 # Config Generators

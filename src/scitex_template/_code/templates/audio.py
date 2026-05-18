@@ -77,7 +77,7 @@ audio_check_audio_status()
 
 def python_api_example():
     """Direct Python API for TTS."""
-    from scitex.audio import speak, list_backends, check_audio_status
+    from scitex_audio import speak, list_backends, check_audio_status
 
     # Basic speech
     speak("Hello from SciTeX")
@@ -112,7 +112,7 @@ def python_api_example():
 
 def generate_audio_example():
     """Generate audio files without playing."""
-    from scitex.audio import generate_audio
+    from scitex_audio import generate_audio
 
     # Generate audio file
     result = generate_audio(
@@ -140,7 +140,7 @@ def main(
     logger=stx.INJECTED,
 ):
     """Session with audio notifications."""
-    from scitex.audio import speak
+    from scitex_audio import speak
 
     logger.info("Starting analysis...")
 

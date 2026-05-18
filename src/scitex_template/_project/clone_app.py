@@ -151,7 +151,7 @@ def _scaffold_inline(project_dir: str, git_strategy: Optional[str]) -> bool:
         (cli / "gui.py").write_text(_render(T.CLI_GUI, ctx))
 
         if git_strategy:
-            from scitex.git import init_git_repo
+            from scitex_git import init_git_repo
 
             init_git_repo(str(root))
 

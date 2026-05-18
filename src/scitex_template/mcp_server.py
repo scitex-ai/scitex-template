@@ -30,21 +30,32 @@ warnings.warn(
 
 import asyncio
 
-# Graceful MCP dependency handling
-try:
-    import mcp.types as types
-    from mcp.server import NotificationOptions, Server
-    from mcp.server.models import InitializationOptions
-    from mcp.server.stdio import stdio_server
+# Graceful MCP dependency handling — `mcp` ships in the `mcp` extra.
+from scitex_dev import try_import_optional
 
-    MCP_AVAILABLE = True
-except ImportError:
-    MCP_AVAILABLE = False
-    types = None  # type: ignore
-    Server = None  # type: ignore
-    NotificationOptions = None  # type: ignore
-    InitializationOptions = None  # type: ignore
-    stdio_server = None  # type: ignore
+types = try_import_optional("mcp.types", extra="mcp", pkg="scitex-template")
+Server = try_import_optional(
+    "mcp.server", "Server", extra="mcp", pkg="scitex-template"
+)
+NotificationOptions = try_import_optional(
+    "mcp.server", "NotificationOptions", extra="mcp", pkg="scitex-template"
+)
+InitializationOptions = try_import_optional(
+    "mcp.server.models",
+    "InitializationOptions",
+    extra="mcp",
+    pkg="scitex-template",
+)
+stdio_server = try_import_optional(
+    "mcp.server.stdio",
+    "stdio_server",
+    extra="mcp",
+    pkg="scitex-template",
+)
+MCP_AVAILABLE = all(
+    x is not None
+    for x in (types, Server, NotificationOptions, InitializationOptions, stdio_server)
+)
 
 __all__ = ["TemplateServer", "main", "MCP_AVAILABLE"]
 

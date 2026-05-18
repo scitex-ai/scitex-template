@@ -136,7 +136,7 @@ capture_create_gif(
 
 def python_api_example():
     """Direct Python API for screenshots."""
-    from scitex.capture import (
+    from scitex_capture import (
         capture_screenshot,
         start_monitoring,
         stop_monitoring,
@@ -177,7 +177,7 @@ def main(
     logger=stx.INJECTED,
 ):
     """Capture session for documentation."""
-    from scitex.capture import (
+    from scitex_capture import (
         capture_screenshot,
         start_monitoring,
         stop_monitoring,

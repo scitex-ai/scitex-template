@@ -1,0 +1,247 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_template._project._generate_readme &mdash; scitex-template 0.6.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=e059a73d"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            scitex-template
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">scitex-template</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../scitex_template.html">scitex_template</a></li>
+      <li class="breadcrumb-item active">scitex_template._project._generate_readme</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scitex_template._project._generate_readme</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Timestamp: &quot;2026-02-17 (ywatanabe)&quot;</span>
+<span class="c1"># File: /home/ywatanabe/proj/scitex-python/src/scitex/template/_project/_generate_readme.py</span>
+<span class="sd">&quot;&quot;&quot;Generate README.md files for new projects.</span>
+
+<span class="sd">All functions accept a plain metadata dict — no Django dependencies.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;create_minimal_readme&quot;</span><span class="p">,</span> <span class="s2">&quot;create_project_readme&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="create_minimal_readme">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.create_minimal_readme">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_minimal_readme</span><span class="p">(</span><span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a minimal README for empty projects.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Project root directory.</span>
+<span class="sd">    metadata : dict</span>
+<span class="sd">        Keys: ``name``, ``created_at``, ``owner_full_name`` or ``owner``,</span>
+<span class="sd">        ``description``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to the generated README.md.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Untitled&quot;</span><span class="p">)</span>
+    <span class="n">created</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+    <span class="n">owner</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;owner_full_name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;owner&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;No description provided.&quot;</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;# </span><span class="si">{</span><span class="n">name</span><span class="si">}</span>
+
+<span class="s2">**Created:** </span><span class="si">{</span><span class="n">created</span><span class="si">}</span>
+<span class="s2">**Owner:** </span><span class="si">{</span><span class="n">owner</span><span class="si">}</span>
+
+<span class="s2">## Description</span>
+
+<span class="si">{</span><span class="n">description</span><span class="si">}</span>
+
+<span class="s2">## Getting Started</span>
+
+<span class="s2">This is an empty project directory. You can:</span>
+
+<span class="s2">1. **Create from template** - Set up a full SciTeX research project structure</span>
+<span class="s2">2. **Upload your files** - Upload existing project files</span>
+<span class="s2">3. **Create manually** - Organize your project structure as you prefer</span>
+
+<span class="s2">---</span>
+<span class="s2">*Created with SciTeX Cloud*</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;README.md&quot;</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="create_project_readme">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.create_project_readme">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_project_readme</span><span class="p">(</span><span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a comprehensive README for templated projects.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Project root directory.</span>
+<span class="sd">    metadata : dict</span>
+<span class="sd">        Keys: ``name``, ``created_at``, ``updated_at``,</span>
+<span class="sd">        ``owner_full_name`` or ``owner``, ``description``,</span>
+<span class="sd">        ``hypotheses``, ``progress``, ``id``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to the generated README.md.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Untitled&quot;</span><span class="p">)</span>
+    <span class="n">created</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+    <span class="n">updated</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;updated_at&quot;</span><span class="p">,</span> <span class="n">created</span><span class="p">))</span>
+    <span class="n">owner</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;owner_full_name&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;owner&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;No description provided.&quot;</span>
+    <span class="n">hypotheses</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hypotheses&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;No hypotheses defined.&quot;</span>
+    <span class="n">progress</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;progress&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">proj_id</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;# </span><span class="si">{</span><span class="n">name</span><span class="si">}</span>
+
+<span class="s2">**Created:** </span><span class="si">{</span><span class="n">created</span><span class="si">}</span>
+<span class="s2">**Owner:** </span><span class="si">{</span><span class="n">owner</span><span class="si">}</span>
+<span class="s2">**Progress:** </span><span class="si">{</span><span class="n">progress</span><span class="si">}</span><span class="s2">%</span>
+
+<span class="s2">## Description</span>
+
+<span class="si">{</span><span class="n">description</span><span class="si">}</span>
+
+<span class="s2">## Hypotheses</span>
+
+<span class="si">{</span><span class="n">hypotheses</span><span class="si">}</span>
+
+<span class="s2">## Directory Structure</span>
+
+<span class="s2">This project follows the standardized SciTeX research project structure:</span>
+
+<span class="s2">- `config/` - Configuration files (YAML, JSON, etc.)</span>
+<span class="s2">- `data/` - Research data (raw, processed, figures, models)</span>
+<span class="s2">- `scripts/` - Source code and analysis scripts</span>
+<span class="s2">- `docs/` - Documentation (manuscripts, notes, references)</span>
+<span class="s2">- `results/` - Analysis outputs (outputs, reports, analysis)</span>
+<span class="s2">- `temp/` - Temporary files (cache, logs, tmp)</span>
+
+<span class="s2">## Getting Started</span>
+
+<span class="s2">This project directory is managed by SciTeX Cloud. You can:</span>
+
+<span class="s2">1. Upload files using the web interface</span>
+<span class="s2">2. Edit documents in the Writer module</span>
+<span class="s2">3. Run code in the Code module</span>
+<span class="s2">4. Create visualizations in the Viz module</span>
+<span class="s2">5. Manage references in the Scholar module</span>
+
+<span class="s2">## Project Management</span>
+
+<span class="s2">- Project ID: </span><span class="si">{</span><span class="n">proj_id</span><span class="si">}</span>
+<span class="s2">- Created: </span><span class="si">{</span><span class="n">created</span><span class="si">}</span>
+<span class="s2">- Last Updated: </span><span class="si">{</span><span class="n">updated</span><span class="si">}</span>
+
+<span class="s2">---</span>
+<span class="s2">*This README was automatically generated by SciTeX Cloud*</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;README.md&quot;</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<span class="c1"># EOF</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

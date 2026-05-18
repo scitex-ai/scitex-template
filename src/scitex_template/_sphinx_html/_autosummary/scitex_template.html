@@ -1,0 +1,753 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_template &mdash; scitex-template 0.6.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e059a73d"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="scitex_template.cli" href="scitex_template.cli.html" />
+    <link rel="prev" title="API Reference" href="../api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            scitex-template
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">scitex_template</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.build_directory_tree"><code class="docutils literal notranslate"><span class="pre">build_directory_tree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.clone_module"><code class="docutils literal notranslate"><span class="pre">clone_module()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.clone_pip_project"><code class="docutils literal notranslate"><span class="pre">clone_pip_project()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.clone_research"><code class="docutils literal notranslate"><span class="pre">clone_research()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.clone_research_minimal"><code class="docutils literal notranslate"><span class="pre">clone_research_minimal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.clone_scitex_minimal"><code class="docutils literal notranslate"><span class="pre">clone_scitex_minimal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.clone_singularity"><code class="docutils literal notranslate"><span class="pre">clone_singularity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.clone_template"><code class="docutils literal notranslate"><span class="pre">clone_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.clone_writer_directory"><code class="docutils literal notranslate"><span class="pre">clone_writer_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.create_child_git"><code class="docutils literal notranslate"><span class="pre">create_child_git()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.create_env_template"><code class="docutils literal notranslate"><span class="pre">create_env_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.create_minimal_readme"><code class="docutils literal notranslate"><span class="pre">create_minimal_readme()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.create_paths_config"><code class="docutils literal notranslate"><span class="pre">create_paths_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.create_project_config"><code class="docutils literal notranslate"><span class="pre">create_project_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.create_project_readme"><code class="docutils literal notranslate"><span class="pre">create_project_readme()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.create_requirements_file"><code class="docutils literal notranslate"><span class="pre">create_requirements_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.customize_minimal_template"><code class="docutils literal notranslate"><span class="pre">customize_minimal_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.customize_template"><code class="docutils literal notranslate"><span class="pre">customize_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.ensure_integration"><code class="docutils literal notranslate"><span class="pre">ensure_integration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.find_parent_git"><code class="docutils literal notranslate"><span class="pre">find_parent_git()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.get_all_templates"><code class="docutils literal notranslate"><span class="pre">get_all_templates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.get_available_templates_info"><code class="docutils literal notranslate"><span class="pre">get_available_templates_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.get_code_template"><code class="docutils literal notranslate"><span class="pre">get_code_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.init_git_repo"><code class="docutils literal notranslate"><span class="pre">init_git_repo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.list_code_templates"><code class="docutils literal notranslate"><span class="pre">list_code_templates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.remove_child_git"><code class="docutils literal notranslate"><span class="pre">remove_child_git()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scitex_template.setup_scholar_writer_integration"><code class="docutils literal notranslate"><span class="pre">setup_scholar_writer_integration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.cli.html">scitex_template.cli</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.mcp_server.html">scitex_template.mcp_server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.registry.html">scitex_template.registry</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">scitex-template</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+      <li class="breadcrumb-item active">scitex_template</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/scitex_template.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-scitex_template">
+<span id="scitex-template"></span><h1>scitex_template<a class="headerlink" href="#module-scitex_template" title="Link to this heading"></a></h1>
+<p>Template management for SciTeX projects.</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#scitex_template.create_child_git" title="scitex_template.create_child_git"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_child_git</span></code></a>(*_a, **_k)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#scitex_template.find_parent_git" title="scitex_template.find_parent_git"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_parent_git</span></code></a>(*_a, **_k)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#scitex_template.get_available_templates_info" title="scitex_template.get_available_templates_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_available_templates_info</span></code></a>()</p></td>
+<td><p>Get information about all available SciTeX project templates.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_template_tree</span></code>(template_id)</p></td>
+<td><p>Create template in a tempdir and return its <code class="docutils literal notranslate"><span class="pre">tree</span></code> output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#scitex_template.init_git_repo" title="scitex_template.init_git_repo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_git_repo</span></code></a>(*_a, **_k)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#scitex_template.remove_child_git" title="scitex_template.remove_child_git"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_child_git</span></code></a>(*_a, **_k)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.build_directory_tree">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">build_directory_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_directory_structure.html#build_directory_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.build_directory_tree" title="Link to this definition"></a></dt>
+<dd><p>Create the standard project directory tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Project root directory (must already exist).</p></li>
+<li><p><strong>structure</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Directory tree specification. Defaults to <code class="docutils literal notranslate"><span class="pre">PROJECT_STRUCTURE</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If a directory cannot be created.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.clone_module">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">clone_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'child'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/clone_module.html#clone_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.clone_module" title="Link to this definition"></a></dt>
+<dd><p>Create a module project template.</p>
+<p>Tries to clone from the GitHub template repo first.
+Falls back to inline scaffold if clone fails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to project directory (will be created).</p></li>
+<li><p><strong>git_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Git initialization strategy.</p></li>
+<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific branch of the template repository to clone.</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific tag/release of the template repository to clone.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments forwarded to clone_project.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.clone_pip_project">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">clone_pip_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'child'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/clone_pip_project.html#clone_pip_project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.clone_pip_project" title="Link to this definition"></a></dt>
+<dd><p>Create a new pip project from the template repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to project directory (will be created). Can be a simple name like “my_project”
+or a full path like “./projects/my_project”</p></li>
+<li><p><strong>git_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Git initialization strategy (‘child’, ‘parent’, None). Default is ‘child’.</p></li>
+<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific branch of the template repository to clone. If None, clones the default branch.
+Mutually exclusive with tag parameter.</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific tag/release of the template repository to clone. If None, clones the default branch.
+Mutually exclusive with branch parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scitex.template</span><span class="w"> </span><span class="kn">import</span> <span class="n">clone_pip_project</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_pip_project</span><span class="p">(</span><span class="s2">&quot;my_pip_project&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_pip_project</span><span class="p">(</span><span class="s2">&quot;./projects/my_project&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_pip_project</span><span class="p">(</span><span class="s2">&quot;my_project&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;develop&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_pip_project</span><span class="p">(</span><span class="s2">&quot;my_project&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s2">&quot;v1.0.0&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.clone_research">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">clone_research</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'child'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/clone_research.html#clone_research"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.clone_research" title="Link to this definition"></a></dt>
+<dd><p>Create a new research project from the template repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to project directory (will be created). Can be a simple name like “my_project”
+or a full path like “./projects/my_project”</p></li>
+<li><p><strong>git_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Git initialization strategy (‘child’, ‘parent’, None). Default is ‘child’.</p></li>
+<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific branch of the template repository to clone. If None, clones the default branch.
+Mutually exclusive with tag parameter.</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific tag/release of the template repository to clone. If None, clones the default branch.
+Mutually exclusive with branch parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scitex.template</span><span class="w"> </span><span class="kn">import</span> <span class="n">clone_research</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_research</span><span class="p">(</span><span class="s2">&quot;my_research_project&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_research</span><span class="p">(</span><span class="s2">&quot;./projects/my_project&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_research</span><span class="p">(</span><span class="s2">&quot;my_project&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;develop&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_research</span><span class="p">(</span><span class="s2">&quot;my_project&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s2">&quot;v1.0.0&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.clone_research_minimal">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">clone_research_minimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'child'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_dirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/clone_research_minimal.html#clone_research_minimal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.clone_research_minimal" title="Link to this definition"></a></dt>
+<dd><p>Create a new minimal research project from scitex-writer (single source of truth).</p>
+<p>Clones scitex-writer and keeps only essential directories for manuscript writing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to project directory (will be created). Can be a simple name like “my_project”
+or a full path like “./projects/my_project”</p></li>
+<li><p><strong>git_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Git initialization strategy (‘child’, ‘parent’, None). Default is ‘child’.</p></li>
+<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific branch of the template repository to clone.</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific tag/release of the template repository to clone.</p></li>
+<li><p><strong>include_dirs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Top-level items to keep. Defaults to MINIMAL_INCLUDE_DIRS.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scitex.template</span><span class="w"> </span><span class="kn">import</span> <span class="n">clone_research_minimal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_research_minimal</span><span class="p">(</span><span class="s2">&quot;my_research_project&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_research_minimal</span><span class="p">(</span><span class="s2">&quot;./projects/my_project&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.clone_scitex_minimal">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">clone_scitex_minimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'child'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/clone_scitex_minimal.html#clone_scitex_minimal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.clone_scitex_minimal" title="Link to this definition"></a></dt>
+<dd><p>Create a minimal scitex project with writer and scholar workspaces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to project directory (will be created).</p></li>
+<li><p><strong>git_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Git initialization strategy (‘child’, ‘parent’, ‘origin’, None).</p></li>
+<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific branch of the writer template to clone.</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific tag/release of the writer template to clone.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments forwarded to writer ensure.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.clone_singularity">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">clone_singularity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'child'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/clone_singularity.html#clone_singularity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.clone_singularity" title="Link to this definition"></a></dt>
+<dd><p>Create a new singularity project from the template repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to project directory (will be created). Can be a simple name like “my_project”
+or a full path like “./projects/my_project”</p></li>
+<li><p><strong>git_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Git initialization strategy (‘child’, ‘parent’, None). Default is ‘child’.</p></li>
+<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific branch of the template repository to clone. If None, clones the default branch.
+Mutually exclusive with tag parameter.</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific tag/release of the template repository to clone. If None, clones the default branch.
+Mutually exclusive with branch parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scitex.template</span><span class="w"> </span><span class="kn">import</span> <span class="n">clone_singularity</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_singularity</span><span class="p">(</span><span class="s2">&quot;my_singularity_project&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_singularity</span><span class="p">(</span><span class="s2">&quot;./projects/my_project&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_singularity</span><span class="p">(</span><span class="s2">&quot;my_project&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;develop&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_singularity</span><span class="p">(</span><span class="s2">&quot;my_project&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s2">&quot;v1.0.0&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.clone_template">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">clone_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'child'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_clone_template.html#clone_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.clone_template" title="Link to this definition"></a></dt>
+<dd><p>Clone a project template by ID.</p>
+<p>Unified dispatcher that resolves template IDs (including aliases)
+and delegates to the appropriate clone function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>template_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Template identifier. Canonical IDs: research, research_minimal,
+scitex_minimal, pip_project, singularity, paper_directory,
+module, scitex_app.
+Aliases: minimal (-&gt;scitex_minimal), pip-project, paper,
+stx-module, app (-&gt;scitex_app).</p></li>
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to project directory (will be created).</p></li>
+<li><p><strong>git_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Git initialization strategy (‘child’, ‘parent’, ‘origin’, None).</p></li>
+<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific branch to clone.</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific tag to clone.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Additional keyword arguments forwarded to the clone function
+(e.g. <code class="docutils literal notranslate"><span class="pre">include_dirs</span></code> for research_minimal).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If template_id is unknown.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.clone_writer_directory">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">clone_writer_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">git_strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'child'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">branch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'main'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/clone_writer_directory.html#clone_writer_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.clone_writer_directory" title="Link to this definition"></a></dt>
+<dd><p>Create a new paper directory from the scitex-writer template repository.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to project directory (will be created). Can be a simple name like “my_paper”
+or a full path like “./papers/my_paper”</p></li>
+<li><p><strong>git_strategy</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Git initialization strategy (‘child’, ‘parent’, None). Default is ‘child’.</p></li>
+<li><p><strong>branch</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific branch of the template repository to clone. Default is ‘main’.
+Mutually exclusive with tag parameter.</p></li>
+<li><p><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Specific tag/release of the template repository to clone. If None, uses the branch.
+Mutually exclusive with branch parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successful, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scitex.template</span><span class="w"> </span><span class="kn">import</span> <span class="n">clone_writer_directory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_writer_directory</span><span class="p">(</span><span class="s2">&quot;my_paper&quot;</span><span class="p">)</span>  <span class="c1"># Uses main branch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_writer_directory</span><span class="p">(</span><span class="s2">&quot;./papers/my_paper&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_writer_directory</span><span class="p">(</span><span class="s2">&quot;my_paper&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;develop&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clone_writer_directory</span><span class="p">(</span><span class="s2">&quot;my_paper&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s2">&quot;v2.0.0&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.create_child_git">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">create_child_git</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_a</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scitex_template.create_child_git" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.create_env_template">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">create_env_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_generate_configs.html#create_env_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.create_env_template" title="Link to this definition"></a></dt>
+<dd><p>Create <code class="docutils literal notranslate"><span class="pre">config/.env.template</span></code> with project-specific placeholders.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Project root directory.</p></li>
+<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Keys: <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the generated .env.template.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.create_minimal_readme">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">create_minimal_readme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_generate_readme.html#create_minimal_readme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.create_minimal_readme" title="Link to this definition"></a></dt>
+<dd><p>Create a minimal README for empty projects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Project root directory.</p></li>
+<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Keys: <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">created_at</span></code>, <code class="docutils literal notranslate"><span class="pre">owner_full_name</span></code> or <code class="docutils literal notranslate"><span class="pre">owner</span></code>,
+<code class="docutils literal notranslate"><span class="pre">description</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the generated README.md.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.create_paths_config">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">create_paths_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_generate_configs.html#create_paths_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.create_paths_config" title="Link to this definition"></a></dt>
+<dd><p>Create <code class="docutils literal notranslate"><span class="pre">config/paths.json</span></code> with resolved directory paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Project root directory.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the generated paths.json.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.create_project_config">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">create_project_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_generate_configs.html#create_project_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.create_project_config" title="Link to this definition"></a></dt>
+<dd><p>Create project.yaml (or .json fallback) in <code class="docutils literal notranslate"><span class="pre">config/</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Project root directory.</p></li>
+<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Keys: <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">description</span></code>, <code class="docutils literal notranslate"><span class="pre">created_at</span></code>,
+<code class="docutils literal notranslate"><span class="pre">owner</span></code>, <code class="docutils literal notranslate"><span class="pre">progress</span></code>, <code class="docutils literal notranslate"><span class="pre">hypotheses</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the generated config file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.create_project_readme">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">create_project_readme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_generate_readme.html#create_project_readme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.create_project_readme" title="Link to this definition"></a></dt>
+<dd><p>Create a comprehensive README for templated projects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Project root directory.</p></li>
+<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Keys: <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">created_at</span></code>, <code class="docutils literal notranslate"><span class="pre">updated_at</span></code>,
+<code class="docutils literal notranslate"><span class="pre">owner_full_name</span></code> or <code class="docutils literal notranslate"><span class="pre">owner</span></code>, <code class="docutils literal notranslate"><span class="pre">description</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hypotheses</span></code>, <code class="docutils literal notranslate"><span class="pre">progress</span></code>, <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the generated README.md.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.create_requirements_file">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">create_requirements_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_generate_configs.html#create_requirements_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.create_requirements_file" title="Link to this definition"></a></dt>
+<dd><p>Create <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> with standard scientific packages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Project root directory.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to the generated requirements.txt.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.customize_minimal_template">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">customize_minimal_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_customize.html#customize_minimal_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.customize_minimal_template" title="Link to this definition"></a></dt>
+<dd><p>Customise a minimal (scitex-writer) template with project metadata.</p>
+<p>Writes <code class="docutils literal notranslate"><span class="pre">title.tex</span></code> and <code class="docutils literal notranslate"><span class="pre">authors.tex</span></code> under <code class="docutils literal notranslate"><span class="pre">00_shared/</span></code>
+(direct clone) or <code class="docutils literal notranslate"><span class="pre">scitex/writer/00_shared/</span></code> (nested layout).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the project directory.</p></li>
+<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Project metadata.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.customize_template">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">customize_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'research'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_customize.html#customize_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.customize_template" title="Link to this definition"></a></dt>
+<dd><p>Customise a cloned template with project-specific information.</p>
+<p>Replaces placeholder text in README.md, title.tex, and authors.tex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Path to the project directory.</p></li>
+<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Project metadata. Expected keys: <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">description</span></code>,
+<code class="docutils literal notranslate"><span class="pre">owner</span></code> (username), <code class="docutils literal notranslate"><span class="pre">owner_full_name</span></code>.</p></li>
+<li><p><strong>template_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Template type hint (currently unused, reserved for future).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.ensure_integration">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">ensure_integration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_scholar_writer_integration.html#ensure_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.ensure_integration" title="Link to this definition"></a></dt>
+<dd><p>Convenience function to ensure integration exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>project_path</strong> (<em>Path</em>) – Root path of the project</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if integration is set up (or already exists)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.find_parent_git">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">find_parent_git</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_a</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scitex_template.find_parent_git" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.get_all_templates">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">get_all_templates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_code/_code_templates.html#get_all_templates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.get_all_templates" title="Link to this definition"></a></dt>
+<dd><p>Get all templates combined into one string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>All templates with headers, ordered by priority:
+1. session - Main workflow template
+2. io - File I/O patterns
+3. Others (config, module, etc.)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.get_available_templates_info">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">get_available_templates_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template.html#get_available_templates_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.get_available_templates_info" title="Link to this definition"></a></dt>
+<dd><p>Get information about all available SciTeX project templates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of template information dictionaries, each containing:
+- id: Template identifier (used in code)
+- name: Human-readable template name
+- description: Template description
+- github_url: GitHub repository URL
+- use_case: When to use this template
+- tree: Tree-command-style directory listing</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scitex.template</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_available_templates_info</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span> <span class="o">=</span> <span class="n">get_available_templates_info</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">template</span> <span class="ow">in</span> <span class="n">templates</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">template</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">template</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.get_code_template">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">get_code_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">docstring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_code/_code_templates.html#get_code_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.get_code_template" title="Link to this definition"></a></dt>
+<dd><p>Get a code template by ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>template_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Template identifier (session, session-minimal, session-plot, etc.)</p></li>
+<li><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – File path to include in template header.</p></li>
+<li><p><strong>docstring</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Custom docstring for the template.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Formatted template content.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.init_git_repo">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">init_git_repo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_a</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scitex_template.init_git_repo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.list_code_templates">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">list_code_templates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_code/_code_templates.html#list_code_templates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.list_code_templates" title="Link to this definition"></a></dt>
+<dd><p>List all available code templates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of template info dictionaries.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.remove_child_git">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">remove_child_git</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_a</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scitex_template.remove_child_git" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.setup_scholar_writer_integration">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.</span></span><span class="sig-name descname"><span class="pre">setup_scholar_writer_integration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/_project/_scholar_writer_integration.html#setup_scholar_writer_integration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.setup_scholar_writer_integration" title="Link to this definition"></a></dt>
+<dd><p>Set up scholar-writer integration structure with symlinks.</p>
+<p>Handles two project layouts:</p>
+<ol class="arabic simple">
+<li><p>Standalone writer (flat): 00_shared/ at project root
+Creates: scholar/bib_files/
+Symlink: 00_shared/bib_files/merged_scholar.bib</p></li>
+<li><p>Nested writer (scitex ecosystem): scitex/writer/00_shared/
+Creates: scitex/scholar/bib_files/
+Symlink: scitex/writer/00_shared/bib_files/merged_scholar.bib</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_path</strong> (<em>Path</em>) – Root path of the project</p></li>
+<li><p><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, recreate symlinks even if they exist</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Result with keys: success, layout, scholar_dir, symlink_created, errors</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Modules</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="scitex_template.cli.html#module-scitex_template.cli" title="scitex_template.cli"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cli</span></code></a></p></td>
+<td><p>CLI for scitex-template.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="scitex_template.mcp_server.html#module-scitex_template.mcp_server" title="scitex_template.mcp_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mcp_server</span></code></a></p></td>
+<td><p>MCP Server for SciTeX Template - Project Scaffolding Framework.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="scitex_template.registry.html#module-scitex_template.registry" title="scitex_template.registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">registry</span></code></a></p></td>
+<td><p>Registry of templates vendored in this repo.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scitex_template.cli.html" class="btn btn-neutral float-right" title="scitex_template.cli" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

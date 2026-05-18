@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_template._project._customize &mdash; scitex-template 0.6.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=e059a73d"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            scitex-template
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">scitex-template</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../scitex_template.html">scitex_template</a></li>
+      <li class="breadcrumb-item active">scitex_template._project._customize</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scitex_template._project._customize</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Timestamp: &quot;2026-02-17 (ywatanabe)&quot;</span>
+<span class="c1"># File: /home/ywatanabe/proj/scitex-python/src/scitex/template/_project/_customize.py</span>
+<span class="sd">&quot;&quot;&quot;Customize cloned templates with project-specific metadata.</span>
+
+<span class="sd">After a template is cloned, these functions replace placeholder values</span>
+<span class="sd">(title, author, description) with actual project metadata.</span>
+
+<span class="sd">All functions accept a plain metadata dict — no Django dependencies.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">getLogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;customize_template&quot;</span><span class="p">,</span> <span class="s2">&quot;customize_minimal_template&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_project_meta</span><span class="p">(</span><span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalise metadata keys to a standard set with defaults.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Untitled Project&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;owner&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;owner&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;owner_full_name&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;owner_full_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;created_at&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;progress&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="s2">&quot;hypotheses&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hypotheses&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+    <span class="p">}</span>
+
+
+<div class="viewcode-block" id="customize_template">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.customize_template">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">customize_template</span><span class="p">(</span>
+    <span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">template_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;research&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Customise a cloned template with project-specific information.</span>
+
+<span class="sd">    Replaces placeholder text in README.md, title.tex, and authors.tex.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Path to the project directory.</span>
+<span class="sd">    metadata : dict</span>
+<span class="sd">        Project metadata. Expected keys: ``name``, ``description``,</span>
+<span class="sd">        ``owner`` (username), ``owner_full_name``.</span>
+<span class="sd">    template_type : str</span>
+<span class="sd">        Template type hint (currently unused, reserved for future).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">_project_meta</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+
+    <span class="n">_update_readme</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+    <span class="n">_update_title_tex</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+    <span class="n">_update_authors_tex</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Customized template for project: </span><span class="si">{</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="customize_minimal_template">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.customize_minimal_template">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">customize_minimal_template</span><span class="p">(</span>
+    <span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Customise a minimal (scitex-writer) template with project metadata.</span>
+
+<span class="sd">    Writes ``title.tex`` and ``authors.tex`` under ``00_shared/``</span>
+<span class="sd">    (direct clone) or ``scitex/writer/00_shared/`` (nested layout).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Path to the project directory.</span>
+<span class="sd">    metadata : dict</span>
+<span class="sd">        Project metadata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">_project_meta</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+
+    <span class="c1"># Try direct clone path first, then nested layout</span>
+    <span class="k">for</span> <span class="n">title_file</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;00_shared&quot;</span> <span class="o">/</span> <span class="s2">&quot;title.tex&quot;</span><span class="p">,</span>
+        <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;scitex&quot;</span> <span class="o">/</span> <span class="s2">&quot;writer&quot;</span> <span class="o">/</span> <span class="s2">&quot;00_shared&quot;</span> <span class="o">/</span> <span class="s2">&quot;title.tex&quot;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="k">if</span> <span class="n">title_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">title_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;%% -*- coding: utf-8 -*-</span><span class="se">\n\\</span><span class="s2">title</span><span class="se">{{</span><span class="si">{</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">}}\n\n</span><span class="s2">%%%% EOF</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">break</span>
+
+    <span class="n">author_name</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;owner_full_name&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;owner&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">author_name</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">author_file</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;00_shared&quot;</span> <span class="o">/</span> <span class="s2">&quot;authors.tex&quot;</span><span class="p">,</span>
+            <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;scitex&quot;</span> <span class="o">/</span> <span class="s2">&quot;writer&quot;</span> <span class="o">/</span> <span class="s2">&quot;00_shared&quot;</span> <span class="o">/</span> <span class="s2">&quot;authors.tex&quot;</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="k">if</span> <span class="n">author_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">author_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;%% -*- coding: utf-8 -*-</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">author[1]</span><span class="se">{{</span><span class="si">{</span><span class="n">author_name</span><span class="si">}</span><span class="se">\\</span><span class="s2">corref</span><span class="se">{{</span><span class="s2">cor1</span><span class="se">}}}}\n\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">address[1]</span><span class="se">{{</span><span class="s2">Institution, Department, City, Country</span><span class="se">}}\n\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">cortext[cor1]</span><span class="se">{{</span><span class="s2">Corresponding author.</span><span class="se">}}\n\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;%%%% EOF</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">break</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Customized minimal template for project: </span><span class="si">{</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># ---- Internal helpers -------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_update_readme</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace placeholder text in README.md.&quot;&quot;&quot;</span>
+    <span class="n">readme</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;README.md&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">readme</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="n">readme</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;# SciTeX Example Research Project&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;# </span><span class="si">{</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="s2">&quot;This is an example research project&quot;</span><span class="p">,</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;Research project created with SciTeX Cloud&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">readme</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_update_title_tex</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write project name to title.tex if found.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;00_shared&quot;</span> <span class="o">/</span> <span class="s2">&quot;title.tex&quot;</span><span class="p">,</span>
+        <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;paper&quot;</span> <span class="o">/</span> <span class="s2">&quot;manuscript&quot;</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;title.tex&quot;</span><span class="p">,</span>
+        <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;scitex&quot;</span> <span class="o">/</span> <span class="s2">&quot;writer&quot;</span> <span class="o">/</span> <span class="s2">&quot;00_shared&quot;</span> <span class="o">/</span> <span class="s2">&quot;title.tex&quot;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">candidate</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">title</span><span class="se">{{</span><span class="si">{</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_update_authors_tex</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write author name to authors.tex if found.&quot;&quot;&quot;</span>
+    <span class="n">author_name</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;owner_full_name&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;owner&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">author_name</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;00_shared&quot;</span> <span class="o">/</span> <span class="s2">&quot;authors.tex&quot;</span><span class="p">,</span>
+        <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;paper&quot;</span> <span class="o">/</span> <span class="s2">&quot;manuscript&quot;</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;authors.tex&quot;</span><span class="p">,</span>
+        <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;scitex&quot;</span> <span class="o">/</span> <span class="s2">&quot;writer&quot;</span> <span class="o">/</span> <span class="s2">&quot;00_shared&quot;</span> <span class="o">/</span> <span class="s2">&quot;authors.tex&quot;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">candidate</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">author</span><span class="se">{{</span><span class="si">{</span><span class="n">author_name</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+
+<span class="c1"># EOF</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

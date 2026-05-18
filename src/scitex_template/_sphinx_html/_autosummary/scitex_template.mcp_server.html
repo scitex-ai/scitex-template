@@ -1,0 +1,199 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_template.mcp_server &mdash; scitex-template 0.6.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e059a73d"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="scitex_template.registry" href="scitex_template.registry.html" />
+    <link rel="prev" title="scitex_template.cli" href="scitex_template.cli.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            scitex-template
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="scitex_template.html">scitex_template</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.build_directory_tree"><code class="docutils literal notranslate"><span class="pre">build_directory_tree()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.clone_module"><code class="docutils literal notranslate"><span class="pre">clone_module()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.clone_pip_project"><code class="docutils literal notranslate"><span class="pre">clone_pip_project()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.clone_research"><code class="docutils literal notranslate"><span class="pre">clone_research()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.clone_research_minimal"><code class="docutils literal notranslate"><span class="pre">clone_research_minimal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.clone_scitex_minimal"><code class="docutils literal notranslate"><span class="pre">clone_scitex_minimal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.clone_singularity"><code class="docutils literal notranslate"><span class="pre">clone_singularity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.clone_template"><code class="docutils literal notranslate"><span class="pre">clone_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.clone_writer_directory"><code class="docutils literal notranslate"><span class="pre">clone_writer_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.create_child_git"><code class="docutils literal notranslate"><span class="pre">create_child_git()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.create_env_template"><code class="docutils literal notranslate"><span class="pre">create_env_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.create_minimal_readme"><code class="docutils literal notranslate"><span class="pre">create_minimal_readme()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.create_paths_config"><code class="docutils literal notranslate"><span class="pre">create_paths_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.create_project_config"><code class="docutils literal notranslate"><span class="pre">create_project_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.create_project_readme"><code class="docutils literal notranslate"><span class="pre">create_project_readme()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.create_requirements_file"><code class="docutils literal notranslate"><span class="pre">create_requirements_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.customize_minimal_template"><code class="docutils literal notranslate"><span class="pre">customize_minimal_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.customize_template"><code class="docutils literal notranslate"><span class="pre">customize_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.ensure_integration"><code class="docutils literal notranslate"><span class="pre">ensure_integration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.find_parent_git"><code class="docutils literal notranslate"><span class="pre">find_parent_git()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.get_all_templates"><code class="docutils literal notranslate"><span class="pre">get_all_templates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.get_available_templates_info"><code class="docutils literal notranslate"><span class="pre">get_available_templates_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.get_code_template"><code class="docutils literal notranslate"><span class="pre">get_code_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.init_git_repo"><code class="docutils literal notranslate"><span class="pre">init_git_repo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.list_code_templates"><code class="docutils literal notranslate"><span class="pre">list_code_templates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.remove_child_git"><code class="docutils literal notranslate"><span class="pre">remove_child_git()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.html#scitex_template.setup_scholar_writer_integration"><code class="docutils literal notranslate"><span class="pre">setup_scholar_writer_integration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.cli.html">scitex_template.cli</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">scitex_template.mcp_server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_template.mcp_server.TemplateServer"><code class="docutils literal notranslate"><span class="pre">TemplateServer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scitex_template.mcp_server.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scitex_template.registry.html">scitex_template.registry</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">scitex-template</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="scitex_template.html">scitex_template</a></li>
+      <li class="breadcrumb-item active">scitex_template.mcp_server</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/scitex_template.mcp_server.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-scitex_template.mcp_server">
+<span id="scitex-template-mcp-server"></span><h1>scitex_template.mcp_server<a class="headerlink" href="#module-scitex_template.mcp_server" title="Link to this heading"></a></h1>
+<p>MCP Server for SciTeX Template - Project Scaffolding Framework.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version This: </span>standalone server is deprecated. Use the unified scitex MCP server:
+CLI: scitex serve
+Python: from scitex.mcp_server import run_server</p>
+</div>
+<p>Provides tools for:
+- Listing available project templates
+- Getting detailed template information
+- Creating new projects from templates
+- Managing git initialization strategies</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#scitex_template.mcp_server.main" title="scitex_template.mcp_server.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
+<td><p>Run the MCP server.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#scitex_template.mcp_server.TemplateServer" title="scitex_template.mcp_server.TemplateServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TemplateServer</span></code></a>()</p></td>
+<td><p>MCP Server for Project Template Management.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="scitex_template.mcp_server.TemplateServer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">scitex_template.mcp_server.</span></span><span class="sig-name descname"><span class="pre">TemplateServer</span></span><a class="reference internal" href="../_modules/scitex_template/mcp_server.html#TemplateServer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.mcp_server.TemplateServer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>MCP Server for Project Template Management.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scitex_template.mcp_server.TemplateServer.setup_handlers">
+<span class="sig-name descname"><span class="pre">setup_handlers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/mcp_server.html#TemplateServer.setup_handlers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.mcp_server.TemplateServer.setup_handlers" title="Link to this definition"></a></dt>
+<dd><p>Set up MCP server handlers.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scitex_template.mcp_server.main">
+<span class="sig-prename descclassname"><span class="pre">scitex_template.mcp_server.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scitex_template/mcp_server.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scitex_template.mcp_server.main" title="Link to this definition"></a></dt>
+<dd><p>Run the MCP server.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scitex_template.cli.html" class="btn btn-neutral float-left" title="scitex_template.cli" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scitex_template.registry.html" class="btn btn-neutral float-right" title="scitex_template.registry" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

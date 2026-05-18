@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scitex_template._project._generate_configs &mdash; scitex-template 0.6.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=e059a73d"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            scitex-template
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">scitex-template</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../scitex_template.html">scitex_template</a></li>
+      <li class="breadcrumb-item active">scitex_template._project._generate_configs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scitex_template._project._generate_configs</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># Timestamp: &quot;2026-02-17 (ywatanabe)&quot;</span>
+<span class="c1"># File: /home/ywatanabe/proj/scitex-python/src/scitex/template/_project/_generate_configs.py</span>
+<span class="sd">&quot;&quot;&quot;Generate project configuration files (YAML, JSON, .env, requirements).</span>
+
+<span class="sd">All functions accept a plain metadata dict — no Django dependencies.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="n">getLogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+    <span class="n">_HAS_YAML</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">_HAS_YAML</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;create_project_config&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create_paths_config&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create_env_template&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create_requirements_file&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="create_project_config">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.create_project_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_project_config</span><span class="p">(</span><span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create project.yaml (or .json fallback) in ``config/``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Project root directory.</span>
+<span class="sd">    metadata : dict</span>
+<span class="sd">        Keys: ``name``, ``id``, ``description``, ``created_at``,</span>
+<span class="sd">        ``owner``, ``progress``, ``hypotheses``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to the generated config file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span>
+    <span class="n">config_dir</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;config&quot;</span>
+    <span class="n">config_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">project_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)),</span>
+            <span class="s2">&quot;owner&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;owner&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;progress&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;paths&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;data_raw&quot;</span><span class="p">:</span> <span class="s2">&quot;./data/raw&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_processed&quot;</span><span class="p">:</span> <span class="s2">&quot;./data/processed&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_figures&quot;</span><span class="p">:</span> <span class="s2">&quot;./data/figures&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_models&quot;</span><span class="p">:</span> <span class="s2">&quot;./data/models&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;scripts&quot;</span><span class="p">:</span> <span class="s2">&quot;./scripts&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="s2">&quot;./results&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;docs&quot;</span><span class="p">:</span> <span class="s2">&quot;./docs&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;temp&quot;</span><span class="p">:</span> <span class="s2">&quot;./temp&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;execution&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;python_version&quot;</span><span class="p">:</span> <span class="s2">&quot;3.8+&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;requirements_file&quot;</span><span class="p">:</span> <span class="s2">&quot;../requirements.txt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;log_level&quot;</span><span class="p">:</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cache_enabled&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;research&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;hypotheses&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hypotheses&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;keywords&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;collaborators&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">_HAS_YAML</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">config_dir</span> <span class="o">/</span> <span class="s2">&quot;project.yaml&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">project_config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">config_dir</span> <span class="o">/</span> <span class="s2">&quot;project.json&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">project_config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="create_paths_config">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.create_paths_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_paths_config</span><span class="p">(</span><span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ``config/paths.json`` with resolved directory paths.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Project root directory.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to the generated paths.json.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span>
+    <span class="n">config_dir</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;config&quot;</span>
+    <span class="n">config_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">paths_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;raw&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;raw&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;processed&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;processed&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;figures&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;figures&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;models&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;models&quot;</span><span class="p">),</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;scripts&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;scripts&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;outputs&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;results&quot;</span> <span class="o">/</span> <span class="s2">&quot;outputs&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;reports&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;results&quot;</span> <span class="o">/</span> <span class="s2">&quot;reports&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;analysis&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;results&quot;</span> <span class="o">/</span> <span class="s2">&quot;analysis&quot;</span><span class="p">),</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;docs&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;docs&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;temp&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;temp&quot;</span> <span class="o">/</span> <span class="s2">&quot;cache&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;logs&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;temp&quot;</span> <span class="o">/</span> <span class="s2">&quot;logs&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;tmp&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;temp&quot;</span> <span class="o">/</span> <span class="s2">&quot;tmp&quot;</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">config_dir</span> <span class="o">/</span> <span class="s2">&quot;paths.json&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">paths_config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="create_env_template">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.create_env_template">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_env_template</span><span class="p">(</span><span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ``config/.env.template`` with project-specific placeholders.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Project root directory.</span>
+<span class="sd">    metadata : dict</span>
+<span class="sd">        Keys: ``name``, ``id``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to the generated .env.template.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span>
+    <span class="n">config_dir</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;config&quot;</span>
+    <span class="n">config_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">proj_id</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;# SciTeX Project Environment Configuration</span>
+<span class="s2"># Project: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span>
+
+<span class="s2"># Python Environment</span>
+<span class="s2">PYTHON_PATH=./scripts</span>
+<span class="s2">PYTHONPATH=$</span><span class="se">{{</span><span class="s2">PYTHONPATH</span><span class="se">}}</span><span class="s2">:./scripts</span>
+
+<span class="s2"># Data Paths</span>
+<span class="s2">DATA_RAW=./data/raw</span>
+<span class="s2">DATA_PROCESSED=./data/processed</span>
+<span class="s2">DATA_FIGURES=./data/figures</span>
+<span class="s2">DATA_MODELS=./data/models</span>
+
+<span class="s2"># Output Paths</span>
+<span class="s2">RESULTS_OUTPUT=./results/outputs</span>
+<span class="s2">RESULTS_REPORTS=./results/reports</span>
+<span class="s2">RESULTS_ANALYSIS=./results/analysis</span>
+
+<span class="s2"># Temporary Paths</span>
+<span class="s2">TEMP_CACHE=./temp/cache</span>
+<span class="s2">TEMP_LOGS=./temp/logs</span>
+<span class="s2">TEMP_TMP=./temp/tmp</span>
+
+<span class="s2"># Project Settings</span>
+<span class="s2">PROJECT_NAME=&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="s2">PROJECT_ID=</span><span class="si">{</span><span class="n">proj_id</span><span class="si">}</span>
+<span class="s2">LOG_LEVEL=INFO</span>
+<span class="s2">CACHE_ENABLED=true</span>
+
+<span class="s2"># Add your custom environment variables below</span>
+<span class="s2"># API_KEY=your_api_key_here</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">config_dir</span> <span class="o">/</span> <span class="s2">&quot;.env.template&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<span class="n">_DEFAULT_REQUIREMENTS</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2"># SciTeX Project Requirements</span>
+<span class="s2"># Core scientific computing packages</span>
+<span class="s2">numpy&gt;=1.21.0</span>
+<span class="s2">pandas&gt;=1.3.0</span>
+<span class="s2">matplotlib&gt;=3.4.0</span>
+<span class="s2">seaborn&gt;=0.11.0</span>
+<span class="s2">scipy&gt;=1.7.0</span>
+
+<span class="s2"># Data processing and analysis</span>
+<span class="s2">scikit-learn&gt;=1.0.0</span>
+<span class="s2">statsmodels&gt;=0.12.0</span>
+
+<span class="s2"># Visualization</span>
+<span class="s2">plotly&gt;=5.0.0</span>
+<span class="s2">bokeh&gt;=2.4.0</span>
+
+<span class="s2"># Jupyter and interactive computing</span>
+<span class="s2">jupyter&gt;=1.0.0</span>
+<span class="s2">ipykernel&gt;=6.0.0</span>
+<span class="s2">nbformat&gt;=5.1.0</span>
+
+<span class="s2"># File I/O and data formats</span>
+<span class="s2">openpyxl&gt;=3.0.0</span>
+<span class="s2">xlrd&gt;=2.0.0</span>
+<span class="s2">h5py&gt;=3.1.0</span>
+
+<span class="s2"># Development and testing</span>
+<span class="s2">pytest&gt;=6.2.0</span>
+<span class="s2">black&gt;=21.0.0</span>
+<span class="s2">flake8&gt;=3.9.0</span>
+
+<span class="s2"># Documentation</span>
+<span class="s2">sphinx&gt;=4.0.0</span>
+<span class="s2">sphinx-rtd-theme&gt;=0.5.0</span>
+
+<span class="s2"># Add your project-specific requirements below:</span>
+<span class="s2"># tensorflow&gt;=2.6.0</span>
+<span class="s2"># torch&gt;=1.9.0</span>
+<span class="s2"># transformers&gt;=4.9.0</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="create_requirements_file">
+<a class="viewcode-back" href="../../../_autosummary/scitex_template.html#scitex_template.create_requirements_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_requirements_file</span><span class="p">(</span><span class="n">project_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ``requirements.txt`` with standard scientific packages.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    project_dir : str</span>
+<span class="sd">        Project root directory.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to the generated requirements.txt.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;requirements.txt&quot;</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">_DEFAULT_REQUIREMENTS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<span class="c1"># EOF</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yusuke Watanabe.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

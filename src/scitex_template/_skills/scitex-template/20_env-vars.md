@@ -1,7 +1,9 @@
 ---
-name: env-vars
-description: Environment variables read by scitex-template. Currently only SCITEX_DIR (ecosystem-wide state-directory override).
-tags: [scitex-template, scitex-package]
+description: |
+  [TOPIC] Environment Variables
+  [DETAILS] Environment variables read by scitex-template. Currently only
+  SCITEX_DIR (ecosystem-wide state-directory override).
+tags: [scitex-template-env-vars, scitex-template, scitex-package]
 ---
 
 # Environment variables

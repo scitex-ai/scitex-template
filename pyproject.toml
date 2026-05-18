@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scitex-template"
-version = "0.6.3"
+version = "0.6.6"
 description = "Project template cloner + code snippet library for the SciTeX ecosystem — six templates vendored, shallow-cloned on demand to ~/.scitex/template/cache/"
 readme = "README.md"
 license = "AGPL-3.0-only"
@@ -37,6 +37,10 @@ dependencies = [
     "gitpython",
     "pyyaml",
     "scitex-config>=0.3.0",
+    # try_import_optional is the canonical optional-dep gate used by
+    # scitex_template/__init__.py, mcp_server.py, _utils/_git_strategy.py
+    # and _project/_clone_project.py. Light: scitex-config + tomli.
+    "scitex-dev>=0.11.0",
 ]
 
 # scitex.git / scitex.scholar / scitex.writer are still imported by a few
@@ -46,16 +50,23 @@ dependencies = [
 # templates needs none of this.
 
 [project.optional-dependencies]
-legacy = [
-    "scitex",
-]
+# Legacy cloners (clone_scitex_minimal, clone_module, clone_app, clone_project
+# remote-fallback path) historically required the umbrella `scitex` package.
+# Per PS139 (no umbrella in standalone pyproject), install scitex separately:
+# `pip install scitex` alongside `pip install scitex-template[legacy]`.
+legacy = []
 mcp = [
     "mcp>=1.0.0",
 ]
 dev = [
-    "pytest>=7.0",
-    "pytest-cov",
+    "mcp>=1.0.0",
     "pytest-asyncio>=0.21",
+    "pytest-cov",
+    "pytest>=7.0",
+    # tests/develop/test_audit.py: gates on shutil.which("scitex-dev")
+    # and imports scitex_dev.testing.audit_all_for_package — the
+    # [cli-audit] extra installs both the CLI shim and audit helpers.
+    "scitex-dev[cli-audit]>=0.11.0",
 ]
 docs = [
     "sphinx>=7.0",
@@ -78,6 +89,17 @@ scitex-template = "scitex_template"
 
 [project.entry-points."scitex_dev.skills"]
 scitex-template = "scitex_template"
+
+[project.urls]
+Homepage = "https://github.com/ywatanabe1989/scitex-template"
+Documentation = "https://scitex-template.readthedocs.io"
+Repository = "https://github.com/ywatanabe1989/scitex-template"
+Issues = "https://github.com/ywatanabe1989/scitex-template/issues"
+
+[tool.coverage.run]
+parallel = true
+source = ["scitex_template"]
+concurrency = ["multiprocessing", "thread"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scitex_template"]

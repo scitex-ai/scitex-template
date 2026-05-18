@@ -98,7 +98,7 @@ def _scaffold_inline(project_dir: str, git_strategy: Optional[str]) -> bool:
         (tests_dir / "test_module.py").write_text(_TEST_MODULE_PY)
 
         if git_strategy:
-            from scitex.git import init_git_repo
+            from scitex_git import init_git_repo
 
             init_git_repo(str(project_path))
 

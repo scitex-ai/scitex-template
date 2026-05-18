@@ -27,13 +27,17 @@ from typing import Optional
 
 import logging
 
-# scitex.git is an optional dep (scitex-template[legacy]). Callers that
-# reach apply_git_strategy() need it; the cache fast-path does not.
-try:
-    import scitex.git  # type: ignore[import-not-found]
-    import scitex  # type: ignore[import-not-found]
-except ImportError:  # pragma: no cover
-    scitex = None  # type: ignore[assignment]
+# scitex (umbrella) is an optional dep (install alongside
+# scitex-template[legacy]). Callers that reach apply_git_strategy()
+# need scitex.git; the cache fast-path does not.
+from scitex_dev import try_import_optional
+
+scitex = try_import_optional("scitex", pkg="scitex")
+# Touch the .git submodule eagerly so attribute access below is cheap;
+# if scitex itself is None or .git is absent, downstream callers raise
+# via _require_scitex_git() / clear errors.
+if scitex is not None:  # pragma: no cover
+    try_import_optional("scitex.git", pkg="scitex")
 
 getLogger = logging.getLogger
 

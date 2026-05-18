@@ -1,5 +1,10 @@
 ---
-description: Set up a symlink so scitex.scholar's bibliography file is shared directly with the LaTeX manuscript directory, eliminating bibliography duplication.
+description: |
+  [TOPIC] Scholar/Writer Integration
+  [DETAILS] Set up a symlink so scitex.scholar's bibliography file is shared
+  directly with the LaTeX manuscript directory, eliminating bibliography
+  duplication.
+tags: [scitex-template-scholar-writer-integration, scitex-template, scitex-package]
 ---
 
 # Scholar-Writer Integration

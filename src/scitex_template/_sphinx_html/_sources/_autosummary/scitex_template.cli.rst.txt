@@ -1,0 +1,6 @@
+scitex\_template.cli
+====================
+
+.. automodule:: scitex_template.cli
+
+   

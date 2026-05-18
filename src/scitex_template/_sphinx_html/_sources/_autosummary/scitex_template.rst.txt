@@ -1,0 +1,26 @@
+﻿scitex\_template
+================
+
+.. automodule:: scitex_template
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      create_child_git
+      find_parent_git
+      get_available_templates_info
+      get_template_tree
+      init_git_repo
+      remove_child_git
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   cli
+   mcp_server
+   registry

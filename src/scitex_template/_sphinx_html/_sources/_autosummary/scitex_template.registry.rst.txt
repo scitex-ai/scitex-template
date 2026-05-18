@@ -1,0 +1,20 @@
+scitex\_template.registry
+=========================
+
+.. automodule:: scitex_template.registry
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      find_template
+      load_registry
+      registry_root
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      TemplateEntry
+   

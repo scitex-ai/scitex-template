@@ -1,5 +1,8 @@
 ---
-description: Clone GitHub-hosted project scaffold templates for research, pip packages, Singularity containers, LaTeX manuscripts, and SciTeX modules.
+description: |
+  [TOPIC] Project Templates
+  [DETAILS] Clone GitHub-hosted project scaffold templates for research, pip packages, Singularity containers, LaTeX manuscripts, and SciTeX modules.
+tags: [scitex-template-project-templates, scitex-template, scitex-package]
 ---
 
 # Project Templates
@@ -11,24 +14,24 @@ Clone pre-built GitHub repository templates to start a new project with the corr
 `clone_template` is the single entry point. All other clone functions are convenience wrappers around it.
 
 ```python
-import scitex as stx
+import scitex
 
 # Canonical IDs
-stx.template.clone_template("research",         "./my_experiment")
-stx.template.clone_template("research_minimal", "./quick_study")
-stx.template.clone_template("scitex_minimal",   "./minimal_project")
-stx.template.clone_template("pip_project",      "./my_package")
-stx.template.clone_template("singularity",      "./hpc_container")
-stx.template.clone_template("paper_directory",  "./manuscript")
-stx.template.clone_template("module",           "./my_module")
-stx.template.clone_template("scitex_app",       "./my_app")
+scitex.template.clone_template("research",         "./my_experiment")
+scitex.template.clone_template("research_minimal", "./quick_study")
+scitex.template.clone_template("scitex_minimal",   "./minimal_project")
+scitex.template.clone_template("pip_project",      "./my_package")
+scitex.template.clone_template("singularity",      "./hpc_container")
+scitex.template.clone_template("paper_directory",  "./manuscript")
+scitex.template.clone_template("module",           "./my_module")
+scitex.template.clone_template("scitex_app",       "./my_app")
 
 # Aliases also work
-stx.template.clone_template("minimal",      "./project")   # -> scitex_minimal
-stx.template.clone_template("pip-project",  "./pkg")       # -> pip_project
-stx.template.clone_template("paper",        "./paper")     # -> paper_directory
-stx.template.clone_template("stx-module",   "./mod")       # -> module
-stx.template.clone_template("app",          "./app")       # -> scitex_app
+scitex.template.clone_template("minimal",      "./project")   # -> scitex_minimal
+scitex.template.clone_template("pip-project",  "./pkg")       # -> pip_project
+scitex.template.clone_template("paper",        "./paper")     # -> paper_directory
+scitex.template.clone_template("stx-module",   "./mod")       # -> module
+scitex.template.clone_template("app",          "./app")       # -> scitex_app
 ```
 
 ### Signature
@@ -65,9 +68,9 @@ def clone_*(
 Full end-to-end scientific research project. Clones from `https://github.com/ywatanabe1989/scitex-research-template.git`.
 
 ```python
-stx.template.clone_research("./my_experiment")
-stx.template.clone_research("./my_experiment", branch="develop")
-stx.template.clone_research("./my_experiment", tag="v1.0.0")
+scitex.template.clone_research("./my_experiment")
+scitex.template.clone_research("./my_experiment", branch="develop")
+scitex.template.clone_research("./my_experiment", tag="v1.0.0")
 ```
 
 ### clone_research_minimal
@@ -75,10 +78,10 @@ stx.template.clone_research("./my_experiment", tag="v1.0.0")
 Manuscript-only subset of the research template. Clones scitex-writer and keeps only the writer-relevant directories.
 
 ```python
-stx.template.clone_research_minimal("./quick_study")
+scitex.template.clone_research_minimal("./quick_study")
 
 # Custom subset of directories to keep
-stx.template.clone_research_minimal(
+scitex.template.clone_research_minimal(
     "./custom",
     include_dirs=["00_shared", "01_manuscript", "scripts"],
 )
@@ -91,7 +94,7 @@ Default `include_dirs` = `["00_shared", "01_manuscript", "02_supplementary", "03
 Python pip-installable package with CI/CD, tests, and pyproject.toml. Clones from `https://github.com/ywatanabe1989/pip-project-template.git`.
 
 ```python
-stx.template.clone_pip_project("./my_package")
+scitex.template.clone_pip_project("./my_package")
 ```
 
 ### clone_singularity
@@ -99,7 +102,7 @@ stx.template.clone_pip_project("./my_package")
 HPC Singularity container project. Clones from `https://github.com/ywatanabe1989/singularity_template.git`.
 
 ```python
-stx.template.clone_singularity("./hpc_container")
+scitex.template.clone_singularity("./hpc_container")
 ```
 
 ### clone_writer_directory
@@ -107,8 +110,8 @@ stx.template.clone_singularity("./hpc_container")
 Standalone LaTeX manuscript directory. Clones from `https://github.com/ywatanabe1989/scitex-writer.git` on the `main` branch.
 
 ```python
-stx.template.clone_writer_directory("./manuscript")
-stx.template.clone_writer_directory("./manuscript", tag="v2.0.0")
+scitex.template.clone_writer_directory("./manuscript")
+scitex.template.clone_writer_directory("./manuscript", tag="v2.0.0")
 ```
 
 ### clone_module
@@ -116,7 +119,7 @@ stx.template.clone_writer_directory("./manuscript", tag="v2.0.0")
 SciTeX workspace module project. Tries GitHub first (`https://github.com/ywatanabe1989/scitex-template-cloud-module.git`), falls back to inline scaffold on failure.
 
 ```python
-stx.template.clone_module("./my_module")
+scitex.template.clone_module("./my_module")
 ```
 
 Inline scaffold structure:
@@ -135,7 +138,7 @@ my_module/
 Minimal SciTeX workspace layout (writer + scholar directories only).
 
 ```python
-stx.template.clone_scitex_minimal("./workspace")
+scitex.template.clone_scitex_minimal("./workspace")
 ```
 
 ## Internals: What clone_project Does
@@ -156,7 +159,7 @@ All clone functions delegate to `clone_project`, which executes these steps in o
 
 ```python
 # Returns list of dicts: id, name, description, github_url, use_case, tree
-templates = stx.template.get_available_templates_info()
+templates = scitex.template.get_available_templates_info()
 for t in templates:
     print(f"{t['id']}: {t['description']}")
     print(t['tree'])

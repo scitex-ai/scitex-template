@@ -146,7 +146,7 @@ scitex scholar auth logout
 
 def python_api_example():
     """Direct Python API usage."""
-    from scitex.scholar import (
+    from scitex_scholar import (
         search_papers,
         enrich_bibtex,
         download_pdf,
@@ -190,7 +190,7 @@ def main(
     logger=stx.INJECTED,
 ):
     """Research literature workflow."""
-    from scitex.scholar import search_papers, enrich_bibtex
+    from scitex_scholar import search_papers, enrich_bibtex
 
     # 1. Search for papers
     logger.info(f"Searching for papers on: {{topic}}")

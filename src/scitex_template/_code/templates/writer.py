@@ -216,7 +216,7 @@ def main(
 
 def python_api_example():
     """Direct Python API for writer."""
-    from scitex.writer import (
+    from scitex_writer import (
         compile_manuscript,
         clean_auxiliary,
         word_count,
