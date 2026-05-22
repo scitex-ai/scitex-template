@@ -9,7 +9,4 @@ coverage:
         target: 90%
         threshold: 5%
 
-comment:
-  layout: "reach, diff, flags, files"
-  behavior: default
-  require_changes: false
+comment: false
