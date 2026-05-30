@@ -642,8 +642,6 @@ mgmt
 
 ### SciTeX-specific patterns (v0.1.0-alpha) ###
 # Writer projects (cloned on-demand via: make setup-writer)
-scitex/writer/*
-!scitex/writer/.gitkeep
 
 # SciTeX cache files (all regenerable)
 scitex/cache/
@@ -656,10 +654,8 @@ scitex/mnt/
 scitex/opt/
 
 # Optional: ignore uploads inbox (uncomment to gitignore before organizing)
-# scitex/uploads/
 
 # Optional: ignore conversations (uncomment for privacy)
-# scitex/ai/conversations/
 
 # Optional: commit metadata.db for team collaboration (already gitignored by **/*.db above)
 # To track metadata.db, add explicit exception:
@@ -672,3 +668,13 @@ scripts/mnist/clf_svm_out/
 scripts/mnist/plot_digits_out/
 scripts/mnist/plot_umap_space_out/
 data/mnist/
+
+# scitex local-state (added by clew-adapt)
+.scitex/clew/db.sqlite
+.scitex/clew/runtime/
+# clew DAG outputs vs source
+data/results/*
+!data/results/.gitkeep
+
+# Override **/*.txt for requirements
+!requirements.txt
