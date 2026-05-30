@@ -672,3 +672,10 @@ scripts/mnist/clf_svm_out/
 scripts/mnist/plot_digits_out/
 scripts/mnist/plot_umap_space_out/
 data/mnist/
+
+# scitex local-state (added by clew-adapt)
+.scitex/clew/db.sqlite
+.scitex/clew/runtime/
+# clew DAG outputs vs source
+data/results/*
+!data/results/.gitkeep

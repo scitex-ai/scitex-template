@@ -31,6 +31,9 @@
 	run-mnist-plot-umap \
 	run-mnist-clf-svm \
 	run-mnist-conf-mat \
+	solve \
+	verify-claims \
+	clean-clew \
 	clean \
 	clean-mnist \
 	clean-outputs \
@@ -67,7 +70,6 @@ DATA_DIR := data
 TESTS_DIR := tests
 SCITEX_DIR := scitex
 WRITER_DIR := $(SCITEX_DIR)/writer  # ./scitex/writer/01_manuscript/...
-MGMT_SCRIPTS := management/scripts
 
 # ============================================
 # Help
@@ -154,31 +156,46 @@ setup: install
 	@echo ""
 
 setup-writer:
-	@$(MGMT_SCRIPTS)/setup-writer.sh
+	@echo 'setup-writer: management script removed; configure scitex/writer/ manually'
 
 verify:
-	@$(MGMT_SCRIPTS)/verify.sh
+	$(MAKE) verify-claims
 
 # ============================================
 # Running MNIST Scripts
 # ============================================
-run-mnist:
-	@$(MGMT_SCRIPTS)/run-mnist.sh all
+run-mnist: run-mnist-download run-mnist-plot-digits run-mnist-plot-umap run-mnist-clf-svm run-mnist-conf-mat
+	@echo "MNIST pipeline complete."
 
 run-mnist-download:
-	@$(MGMT_SCRIPTS)/run-mnist.sh download
+	cd $(MNIST_DIR) && $(PYTHON) 01_download.py
 
 run-mnist-plot-digits:
-	@$(MGMT_SCRIPTS)/run-mnist.sh digits
+	cd $(MNIST_DIR) && $(PYTHON) 02_plot_digits.py
 
 run-mnist-plot-umap:
-	@$(MGMT_SCRIPTS)/run-mnist.sh umap
+	cd $(MNIST_DIR) && $(PYTHON) 03_plot_umap_space.py
 
 run-mnist-clf-svm:
-	@$(MGMT_SCRIPTS)/run-mnist.sh svm
+	cd $(MNIST_DIR) && $(PYTHON) 04_clf_svm.py
 
 run-mnist-conf-mat:
-	@$(MGMT_SCRIPTS)/run-mnist.sh confmat
+	cd $(MNIST_DIR) && $(PYTHON) 05_plot_conf_mat.py
+
+# --- Clew DAG terminus (agent target) -----------------------------------
+# `make solve` writes data/results/claims.json via scitex.clew. It reads
+# stage 04's real metrics when available; otherwise it falls back to a
+# deterministic synthetic metric so the DAG is exercisable on a fresh
+# checkout. Run `make run-mnist` first for real-data claims.
+solve: clean-clew
+	cd $(MNIST_DIR) && $(PYTHON) 06_register_claims.py
+
+# `make verify` is plain-Python (out-of-band; NOT in the agent's Clew DAG).
+verify-claims:
+	$(PYTHON) scripts/verify/check_schema.py
+
+clean-clew:
+	@rm -f .scitex/clew/db.sqlite .scitex/clew/runtime/db.sqlite 2>/dev/null || true
 
 # ============================================
 # Cleaning
@@ -187,25 +204,25 @@ clean:
 	@$(MGMT_SCRIPTS)/clean.sh
 
 clean-mnist:
-	@$(MGMT_SCRIPTS)/clean.sh mnist
+	$(MAKE) clean-data clean-outputs
 
 clean-outputs:
-	@$(MGMT_SCRIPTS)/clean.sh outputs
+	find scripts -type d -name '*_out' -prune -exec rm -rf {} + 2>/dev/null || true
 
 clean-data:
-	@$(MGMT_SCRIPTS)/clean.sh data
+	rm -rf data/mnist 2>/dev/null || true
 
 clean-logs:
-	@$(MGMT_SCRIPTS)/clean.sh logs
+	find . -name '*.log' -type f -delete 2>/dev/null || true
 
 clean-all:
-	@$(MGMT_SCRIPTS)/clean.sh all
+	$(MAKE) clean-outputs clean-data clean-logs clean-python clean-clew
 
 clean-python:
-	@$(MGMT_SCRIPTS)/clean.sh python
+	find . -type d -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null || true; find . -name '*.pyc' -delete 2>/dev/null || true
 
 clean-writer:
-	@$(MGMT_SCRIPTS)/clean.sh writer
+	@echo 'clean-writer: management script removed; clean manuscript outputs manually under scitex/writer/'
 
 # ============================================
 # Testing

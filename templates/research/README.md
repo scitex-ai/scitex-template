@@ -507,3 +507,85 @@ AGPL-3.0
 ## Contact
 
 Yusuke Watanabe (ywatanabe@scitex.ai)
+
+## Clew-aware MNIST pipeline (2026-05-30)
+
+The MNIST example now ends in a **Clew validity-gate** stage so each
+test-set metric back-propagates through the Clew DAG to source data.
+That stage + the host-side schema check landed alongside a small
+infra cleanup (removed `management/`; added `.scitex/clew/` per the
+SciTeX local-state convention).
+
+### New scripts
+
+```
+scripts/
+├── mnist/
+│   ├── 01_download.py        unchanged
+│   ├── 02_plot_digits.py     unchanged
+│   ├── 03_plot_umap_space.py unchanged
+│   ├── 04_clf_svm.py         unchanged — produces classification_report.csv
+│   ├── 05_plot_conf_mat.py   unchanged
+│   └── 06_register_claims.py NEW — Clew DAG terminus
+└── verify/                    NEW (canonical agent-vs-verify split)
+    └── check_schema.py        plain-Python out-of-band schema check
+```
+
+`06_register_claims.py`:
+
+- Reads `data/mnist/classification_report.csv` if the full MNIST
+  pipeline has been run (via `make run-mnist`) and registers REAL
+  `test_accuracy` + `test_macro_f1` claims back-propagating to that
+  CSV via `scitex_clew.add_claim(source_file=...)`.
+- Otherwise (fresh checkout, no MNIST cached), writes a tiny stub
+  metrics file (`data/results/_synthetic_metrics.json`) and registers
+  deterministic synthetic claims back-propagating to *that* file —
+  so the Clew DAG is still exercised end-to-end, just with a
+  placeholder source.
+
+### New Makefile targets
+
+```bash
+make solve              # run 06_register_claims.py (lightweight; ~2s)
+make verify-claims      # plain-Python schema check on data/results/claims.json
+make clean-clew         # drop the Clew SQLite DB
+make run-mnist          # full pipeline 01→05 (downloads MNIST, trains SVM; slow)
+```
+
+The recommended flow:
+
+```bash
+make run-mnist          # heavy, once per dataset refresh
+make solve              # cheap, run after every analysis tweak
+make verify-claims      # cheap, schema gate
+```
+
+### Infra changes shipped in this PR
+
+- `management/` removed (operator brief). Its `clean.sh`,
+  `run-mnist.sh`, `verify.sh`, `setup-writer.sh` helpers are folded
+  into the Makefile recipes inline (`run-mnist` → direct python
+  calls; `clean-outputs` → `find ... -name '*_out' -delete`; etc.).
+- `.scitex/` added with a `clew/` subdir per the SciTeX local-state
+  convention. The Clew SQLite DB will land at `.scitex/clew/db.sqlite`
+  (or `.scitex/clew/runtime/db.sqlite` after the upcoming runtime
+  migration); both paths are gitignored.
+
+### Refactor caveats (live scitex 2.29 / scitex-session 0.2.0)
+
+Two non-fatal log lines fire on every `@stx.session` lifecycle on
+the current editable scitex:
+
+```
+ERRO: Error occurred while saving: _save_pickle() got an unexpected keyword argument 'track'
+ERRO: Error occurred while saving: _save_yaml()   got an unexpected keyword argument 'track'
+```
+
+These come from `scitex_session._lifecycle._config` calling
+`stx.io.save(..., track=...)` on the auto-dumped CONFIG.pkl/yaml;
+the `track=` kwarg was removed from `scitex_io._save_pickle` /
+`_save_yaml` in the SoC refactor. The session still reports
+`FINISHED_SUCCESS` and user main returns normally — `make solve`
+exits 0 — so this is log noise, not a blocker. Surfaced for the
+scitex-session / scitex-io refactor owners.
+
