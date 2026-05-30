@@ -28,7 +28,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # class, macro/weighted averages). When the user has only run ``make
 # solve`` on a fresh checkout, the file is absent and we fall back to a
 # deterministic synthetic claim so the DAG itself is exercised end-to-end.
-CLF_REPORT = PROJECT_ROOT / "data/mnist/classification_report.csv"
+CLF_REPORT  = PROJECT_ROOT / "data/mnist/classification_report.csv"  # paper artefact
+METRICS_JSON = PROJECT_ROOT / "data/mnist/metrics.json"  # clew DAG node consumed by this stage
 
 # Where claims.json lives. Stable cross-stage location; the agent-prompt
 # contract (``capsule_id``-less since the host adds identification
@@ -50,18 +51,22 @@ _TYPE_MAP = {
 
 
 def _read_real_metrics() -> tuple[dict, Path] | None:
-    """Return (metrics dict, source-file path) if stage 04 ran, else None."""
-    if not CLF_REPORT.is_file():
+    """Return (metrics dict, source-file path) if stage 04 ran, else None.
+
+    Reads ``data/mnist/metrics.json`` (the compact stable DAG node stage
+    04 emits alongside the writer-friendly classification_report.csv).
+    """
+    if not METRICS_JSON.is_file():
         return None
     try:
-        # scitex.io.load on a CSV returns a pandas DataFrame (the
-        # classification_report is keyed by class label + macro/weighted/
-        # accuracy rows when output_dict=True was saved).
-        df = stx.io.load(str(CLF_REPORT))
-        # Pull accuracy + macro-avg F1 by the sklearn report convention.
-        accuracy = float(df.loc["accuracy"].iloc[0])
-        macro_f1 = float(df.loc["macro avg", "f1-score"])
-        return ({"accuracy": accuracy, "macro_f1": macro_f1}, CLF_REPORT)
+        metrics = json.loads(METRICS_JSON.read_text())
+        return (
+            {
+                "accuracy": float(metrics["accuracy"]),
+                "macro_f1": float(metrics["macro_f1"]),
+            },
+            METRICS_JSON,
+        )
     except Exception:
         return None
 

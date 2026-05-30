@@ -507,84 +507,131 @@ AGPL-3.0
 
 Yusuke Watanabe (ywatanabe@scitex.ai)
 
-## Clew-aware MNIST pipeline (2026-05-30)
 
-The MNIST example now ends in a **Clew validity-gate** stage so each
-test-set metric back-propagates through the Clew DAG to source data.
-That stage + the host-side schema check landed alongside a small
-infra cleanup (removed `management/`; added `.scitex/clew/` per the
-SciTeX local-state convention).
+## Clew-aware MNIST pipeline (validated 2026-05-30 by end-to-end run)
 
-### New scripts
+This template's MNIST example is now a clew-aware, validity-gated DAG:
+each metric in `data/results/claims.json` back-propagates through the
+Clew DAG to source data on disk. `make solve` actually runs the
+pipeline (no synthetic shortcuts) and produces real claims.
+
+### Layout (after this PR)
 
 ```
-scripts/
-├── mnist/
-│   ├── 01_download.py        unchanged
-│   ├── 02_plot_digits.py     unchanged
-│   ├── 03_plot_umap_space.py unchanged
-│   ├── 04_clf_svm.py         unchanged — produces classification_report.csv
-│   ├── 05_plot_conf_mat.py   unchanged
-│   └── 06_register_claims.py NEW — Clew DAG terminus
-└── verify/                    NEW (canonical agent-vs-verify split)
-    └── check_schema.py        plain-Python out-of-band schema check
+templates/research/
+├── .gitignore
+├── .scitex/clew/        # local-state convention — Clew DB / runtime
+├── CHANGELOG.md
+├── CLAUDE.md
+├── LICENSE
+├── Makefile
+├── README.md
+├── _skills/             # agent guidance (unchanged)
+├── config/
+│   ├── MNIST.yaml       # CONFIG.MNIST namespace (BATCH_SIZE, NORMALIZE,
+│   │                    #   RANDOM_STATE, SVM_TRAIN_SUBSET, ...)
+│   └── PATH.yaml        # CONFIG.PATH namespace (no outer `PATH:` wrapper)
+├── data/
+│   ├── mnist/           # populated by 01_download.py
+│   └── results/         # claims.json (DAG terminus)
+├── docs/
+├── externals/
+├── requirements.txt     # NEW — scitex / torch / sklearn / umap-learn / ...
+├── scripts/
+│   ├── mnist/           # 5 existing verb-named stages + 06_register_claims (NEW)
+│   │   ├── 01_download.py
+│   │   ├── 02_plot_digits.py
+│   │   ├── 03_plot_umap_space.py
+│   │   ├── 04_clf_svm.py             # +SVM_TRAIN_SUBSET subsample + metrics.json
+│   │   ├── 05_plot_conf_mat.py
+│   │   ├── 06_register_claims.py     # NEW — DAG terminus + scitex_clew.add_claim
+│   │   └── main.sh
+│   └── verify/                       # NEW — agent-vs-verify split
+│       └── check_schema.py
+├── template.yaml
+└── tests/
 ```
 
-`06_register_claims.py`:
-
-- Reads `data/mnist/classification_report.csv` if the full MNIST
-  pipeline has been run (via `make run-mnist`) and registers REAL
-  `test_accuracy` + `test_macro_f1` claims back-propagating to that
-  CSV via `scitex_clew.add_claim(source_file=...)`.
-- Otherwise (fresh checkout, no MNIST cached), writes a tiny stub
-  metrics file (`data/results/_synthetic_metrics.json`) and registers
-  deterministic synthetic claims back-propagating to *that* file —
-  so the Clew DAG is still exercised end-to-end, just with a
-  placeholder source.
-
-### New Makefile targets
+### `make solve` flow
 
 ```bash
-make solve              # run 06_register_claims.py (lightweight; ~2s)
-make verify-claims      # plain-Python schema check on data/results/claims.json
-make clean-clew         # drop the Clew SQLite DB
-make run-mnist          # full pipeline 01→05 (downloads MNIST, trains SVM; slow)
+make solve              # downloads MNIST (once), trains SVM, emits claims.json
+make verify-claims      # plain-Python schema check on claims.json
+make clean-clew         # drop the Clew SQLite DB only
 ```
 
-The recommended flow:
+The recipe (`solve: clean-clew`):
+
+1. Idempotent guard: if `data/mnist/train_flattened.npy` is missing,
+   run `01_download.py` (downloads ~9.5 MB MNIST → flattens → saves
+   ~400 MB of npy/pkl into `output/data/mnist/` with stable symlinks
+   under `data/mnist/`).
+2. Always run `04_clf_svm.py`: trains a subsample-size RBF SVM
+   (controlled by `CONFIG.MNIST.SVM_TRAIN_SUBSET`, default 500 in this
+   template — full MNIST + RBF is hours). Writes
+   `data/mnist/classification_report.csv` (writer-friendly) AND
+   `data/mnist/metrics.json` (the clew-DAG node consumed downstream).
+3. `06_register_claims.py` reads `data/mnist/metrics.json`, writes the
+   canonical `data/results/claims.json` ({claims:[...]} contract), and
+   registers each claim via `scitex_clew.add_claim(file_path=...,
+   claim_type=..., source_file=...)`.
+
+### What `make solve` actually produces (verified)
 
 ```bash
-make run-mnist          # heavy, once per dataset refresh
-make solve              # cheap, run after every analysis tweak
-make verify-claims      # cheap, schema gate
+$ time make solve
+…
+SUCC: Registering real metrics from …/data/mnist/metrics.json:
+    {'accuracy': 0.8711, 'macro_f1': 0.86935046024982}
+INFO: Wrote 2 claims -> …/data/results/claims.json
+DONE n_claims=2
+INFO: Congratulations! The script completed: FINISHED_SUCCESS/…
+make solve rc=0 wall=23s
+
+$ make verify-claims
+OK schema: 2 claims, all required keys present
+
+$ cat data/results/claims.json
+{
+  "claims": [
+    {"question":"test_accuracy", "answer":"0.871100", "answer_type":"number"},
+    {"question":"test_macro_f1", "answer":"0.869350", "answer_type":"number"}
+  ]
+}
 ```
 
-### Infra changes shipped in this PR
+### Bugs the dogfooding surfaced (and fixed in the template)
 
-- `management/` removed (operator brief). Its `clean.sh`,
-  `run-mnist.sh`, `verify.sh`, `setup-writer.sh` helpers are folded
-  into the Makefile recipes inline (`run-mnist` → direct python
-  calls; `clean-outputs` → `find ... -name '*_out' -delete`; etc.).
-- `.scitex/` added with a `clew/` subdir per the SciTeX local-state
-  convention. The Clew SQLite DB will land at `.scitex/clew/db.sqlite`
-  (or `.scitex/clew/runtime/db.sqlite` after the upcoming runtime
-  migration); both paths are gitignored.
+1. `make install` referenced a missing `requirements.txt` → added.
+2. The Makefile recipes did `cd $(MNIST_DIR) && python …` — scitex
+   then looked for `scripts/mnist/config/` and couldn't find it
+   (`'DotDict' object has no attribute 'MNIST'`). Fix: run python
+   from the project root via `python3 $(MNIST_DIR)/0X_*.py`.
+2.   The `management/scripts/run-mnist.sh` dispatcher previously
+   masked this by setting `MNIST_DIR` via `GIT_ROOT` — once
+   `management/` was removed (operator brief), the latent bug
+   surfaced. The new Makefile recipes do the right thing inline.
+3. Stage 04's `classification_report.csv` is dataframe-shaped (columns
+   are class labels + macro/weighted/accuracy; rows are
+   precision/recall/f1/support; no row index). Stage 06's CSV-keyed
+   lookup (`df.loc["accuracy"]`) silently failed → fell back to
+   synthetic. Fix: stage 04 now ALSO writes a compact
+   `metrics.json` (`{accuracy, macro_f1}`) as the stable clew DAG
+   node; stage 06 reads that JSON directly. The CSV stays for the
+   writer / paper.
+4. Full MNIST + RBF SVM trains for hours. Fix:
+   `CONFIG.MNIST.SVM_TRAIN_SUBSET` (default 500) slices the train
+   set for `make solve` smokes; set to None / unset for full
+   training on a long-running CI host.
 
-### Refactor caveats (live scitex 2.29 / scitex-session 0.2.0)
+### Refactor caveats (NOT fixed; scitex source is read-only)
 
-Two non-fatal log lines fire on every `@stx.session` lifecycle on
-the current editable scitex:
-
-```
-ERRO: Error occurred while saving: _save_pickle() got an unexpected keyword argument 'track'
-ERRO: Error occurred while saving: _save_yaml()   got an unexpected keyword argument 'track'
-```
-
-These come from `scitex_session._lifecycle._config` calling
-`stx.io.save(..., track=...)` on the auto-dumped CONFIG.pkl/yaml;
-the `track=` kwarg was removed from `scitex_io._save_pickle` /
-`_save_yaml` in the SoC refactor. The session still reports
-`FINISHED_SUCCESS` and user main returns normally — `make solve`
-exits 0 — so this is log noise, not a blocker. Surfaced for the
-scitex-session / scitex-io refactor owners.
+`scitex_session._lifecycle._config` calls `stx.io.save(..., track=...)`
+on the auto-dumped `CONFIG.pkl` / `CONFIG.yaml`. The `track=` kwarg was
+removed from `scitex_io._save_pickle` / `_save_yaml` in the SoC refactor.
+Result: two `ERRO: _save_*() got an unexpected keyword argument 'track'`
+log lines on every `@stx.session` lifecycle. They are
+**logged-but-handled** — the session reaches `FINISHED_SUCCESS` and the
+script exits 0. Surfaced for the refactor owners; no template change
+required.
 

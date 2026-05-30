@@ -163,27 +163,33 @@ run-mnist: run-mnist-download run-mnist-plot-digits run-mnist-plot-umap run-mnis
 	@echo "MNIST pipeline complete."
 
 run-mnist-download:
-	cd $(MNIST_DIR) && $(PYTHON) 01_download.py
+	$(PYTHON) $(MNIST_DIR)/01_download.py
 
 run-mnist-plot-digits:
-	cd $(MNIST_DIR) && $(PYTHON) 02_plot_digits.py
+	$(PYTHON) $(MNIST_DIR)/02_plot_digits.py
 
 run-mnist-plot-umap:
-	cd $(MNIST_DIR) && $(PYTHON) 03_plot_umap_space.py
+	$(PYTHON) $(MNIST_DIR)/03_plot_umap_space.py
 
 run-mnist-clf-svm:
-	cd $(MNIST_DIR) && $(PYTHON) 04_clf_svm.py
+	$(PYTHON) $(MNIST_DIR)/04_clf_svm.py
 
 run-mnist-conf-mat:
-	cd $(MNIST_DIR) && $(PYTHON) 05_plot_conf_mat.py
+	$(PYTHON) $(MNIST_DIR)/05_plot_conf_mat.py
 
 # --- Clew DAG terminus (agent target) -----------------------------------
-# `make solve` writes data/results/claims.json via scitex.clew. It reads
-# stage 04's real metrics when available; otherwise it falls back to a
-# deterministic synthetic metric so the DAG is exercisable on a fresh
-# checkout. Run `make run-mnist` first for real-data claims.
+# `make solve` runs the real Clew DAG end-to-end:
+#   01_download.py   -> data/mnist/{*_flattened,*_labels}.npy (MNIST source)
+#   04_clf_svm.py    -> data/mnist/classification_report.csv (subsample-trained
+#                        SVM; set CONFIG.MNIST.SVM_TRAIN_SUBSET to control size)
+#   06_register_claims.py -> data/results/claims.json + scitex_clew.add_claim
+# The decorative stages (02_plot_digits, 03_plot_umap_space, 05_plot_conf_mat)
+# are NOT part of the validity-gate DAG; run them separately via
+# `make run-mnist` for the full pipeline including figures.
 solve: clean-clew
-	cd $(MNIST_DIR) && $(PYTHON) 06_register_claims.py
+	@test -L data/mnist/train_flattened.npy || $(PYTHON) $(MNIST_DIR)/01_download.py
+	$(PYTHON) $(MNIST_DIR)/04_clf_svm.py
+	$(PYTHON) $(MNIST_DIR)/06_register_claims.py
 
 # `make verify` is plain-Python (out-of-band; NOT in the agent's Clew DAG).
 verify-claims:

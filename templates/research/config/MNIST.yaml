@@ -20,4 +20,8 @@ NORMALIZE:
 LABELS:
   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+
+SVM_TRAIN_SUBSET:
+  500  # subsample SVM train set for fast smoke; null/unset → full MNIST (slow)
+
 # EOF

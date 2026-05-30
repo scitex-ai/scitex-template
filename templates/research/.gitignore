@@ -675,3 +675,6 @@ data/mnist/
 # clew DAG outputs vs source
 data/results/*
 !data/results/.gitkeep
+
+# Override **/*.txt for requirements
+!requirements.txt
