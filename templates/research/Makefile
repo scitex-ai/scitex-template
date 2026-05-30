@@ -68,8 +68,6 @@ MNIST_DIR := $(SCRIPTS_DIR)/mnist
 CONFIG_DIR := config
 DATA_DIR := data
 TESTS_DIR := tests
-SCITEX_DIR := scitex
-WRITER_DIR := $(SCITEX_DIR)/writer  # ./scitex/writer/01_manuscript/...
 
 # ============================================
 # Help
@@ -152,11 +150,8 @@ setup: install
 	@echo ""
 	@echo "To create a writer project, run:"
 	@echo "  make setup-writer"
-	@echo "  or manually: scitex writer clone $(WRITER_DIR)/your_paper_name"
 	@echo ""
 
-setup-writer:
-	@echo 'setup-writer: management script removed; configure scitex/writer/ manually'
 
 verify:
 	$(MAKE) verify-claims
@@ -221,8 +216,6 @@ clean-all:
 clean-python:
 	find . -type d -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null || true; find . -name '*.pyc' -delete 2>/dev/null || true
 
-clean-writer:
-	@echo 'clean-writer: management script removed; clean manuscript outputs manually under scitex/writer/'
 
 # ============================================
 # Testing

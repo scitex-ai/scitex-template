@@ -156,7 +156,6 @@ The `scitex/` directory integrates with [SciTeX Cloud](https://scitex.ai):
 
 ## Manuscript Setup (Writer)
 
-The `scitex/writer/` directory is **not included** in the template - it's cloned on-demand to maintain independent git history.
 
 <details>
 <summary><strong>Initialize Writer Project</strong></summary>
