@@ -1,0 +1,12 @@
+id: research-clew
+description: |
+  Minimal Clew-compatible SciTeX research project. Demonstrates the
+  canonical agent-vs-verify split, clean-DAG Makefile, scitex.session
+  decorator usage, and scitex.clew claims registration over a worked
+  end-to-end example (synthetic sample → stats → claims.json).
+version: "0.1.0"
+runtime:
+  python: ">=3.10"
+  scitex: ">=2.0"
+entry: "make solve"
+output: "data/results/claims.json"

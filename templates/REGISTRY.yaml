@@ -32,3 +32,7 @@ templates:
     description: LaTeX manuscript scaffold — compile, manuscript, revision, supplementary
     version: "0.1.0"
     path: templates/paper
+  - id: research-clew
+    description: Minimal clew-compatible SciTeX research project (worked example, scripts/agent + scripts/verify split, scitex.clew claims)
+    version: "0.1.0"
+    path: templates/research-clew

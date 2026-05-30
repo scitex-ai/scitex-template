@@ -1,0 +1,14 @@
+# SciTeX runtime artefacts
+*_out/
+data/intermediate/*
+!data/intermediate/.gitkeep
+data/results/*
+!data/results/.gitkeep
+.scitex/clew/runtime/
+.scitex/clew/db.sqlite
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage

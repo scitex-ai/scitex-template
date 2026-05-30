@@ -1,0 +1,16 @@
+# Timestamp: "2026-05-30 (ywatanabe)"
+# File: config/PARAMS.yaml
+#
+# Hyper-parameters / knobs accessible via CONFIG.PARAMS.X inside
+# @stx.session-decorated mains.
+
+SEED:
+  42
+N_SAMPLES:
+  100
+TRUE_MEAN:
+  0.0
+TRUE_STD:
+  1.0
+
+# EOF

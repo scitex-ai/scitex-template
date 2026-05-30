@@ -1,0 +1,21 @@
+# Timestamp: "2026-05-30 (ywatanabe)"
+# File: config/PATH.yaml
+#
+# IMPORTANT — no outer `PATH:` wrapper here. The file IS the
+# `CONFIG.PATH` namespace; top-level keys are direct path slots.
+# Values can be plain strings (cheapest, recommended for fresh
+# templates) OR f-string literals referencing other CONFIG.PATH.* /
+# CONFIG.PARAMS.* nodes (use `eval(CONFIG.PATH.X)` to expand those
+# at read time).
+#
+# This minimal template uses plain relative paths; promote to
+# f-strings only when you need cross-stage path composition.
+
+RAW_DATA:
+  "./data/intermediate/raw.npy"
+STATS:
+  "./data/intermediate/stats.json"
+CLAIMS:
+  "./data/results/claims.json"
+
+# EOF
