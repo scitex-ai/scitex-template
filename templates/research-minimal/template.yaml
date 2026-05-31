@@ -1,0 +1,13 @@
+id: research-minimal
+description: |
+  Minimal clew-ready SciTeX research-project exemplar (~14 files). What a
+  solver-agent under paper-scitex-clew imitates when scaffolding /workdir:
+  canonical agent-vs-verify split, clean-DAG Makefile, scitex.session,
+  scitex.clew claims back-propagating to source data. No torch/sklearn -
+  uses a synthetic-sample pipeline so smoke tests run in seconds.
+version: "0.1.0"
+runtime:
+  python: ">=3.10"
+  scitex: ">=2.0"
+entry: "make solve"
+output: "data/results/claims.json"

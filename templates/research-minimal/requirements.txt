@@ -1,0 +1,5 @@
+# Minimal runtime deps. The pipeline uses ONLY numpy +
+# scitex + scitex-clew - no torch / sklearn / umap-learn.
+scitex>=2.0
+scitex-clew>=0.2
+numpy>=1.24

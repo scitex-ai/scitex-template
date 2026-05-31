@@ -1,0 +1,13 @@
+# Timestamp: "2026-05-31 (ywatanabe)"
+# File: config/PARAMS.yaml
+
+SEED:
+  42
+N_SAMPLES:
+  100
+TRUE_MEAN:
+  0.0
+TRUE_STD:
+  1.0
+
+# EOF

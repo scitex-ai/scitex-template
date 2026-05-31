@@ -1,0 +1,13 @@
+# Timestamp: "2026-05-31 (ywatanabe)"
+# File: config/PATH.yaml
+#
+# NO outer `PATH:` wrapper - the file IS the CONFIG.PATH namespace.
+
+RAW_DATA:
+  "./data/intermediate/raw.npy"
+STATS:
+  "./data/intermediate/stats.json"
+CLAIMS:
+  "./data/results/claims.json"
+
+# EOF

@@ -1,0 +1,12 @@
+output/
+*_out/
+__pycache__/
+*.pyc
+
+.scitex/clew/db.sqlite
+.scitex/clew/runtime/
+
+data/intermediate/*
+!data/intermediate/.gitkeep
+data/results/*
+!data/results/.gitkeep
