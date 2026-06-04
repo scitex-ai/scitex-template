@@ -18,11 +18,11 @@ def plot_samples(loader: DataLoader, CONFIG, plt, n_samples: int = 25) -> None:
 
     for idx, ax in enumerate(axes.flat):
         if idx < n_samples:
-            ax.plot_imshow(images[idx].squeeze(), cmap="gray")
+            ax.imshow(images[idx].squeeze(), cmap="gray")
             ax.set_title(f"Label: {labels[idx]}")
             ax.axis("off")
 
-    plt.tight_layout()
+    fig.tight_layout()
     return fig
 
 
@@ -38,21 +38,21 @@ def plot_label_examples(loader: DataLoader, CONFIG, plt) -> None:
     for idx, (label, img) in enumerate(sorted(label_examples.items())):
         row, col = idx // 5, idx % 5
         ax = axes[row, col]
-        ax.plot_imshow(img.squeeze(), cmap="gray")
+        ax.imshow(img.squeeze(), cmap="gray")
         ax.set_title(f"Digit: {label}")
         ax.axis("off")
 
-    plt.tight_layout()
+    fig.tight_layout()
     return fig
 
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rng_manager=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Visualize MNIST samples"""
     train_loader = stx.io.load(CONFIG.PATH.MNIST.LOADER.TRAIN)

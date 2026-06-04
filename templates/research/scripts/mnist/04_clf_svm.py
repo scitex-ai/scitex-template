@@ -47,11 +47,11 @@ def evaluate(
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rng_manager=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Train SVM classifier on MNIST"""
     train_data = stx.io.load(CONFIG.PATH.MNIST.FLATTENED.TRAIN)

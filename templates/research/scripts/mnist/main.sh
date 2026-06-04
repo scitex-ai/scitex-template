@@ -42,7 +42,8 @@ main() {
     ./scripts/mnist/02_plot_digits.py && \
     ./scripts/mnist/03_plot_umap_space.py && \
     ./scripts/mnist/04_clf_svm.py && \
-    ./scripts/mnist/05_plot_conf_mat.py
+    ./scripts/mnist/05_plot_conf_mat.py && \
+    ./scripts/mnist/06_register_claims.py
 }
 
 cleanup
