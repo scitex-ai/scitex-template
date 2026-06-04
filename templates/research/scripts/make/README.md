@@ -25,6 +25,57 @@ named `<verb>_<noun>.sh` in this directory.
   `clean_…`, `format_…`, `test_…`, `verify_…`, `setup_…`, `install_…`,
   `show_…`). Scripts are *things you do*, not nouns.
 
+## Naming convention — verb_noun.sh, mandatory
+
+Every script in this directory **must** be named `<verb>_<noun>.sh`. The
+verb comes first because a script is *an action*; the noun specifies *what
+the action operates on*. We do not use noun-led or noun-only names
+(`mnist.sh`, `outputs.sh`) — those describe a *thing*, not an *action*,
+and quickly become ambiguous as the set of operations grows ("does
+`mnist.sh` run it? clean it? both?").
+
+### Allowed verbs (current set)
+
+| Verb | Used when the script… | Examples |
+| --- | --- | --- |
+| `run_` | executes a pipeline or stage that produces artefacts | `run_all.sh`, `run_mnist.sh`, `run_mnist_clf_svm.sh` |
+| `clean_` | removes generated state (outputs, caches, logs) | `clean_all.sh`, `clean_outputs.sh`, `clean_clew.sh` |
+| `format_` | rewrites source files in place (lint-fix tier) | `format_python.sh`, `format_shell.sh` |
+| `lint_` | reports issues without modifying source | `lint_python.sh` |
+| `test_` | runs the test suite or a slice of it | `test.sh`, `test_verbose.sh`, `test_sync.sh` |
+| `verify_` | reproducibility checks (clew, claims, schemas) | `verify.sh`, `verify_claims.sh` |
+| `install_` | resolves and installs runtime / dev dependencies | `install.sh`, `install_dev.sh` |
+| `setup_` | one-shot bootstrap (install + dirs + config) | `setup.sh`, `setup_writer.sh` |
+| `show_` | print read-only information to stdout | `show_config.sh` |
+| `check_` | umbrella verbs that chain other actions | `check.sh` (= format + lint + test) |
+| `tree_` / `info_` | one-screen project snapshots | `tree.sh`, `info.sh` |
+
+If your new script doesn't fit one of these verbs, prefer adopting an
+existing verb over inventing a new one — when in doubt, ask in the PR.
+Invent a new verb only when the existing set genuinely cannot express the
+action (and document it back into this table in the same PR).
+
+### Bare verb is fine when there's no scope
+
+A `<verb>.sh` (no `_<noun>` suffix) is the **umbrella** form — the script
+that does the verb across every relevant target. So:
+
+- `clean.sh` is the umbrella for `clean_outputs.sh` + `clean_data.sh` + ….
+- `format.sh` is the umbrella for `format_python.sh` + `format_shell.sh`.
+- `run_all.sh` is the umbrella for every `run_<example>.sh`.
+
+The asymmetry (`clean.sh` is umbrella, `run_all.sh` is umbrella but uses
+`run_all` not bare `run`) is because `run` alone is ambiguous when more
+than one pipeline exists — `run_all` is explicit.
+
+### Why this matters for `make`
+
+Because the Makefile is generated mechanically from this directory, every
+filename here must correspond to a valid `make` target (`run-mnist`,
+`clean-outputs`, etc.) via snake_case → kebab-case translation. Adding a
+`mnist.sh` would force a `make mnist` target, which is non-verbal and
+collides badly with future `clean_mnist`, `run_mnist`, `verify_mnist`.
+
 ## Dual-invocation contract
 
 For every public target `X` declared in the [`Makefile`](../../Makefile),
