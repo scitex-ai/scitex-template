@@ -1,20 +1,18 @@
 # ============================================
 # SciTeX Template Research - Makefile
 # ============================================
-# Scientific research project workflow automation
-# Location: /Makefile
+# Scientific research project workflow automation.
 #
-# Key Features:
-# - Script execution and pipeline management
-# - Dependency installation and environment setup
-# - Output cleaning and data management
-# - Code formatting and quality checks
-# - Testing automation
+# Target bodies live in verb-form shell scripts under scripts/make/.
+# Every target below is a thin wrapper around ./scripts/make/<verb>_<noun>.sh,
+# so both `make <target>` and `./scripts/make/<verb>_<noun>.sh` produce the
+# same behaviour. Edit the .sh files; do not bury logic in this Makefile.
 #
 # Usage:
 #   make help                      # Show this help
 #   make install                   # Install dependencies
-#   make run-mnist                 # Run MNIST example pipeline
+#   make run-all                   # Run every example pipeline end-to-end
+#   make run-mnist                 # Run the MNIST example pipeline (01-06)
 #   make clean                     # Clean outputs
 #   make format                    # Format code
 #   make test                      # Run tests
@@ -25,13 +23,14 @@
 	install-dev \
 	setup \
 	setup-writer \
+	run-all \
 	run-mnist \
 	run-mnist-download \
 	run-mnist-plot-digits \
 	run-mnist-plot-umap \
 	run-mnist-clf-svm \
 	run-mnist-conf-mat \
-	solve \
+	run-mnist-register-claims \
 	verify-claims \
 	clean-clew \
 	clean \
@@ -59,17 +58,6 @@
 .DEFAULT_GOAL := help
 
 # ============================================
-# Configuration
-# ============================================
-PYTHON := python3
-PIP := pip3
-SCRIPTS_DIR := scripts
-MNIST_DIR := $(SCRIPTS_DIR)/mnist
-CONFIG_DIR := config
-DATA_DIR := data
-TESTS_DIR := tests
-
-# ============================================
 # Help
 # ============================================
 help:
@@ -85,12 +73,15 @@ help:
 	@echo "  make setup-writer                  # Clone writer template project (example_paper)"
 	@echo ""
 	@echo "Running Scripts:"
-	@echo "  make run-mnist                     # Run complete MNIST pipeline"
+	@echo "  make run-all                       # Run every example pipeline end-to-end"
+	@echo "  make run-mnist                     # Run complete MNIST pipeline (01-06, incl. claims)"
 	@echo "  make run-mnist-download            # Download MNIST data"
 	@echo "  make run-mnist-plot-digits         # Plot MNIST digits"
 	@echo "  make run-mnist-plot-umap           # Create UMAP visualization"
 	@echo "  make run-mnist-clf-svm             # Train SVM classifier"
 	@echo "  make run-mnist-conf-mat            # Plot confusion matrix"
+	@echo "  make run-mnist-register-claims     # Register validity claims (Clew DAG terminus)"
+	@echo "  make verify-claims                 # Verify claims.json schema (out-of-band)"
 	@echo ""
 	@echo "Cleaning:"
 	@echo "  make clean                         # Clean script outputs"
@@ -99,6 +90,7 @@ help:
 	@echo "  make clean-data                    # Clean generated data files"
 	@echo "  make clean-logs                    # Clean log files"
 	@echo "  make clean-writer                  # Remove writer projects (use with caution!)"
+	@echo "  make clean-clew                    # Reset the Clew runtime sqlite ledger"
 	@echo "  make clean-all                     # Clean everything (outputs + data + cache)"
 	@echo "  make clean-python                  # Clean Python cache files"
 	@echo ""
@@ -125,242 +117,126 @@ help:
 # Installation & Setup
 # ============================================
 install:
-	@echo "Installing Python dependencies..."
-	@if [ -f requirements.txt ]; then \
-		$(PIP) install -r requirements.txt; \
-		echo "Dependencies installed"; \
-	else \
-		echo "requirements.txt not found"; \
-		exit 1; \
-	fi
+	@./scripts/make/install.sh
 
 install-dev:
-	@echo "Installing development dependencies..."
-	@$(PIP) install pytest pytest-cov ruff black isort mypy
-	@echo "Development dependencies installed"
+	@./scripts/make/install_dev.sh
 
-setup: install
-	@echo "Setting up project..."
-	@mkdir -p $(DATA_DIR)
-	@mkdir -p $(DATA_DIR)/mnist/figures
-	@mkdir -p $(DATA_DIR)/mnist/models
-	@mkdir -p $(DATA_DIR)/mnist/raw
-	@echo "Project setup complete"
-	@$(MAKE) verify
-	@echo ""
-	@echo "To create a writer project, run:"
-	@echo "  make setup-writer"
-	@echo ""
+setup:
+	@./scripts/make/setup.sh
 
+setup-writer:
+	@./scripts/make/setup_writer.sh
 
 verify:
-	$(MAKE) verify-claims
+	@./scripts/make/verify.sh
 
 # ============================================
 # Running MNIST Scripts
 # ============================================
-run-mnist: run-mnist-download run-mnist-plot-digits run-mnist-plot-umap run-mnist-clf-svm run-mnist-conf-mat
-	@echo "MNIST pipeline complete."
+run-all:
+	@./scripts/make/run_all.sh
+
+run-mnist:
+	@./scripts/make/run_mnist.sh
 
 run-mnist-download:
-	$(PYTHON) $(MNIST_DIR)/01_download.py
+	@./scripts/make/run_mnist_download.sh
 
 run-mnist-plot-digits:
-	$(PYTHON) $(MNIST_DIR)/02_plot_digits.py
+	@./scripts/make/run_mnist_plot_digits.sh
 
 run-mnist-plot-umap:
-	$(PYTHON) $(MNIST_DIR)/03_plot_umap_space.py
+	@./scripts/make/run_mnist_plot_umap.sh
 
 run-mnist-clf-svm:
-	$(PYTHON) $(MNIST_DIR)/04_clf_svm.py
+	@./scripts/make/run_mnist_clf_svm.sh
 
 run-mnist-conf-mat:
-	$(PYTHON) $(MNIST_DIR)/05_plot_conf_mat.py
+	@./scripts/make/run_mnist_conf_mat.sh
 
-# --- Clew DAG terminus (agent target) -----------------------------------
-# `make solve` runs the real Clew DAG end-to-end:
-#   01_download.py   -> data/mnist/{*_flattened,*_labels}.npy (MNIST source)
-#   04_clf_svm.py    -> data/mnist/classification_report.csv (subsample-trained
-#                        SVM; set CONFIG.MNIST.SVM_TRAIN_SUBSET to control size)
-#   06_register_claims.py -> data/results/claims.json + scitex_clew.add_claim
-# The decorative stages (02_plot_digits, 03_plot_umap_space, 05_plot_conf_mat)
-# are NOT part of the validity-gate DAG; run them separately via
-# `make run-mnist` for the full pipeline including figures.
-solve: clean-clew
-	@test -L data/mnist/train_flattened.npy || $(PYTHON) $(MNIST_DIR)/01_download.py
-	$(PYTHON) $(MNIST_DIR)/04_clf_svm.py
-	$(PYTHON) $(MNIST_DIR)/06_register_claims.py
+run-mnist-register-claims:
+	@./scripts/make/run_mnist_register_claims.sh
 
-# `make verify` is plain-Python (out-of-band; NOT in the agent's Clew DAG).
+# `make verify-claims` is plain-Python (out-of-band; NOT in the agent's Clew
+# DAG). It validates data/results/claims.json against the expected schema.
 verify-claims:
-	$(PYTHON) scripts/verify/check_schema.py
+	@./scripts/make/verify_claims.sh
 
 clean-clew:
-	@rm -f .scitex/clew/db.sqlite .scitex/clew/runtime/db.sqlite 2>/dev/null || true
+	@./scripts/make/clean_clew.sh
 
 # ============================================
 # Cleaning
 # ============================================
 clean:
-	@$(MGMT_SCRIPTS)/clean.sh
+	@./scripts/make/clean.sh
 
 clean-mnist:
-	$(MAKE) clean-data clean-outputs
+	@./scripts/make/clean_mnist.sh
 
 clean-outputs:
-	find scripts -type d -name '*_out' -prune -exec rm -rf {} + 2>/dev/null || true
+	@./scripts/make/clean_outputs.sh
 
 clean-data:
-	rm -rf data/mnist 2>/dev/null || true
+	@./scripts/make/clean_data.sh
 
 clean-logs:
-	find . -name '*.log' -type f -delete 2>/dev/null || true
+	@./scripts/make/clean_logs.sh
 
 clean-all:
-	$(MAKE) clean-outputs clean-data clean-logs clean-python clean-clew
+	@./scripts/make/clean_all.sh
 
 clean-python:
-	find . -type d -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null || true; find . -name '*.pyc' -delete 2>/dev/null || true
+	@./scripts/make/clean_python.sh
 
+clean-writer:
+	@./scripts/make/clean_writer.sh
 
 # ============================================
 # Testing
 # ============================================
 test:
-	@echo "Running tests..."
-	@if command -v pytest >/dev/null 2>&1; then \
-		pytest $(TESTS_DIR) -q; \
-	else \
-		echo "pytest not installed. Run: make install-dev"; \
-		exit 1; \
-	fi
+	@./scripts/make/test.sh
 
 test-verbose:
-	@echo "Running tests (verbose)..."
-	@if command -v pytest >/dev/null 2>&1; then \
-		pytest $(TESTS_DIR) -v; \
-	else \
-		echo "pytest not installed. Run: make install-dev"; \
-		exit 1; \
-	fi
+	@./scripts/make/test_verbose.sh
 
 test-sync:
-	@echo "Synchronizing test structure with scripts..."
-	@$(TESTS_DIR)/sync_tests_with_scripts.sh
-	@echo "Test synchronization complete"
+	@./scripts/make/test_sync.sh
 
 # ============================================
 # Code Quality
 # ============================================
-format: format-python format-shell
-	@echo ""
-	@echo "All formatting and linting complete!"
+format:
+	@./scripts/make/format.sh
 
 format-python:
-	@echo "Formatting Python code with ruff..."
-	@if command -v ruff >/dev/null 2>&1; then \
-		ruff format $(SCRIPTS_DIR) $(TESTS_DIR) --quiet || echo "Ruff formatting completed with warnings"; \
-		echo "Python formatting complete"; \
-	else \
-		echo "Ruff not found. Install with: pip install ruff"; \
-		exit 1; \
-	fi
+	@./scripts/make/format_python.sh
 
 format-shell:
-	@echo "Formatting and linting shell scripts..."
-	@if command -v shfmt >/dev/null 2>&1; then \
-		find $(SCRIPTS_DIR) $(MGMT_SCRIPTS) -name "*.sh" \
-			! -path "*/node_modules/*" \
-			! -path "*/.venv/*" \
-			-exec shfmt -w -i 4 -bn -ci -sr {} + \
-			2>&1 || echo "shfmt formatting completed with warnings"; \
-		echo "Shell formatting complete!"; \
-	else \
-		echo "shfmt not found. Install with: go install mvdan.cc/sh/v3/cmd/shfmt@latest"; \
-		echo "Skipping shell formatting..."; \
-	fi
-	@if command -v shellcheck >/dev/null 2>&1; then \
-		find $(SCRIPTS_DIR) $(MGMT_SCRIPTS) -name "*.sh" \
-			! -path "*/node_modules/*" \
-			! -path "*/.venv/*" \
-			-exec shellcheck --severity=error {} + \
-			2>&1 || echo "ShellCheck found errors"; \
-		echo "Shell linting complete!"; \
-	else \
-		echo "shellcheck not found. Install with: sudo apt-get install shellcheck"; \
-		echo "Skipping shell linting..."; \
-	fi
+	@./scripts/make/format_shell.sh
 
-lint: lint-python
+lint:
+	@./scripts/make/lint.sh
 
 lint-python:
-	@echo "Linting Python code with ruff..."
-	@if command -v ruff >/dev/null 2>&1; then \
-		ruff check $(SCRIPTS_DIR) $(TESTS_DIR) --quiet || echo "Ruff found issues"; \
-		echo "Linting complete"; \
-	else \
-		echo "Ruff not found. Install with: pip install ruff"; \
-		exit 1; \
-	fi
+	@./scripts/make/lint_python.sh
 
-check: format lint test
-	@echo ""
-	@echo "All checks passed!"
+check:
+	@./scripts/make/check.sh
 
 # ============================================
 # Information & Diagnostics
 # ============================================
 info:
-	@echo "Project Information:"
-	@echo ""
-	@echo "  Project: SciTeX Template Research"
-	@echo "  Python: $$($(PYTHON) --version 2>&1)"
-	@echo "  Scripts: $$(find $(SCRIPTS_DIR) -name "*.py" | wc -l) Python files"
-	@echo "  Config: $$(ls -1 $(CONFIG_DIR)/*.yaml 2>/dev/null | wc -l) YAML files"
-	@echo ""
-	@echo "  MNIST Scripts:"
-	@echo "    - $$(ls -1 $(MNIST_DIR)/*.py 2>/dev/null | wc -l) scripts"
-	@echo "    - $$(ls -1d $(MNIST_DIR)/*_out 2>/dev/null | wc -l) output directories"
-	@echo ""
-	@if [ -d $(DATA_DIR)/mnist/figures ]; then \
-		echo "  Generated Figures: $$(ls -1 $(DATA_DIR)/mnist/figures/*.jpg 2>/dev/null | wc -l)"; \
-	fi
-	@if [ -d $(DATA_DIR)/mnist/models ]; then \
-		echo "  Saved Models: $$(ls -1 $(DATA_DIR)/mnist/models/*.pkl 2>/dev/null | wc -l)"; \
-	fi
+	@./scripts/make/info.sh
 
 tree:
-	@echo "Project Structure:"
-	@if command -v tree >/dev/null 2>&1; then \
-		tree -L 3 -I '__pycache__|*.pyc|.git|.venv|*.egg-info|.pytest_cache|.ruff_cache|.mypy_cache' -C; \
-	else \
-		echo "tree command not found. Install with: sudo apt-get install tree"; \
-		ls -R; \
-	fi
+	@./scripts/make/tree.sh
 
 show-config:
-	@echo "Configuration Files:"
-	@echo ""
-	@if command -v yq >/dev/null 2>&1; then \
-		for cfg in $(CONFIG_DIR)/*.yaml; do \
-			if [ -f "$$cfg" ]; then \
-				echo "$$cfg:"; \
-				yq -C '.' "$$cfg" 2>/dev/null || cat "$$cfg"; \
-				echo ""; \
-			fi; \
-		done; \
-	else \
-		echo "yq not installed. Showing raw YAML files:"; \
-		echo "(Install yq for colored output: sudo apt-get install yq or brew install yq)"; \
-		echo ""; \
-		for cfg in $(CONFIG_DIR)/*.yaml; do \
-			if [ -f "$$cfg" ]; then \
-				echo "$$cfg:"; \
-				cat "$$cfg"; \
-				echo ""; \
-			fi; \
-		done; \
-	fi
+	@./scripts/make/show_config.sh
 
 # ============================================
 # Utility Targets
