@@ -687,6 +687,7 @@ data/mnist/*
 .scitex/clew/runtime/
 # clew DAG outputs vs source
 data/results/*
+!data/results/clew_dag.html
 !data/results/.gitkeep
 
 # Override **/*.txt for requirements
