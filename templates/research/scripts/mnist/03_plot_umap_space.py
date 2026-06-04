@@ -25,7 +25,7 @@ def plot_umap(embedding: np.ndarray, labels: np.ndarray, CONFIG, plt) -> None:
         embedding[:, 0], embedding[:, 1], c=labels, cmap="tab10", alpha=0.5
     )
 
-    plt.colorbar(scatter)
+    fig.colorbar(scatter, ax=ax)
     ax.set_xyt("UMAP 1", "UMAP 2", "UMAP Projection of MNIST Digits")
 
     return fig
@@ -33,11 +33,11 @@ def plot_umap(embedding: np.ndarray, labels: np.ndarray, CONFIG, plt) -> None:
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rng_manager=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Create UMAP visualization of MNIST"""
     train_data = stx.io.load(CONFIG.PATH.MNIST.FLATTENED.TRAIN)

@@ -86,11 +86,11 @@ def _synthetic_demo_metrics() -> tuple[dict, Path]:
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rng_manager=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     real = _read_real_metrics()
     if real is not None:
