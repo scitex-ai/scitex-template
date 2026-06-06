@@ -10,8 +10,6 @@ automated data management, and manuscript writing.
 - Scripts go in `scripts/` with numbered prefixes: `01_preprocess.py`, `02_train.py`, etc.
 - Script outputs land in `{script_name}_out/` and are symlinked to `data/` for centralized access
 - Use `symlink_to` parameter in `stx.io.save()` to create data provenance links
-- Manuscripts live in `scitex/writer/` (LaTeX, cloned on-demand via `make setup-writer`)
-- Bibliography and research library in `scitex/scholar/`
 
 ## Directory Conventions
 

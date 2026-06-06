@@ -31,6 +31,9 @@
 	run-mnist-plot-umap \
 	run-mnist-clf-svm \
 	run-mnist-conf-mat \
+	solve \
+	verify-claims \
+	clean-clew \
 	clean \
 	clean-mnist \
 	clean-outputs \
@@ -65,9 +68,6 @@ MNIST_DIR := $(SCRIPTS_DIR)/mnist
 CONFIG_DIR := config
 DATA_DIR := data
 TESTS_DIR := tests
-SCITEX_DIR := scitex
-WRITER_DIR := $(SCITEX_DIR)/writer  # ./scitex/writer/01_manuscript/...
-MGMT_SCRIPTS := management/scripts
 
 # ============================================
 # Help
@@ -150,35 +150,53 @@ setup: install
 	@echo ""
 	@echo "To create a writer project, run:"
 	@echo "  make setup-writer"
-	@echo "  or manually: scitex writer clone $(WRITER_DIR)/your_paper_name"
 	@echo ""
 
-setup-writer:
-	@$(MGMT_SCRIPTS)/setup-writer.sh
 
 verify:
-	@$(MGMT_SCRIPTS)/verify.sh
+	$(MAKE) verify-claims
 
 # ============================================
 # Running MNIST Scripts
 # ============================================
-run-mnist:
-	@$(MGMT_SCRIPTS)/run-mnist.sh all
+run-mnist: run-mnist-download run-mnist-plot-digits run-mnist-plot-umap run-mnist-clf-svm run-mnist-conf-mat
+	@echo "MNIST pipeline complete."
 
 run-mnist-download:
-	@$(MGMT_SCRIPTS)/run-mnist.sh download
+	$(PYTHON) $(MNIST_DIR)/01_download.py
 
 run-mnist-plot-digits:
-	@$(MGMT_SCRIPTS)/run-mnist.sh digits
+	$(PYTHON) $(MNIST_DIR)/02_plot_digits.py
 
 run-mnist-plot-umap:
-	@$(MGMT_SCRIPTS)/run-mnist.sh umap
+	$(PYTHON) $(MNIST_DIR)/03_plot_umap_space.py
 
 run-mnist-clf-svm:
-	@$(MGMT_SCRIPTS)/run-mnist.sh svm
+	$(PYTHON) $(MNIST_DIR)/04_clf_svm.py
 
 run-mnist-conf-mat:
-	@$(MGMT_SCRIPTS)/run-mnist.sh confmat
+	$(PYTHON) $(MNIST_DIR)/05_plot_conf_mat.py
+
+# --- Clew DAG terminus (agent target) -----------------------------------
+# `make solve` runs the real Clew DAG end-to-end:
+#   01_download.py   -> data/mnist/{*_flattened,*_labels}.npy (MNIST source)
+#   04_clf_svm.py    -> data/mnist/classification_report.csv (subsample-trained
+#                        SVM; set CONFIG.MNIST.SVM_TRAIN_SUBSET to control size)
+#   06_register_claims.py -> data/results/claims.json + scitex_clew.add_claim
+# The decorative stages (02_plot_digits, 03_plot_umap_space, 05_plot_conf_mat)
+# are NOT part of the validity-gate DAG; run them separately via
+# `make run-mnist` for the full pipeline including figures.
+solve: clean-clew
+	@test -L data/mnist/train_flattened.npy || $(PYTHON) $(MNIST_DIR)/01_download.py
+	$(PYTHON) $(MNIST_DIR)/04_clf_svm.py
+	$(PYTHON) $(MNIST_DIR)/06_register_claims.py
+
+# `make verify` is plain-Python (out-of-band; NOT in the agent's Clew DAG).
+verify-claims:
+	$(PYTHON) scripts/verify/check_schema.py
+
+clean-clew:
+	@rm -f .scitex/clew/db.sqlite .scitex/clew/runtime/db.sqlite 2>/dev/null || true
 
 # ============================================
 # Cleaning
@@ -187,25 +205,23 @@ clean:
 	@$(MGMT_SCRIPTS)/clean.sh
 
 clean-mnist:
-	@$(MGMT_SCRIPTS)/clean.sh mnist
+	$(MAKE) clean-data clean-outputs
 
 clean-outputs:
-	@$(MGMT_SCRIPTS)/clean.sh outputs
+	find scripts -type d -name '*_out' -prune -exec rm -rf {} + 2>/dev/null || true
 
 clean-data:
-	@$(MGMT_SCRIPTS)/clean.sh data
+	rm -rf data/mnist 2>/dev/null || true
 
 clean-logs:
-	@$(MGMT_SCRIPTS)/clean.sh logs
+	find . -name '*.log' -type f -delete 2>/dev/null || true
 
 clean-all:
-	@$(MGMT_SCRIPTS)/clean.sh all
+	$(MAKE) clean-outputs clean-data clean-logs clean-python clean-clew
 
 clean-python:
-	@$(MGMT_SCRIPTS)/clean.sh python
+	find . -type d -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null || true; find . -name '*.pyc' -delete 2>/dev/null || true
 
-clean-writer:
-	@$(MGMT_SCRIPTS)/clean.sh writer
 
 # ============================================
 # Testing

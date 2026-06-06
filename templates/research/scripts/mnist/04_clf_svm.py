@@ -33,25 +33,40 @@ def evaluate(
     stx.io.save(predictions, "./predictions.npy", symlink_to="./data/mnist")
     stx.io.save(labels, "./labels.npy", symlink_to="./data/mnist")
 
-    return {
-        "accuracy": report["accuracy"],
-        "macro_f1": report["macro avg"]["f1-score"],
+    # Compact, stable JSON the clew-DAG-terminus (stage 06) reads.
+    # The dataframe-flattened CSV above is for the writer / paper, this
+    # JSON is the well-formed input the validity-gate consumes.
+    metrics = {
+        "accuracy": float(report["accuracy"]),
+        "macro_f1": float(report["macro avg"]["f1-score"]),
     }
+    stx.io.save(metrics, "./metrics.json", symlink_to="./data/mnist")
+
+    return metrics
 
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rng_manager=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Train SVM classifier on MNIST"""
     train_data = stx.io.load(CONFIG.PATH.MNIST.FLATTENED.TRAIN)
     train_labels = stx.io.load(CONFIG.PATH.MNIST.LABELS.TRAIN)
     test_data = stx.io.load(CONFIG.PATH.MNIST.FLATTENED.TEST)
     test_labels = stx.io.load(CONFIG.PATH.MNIST.LABELS.TEST)
+
+    # Optional subsample so the template's `make solve` is tractable
+    # (full MNIST + RBF SVM is hours). Set CONFIG.MNIST.SVM_TRAIN_SUBSET
+    # to a positive int to slice; omit / set to None for full training.
+    subset = getattr(CONFIG.MNIST, "SVM_TRAIN_SUBSET", None)
+    if isinstance(subset, int) and 0 < subset < len(train_data):
+        logger.info(f"Subsampling train set to {subset} (full size={len(train_data)})")
+        train_data = train_data[:subset]
+        train_labels = train_labels[:subset]
 
     model = train_svm(train_data, train_labels, CONFIG)
     metrics = evaluate(model, test_data, test_labels)

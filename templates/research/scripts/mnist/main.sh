@@ -8,8 +8,6 @@ THIS_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
 LOG_PATH="$THIS_DIR/.$(basename $0).log"
 echo > "$LOG_PATH"
 
-GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
-
 GRAY='\033[0;90m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -42,7 +40,8 @@ main() {
     ./scripts/mnist/02_plot_digits.py && \
     ./scripts/mnist/03_plot_umap_space.py && \
     ./scripts/mnist/04_clf_svm.py && \
-    ./scripts/mnist/05_plot_conf_mat.py
+    ./scripts/mnist/05_plot_conf_mat.py && \
+    ./scripts/mnist/06_register_claims.py
 }
 
 cleanup
