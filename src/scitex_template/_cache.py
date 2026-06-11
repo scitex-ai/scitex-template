@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 from scitex_config._ecosystem import local_state
 
@@ -142,4 +143,71 @@ def clone_template_from_cache(
         else:
             shutil.copy2(child, dst, follow_symlinks=False)
 
+    _write_manifest(target_path, entry, branch=branch, cache_root=cache_root)
+
     return target_path
+
+
+def _cache_commit_sha(cache_root: Path) -> str:
+    """Best-effort HEAD sha of the cache checkout. ``"unknown"`` if the
+    cache is not a git repo (e.g. a test fixture) or git is unavailable."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(cache_root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, ValueError):
+        return "unknown"
+    if result.returncode != 0:
+        return "unknown"
+    return result.stdout.strip() or "unknown"
+
+
+def _generator_version() -> str:
+    """Installed scitex-template version, or ``"unknown"`` if not resolvable."""
+    try:
+        from importlib.metadata import version
+
+        return version("scitex-template")
+    except Exception:
+        return "unknown"
+
+
+def _write_manifest(target_path: Path, entry, *, branch: str, cache_root: Path) -> Path:
+    """Stamp a provenance manifest into the prepared template so a consumer
+    can later tell exactly what was pulled and pin it for reproducibility.
+
+    Lives at ``<target>/.scitex/template/MANIFEST.yaml`` — the template
+    tool's own ``.scitex/`` home, matching the config-resolution convention.
+    """
+    import yaml
+
+    manifest = {
+        "schema": "scitex-template/manifest@v1",
+        "template": {
+            "id": entry.id,
+            "version": entry.version,
+            "description": entry.description,
+        },
+        "source": {
+            "monorepo": MONOREPO_URL,
+            "branch": branch,
+            "commit": _cache_commit_sha(cache_root),
+        },
+        "generator": {
+            "scitex_template_version": _generator_version(),
+        },
+        "prepared_at": datetime.now(timezone.utc)
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z"),
+    }
+
+    manifest_dir = target_path / ".scitex" / "template"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = manifest_dir / "MANIFEST.yaml"
+    manifest_path.write_text(
+        "# scitex-template provenance — written at clone time. Do not edit by hand.\n"
+        + yaml.safe_dump(manifest, sort_keys=False)
+    )
+    return manifest_path
