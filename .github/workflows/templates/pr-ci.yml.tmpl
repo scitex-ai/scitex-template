@@ -1,0 +1,120 @@
+name: pr-ci
+
+# Consolidated PR-only CI gate. Runs the per-PR validation suite as a
+# single workflow so the cancel-in-progress concurrency group, path
+# filters, and uv cache apply uniformly. Post-merge validation lives
+# in release-ci.yml.
+#
+# L1 concurrency — cancel superseded PR runs.
+# L3 path filters — skip docs/skills/examples/markdown-only PRs.
+# L4 conditional matrix — full <PYTHON_VERSIONS_JSON> on PR (this trigger).
+# L5 uv with cache-by-pyproject.toml. Keeps actions/setup-python so
+#    `uv pip install --system` targets a non-externally-managed python.
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - 'docs/**'
+      - '_skills/**'
+      - 'examples/**'
+      - '**.md'
+      - 'CHANGELOG.*'
+      - '.github/CODEOWNERS'
+      - '.github/ISSUE_TEMPLATE/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  import-smoke:
+    name: import-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+      - name: Install (no extras)
+        run: uv pip install --system -e .
+      - name: Import smoke
+        run: python -c "import <PKG_MODULE>; print(<PKG_MODULE>.__version__)"
+
+  dep-hygiene-smoke:
+    name: dep-hygiene-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+      - name: bare install
+        run: uv pip install --system .
+      - name: import package
+        run: python -c "import <PKG_MODULE>; print(<PKG_MODULE>.__name__)"
+
+  tests:
+    name: pytest-matrix-on-ubuntu-py${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ${{ github.event_name == 'pull_request' && fromJson('<PYTHON_VERSIONS_JSON>') || fromJson('["3.12"]') }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+      - name: Install dependencies
+        # Fallback chain: prefer [all,dev] so optional-dep code paths
+        # (yaml, fastmcp, textual) get exercised. Falls back to [dev] then
+        # plain editable so a packaging hiccup doesn't strand CI.
+        run: uv pip install --system -e ".[all,dev]" || uv pip install --system -e ".[dev]" || uv pip install --system -e .
+      - name: Run tests
+        run: pytest tests/ --cov=src/<PKG_MODULE> --cov-report=xml --cov-report=term
+      - name: Upload coverage to Codecov
+        if: always() && matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: pyproject.toml
+      - name: Install package + audit tooling
+        run: |
+          uv pip install --system -e ".[dev]"
+          uv pip install --system "scitex-dev[cli-audit]"
+      - name: Run scitex-dev ecosystem audit-all
+        run: scitex-dev ecosystem audit-all <PKG_NAME> --no-version-check
