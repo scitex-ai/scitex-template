@@ -55,7 +55,8 @@ def clone_scitex_minimal(
         project_path = Path(project_dir)
         project_path.mkdir(parents=True, exist_ok=True)
 
-        # Ensure writer workspace (full scitex-writer clone)
+        # Ensure writer workspace (full scitex-writer clone).
+        # scitex_writer exports ensure_workspace as a top-level FUNCTION.
         from scitex_writer import ensure_workspace as ensure_writer
 
         ensure_writer(
@@ -66,8 +67,16 @@ def clone_scitex_minimal(
             **kwargs,
         )
 
-        # Ensure scholar workspace (directory scaffold)
-        from scitex_scholar import ensure_workspace as ensure_scholar
+        # Ensure scholar workspace (directory scaffold).
+        # IMPORTANT: scitex_scholar does NOT re-export ensure_workspace at
+        # top level (verified 1.2.4/1.3.1/1.4.x) — ``from scitex_scholar
+        # import ensure_workspace`` binds the SUBMODULE, and calling it
+        # raised ``TypeError: 'module' object is not callable``, silently
+        # failing every scitex_minimal clone. Import the inner callable
+        # explicitly from the submodule.
+        from scitex_scholar.ensure_workspace import (
+            ensure_workspace as ensure_scholar,
+        )
 
         ensure_scholar(str(project_path))
 
@@ -80,7 +89,11 @@ def clone_scitex_minimal(
         return True
 
     except Exception as e:
-        logger.error(f"Failed to create scitex_minimal project: {e}")
+        # Keep the bool contract (the TEMPLATES dispatcher and CLI exit code
+        # rely on it) but preserve the full traceback for downstream
+        # consumers (e.g. hub slot-reset quarantine_reason) instead of
+        # swallowing it into a bare str(e).
+        logger.exception(f"Failed to create scitex_minimal project: {e}")
         return False
 
 
