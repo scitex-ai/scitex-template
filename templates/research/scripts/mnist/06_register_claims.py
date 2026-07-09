@@ -6,10 +6,18 @@ run end-to-end via ``make run-mnist``), or falls back to a synthetic
 demo metric (so ``make solve`` is GREEN on a fresh checkout without
 needing a multi-hour SVM training first).
 
-Emits ``data/results/claims.json`` in the canonical clew output
-contract, and registers each claim with ``scitex_clew.add_claim`` so
-the claim back-propagates through the Clew DAG to source data --
-that's the validity gate the verifier runs.
+Emits three artefacts under ``data/results/``:
+
+1. ``claims.json`` — canonical clew output contract (the file the
+   submission validator + cohort verifier read).
+2. Registers each claim into ``.scitex/clew/db.sqlite`` via
+   ``scitex_clew.add_claim`` so the claim back-propagates through the
+   Clew DAG to source data. That's the validity gate the verifier runs.
+3. ``clew_dag.html`` — interactive Mermaid.js visualisation of the
+   registered-claims DAG (rendered via ``scitex_clew.render_dag``).
+   Open in any browser to inspect ``claim -> source_file -> raw inputs``.
+   Best-effort artefact: if render fails on older scitex-clew, the
+   DONE signal is unaffected.
 """
 
 from __future__ import annotations
@@ -36,6 +44,13 @@ METRICS_JSON = PROJECT_ROOT / "data/mnist/metrics.json"  # clew DAG node consume
 # out-of-band) prescribes exactly this shape:
 #   { "claims": [ {question, answer, answer_type}, ... ] }
 CLAIMS = PROJECT_ROOT / "data/results/claims.json"
+
+# Visualised clew DAG (interactive HTML via Mermaid.js). Saves alongside
+# claims.json so the back-propagation (claim -> source_file -> raw inputs)
+# is inspectable by a human in a browser, not just by the verifier. The
+# graph is built from the *registered* claims (claims=True), so it stays
+# in sync with what the verifier will see.
+CLEW_DAG_HTML = PROJECT_ROOT / "data/results/clew_dag.html"
 
 
 # Map output-contract answer_type -> scitex_clew claim_type vocab
@@ -86,11 +101,11 @@ def _synthetic_demo_metrics() -> tuple[dict, Path]:
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rng_manager=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     real = _read_real_metrics()
     if real is not None:
@@ -135,6 +150,22 @@ def main(
             claim_value=entry["answer"],
             source_file=rel_source,
         )
+
+    # --- Clew DAG visualization (human-inspectable artefact) -----------
+    # Renders the registered-claims DAG to an interactive HTML file via
+    # Mermaid.js (no extra deps beyond scitex-clew itself). Open in any
+    # browser to see claim -> source_file -> raw inputs back-propagation.
+    # If rendering fails (e.g. older scitex-clew without render_dag),
+    # we log and continue — DONE signal must NOT depend on the viz.
+    try:
+        clew.render_dag(
+            output_path=CLEW_DAG_HTML,
+            claims=True,
+            title="MNIST — clew claims DAG",
+        )
+        logger.info(f"Rendered clew DAG -> {CLEW_DAG_HTML}")
+    except Exception as exc:  # pragma: no cover — best-effort artefact
+        logger.warning(f"clew.render_dag skipped: {exc}")
 
     n = len(claims_payload["claims"])
     print(f"DONE n_claims={n}")
