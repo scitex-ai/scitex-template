@@ -16,22 +16,22 @@ from sklearn.metrics import confusion_matrix
 def plot_confusion_matrix(labels: np.ndarray, predictions: np.ndarray, CONFIG) -> None:
     cm = confusion_matrix(labels, predictions)
     fig, ax = stx.plt.subplots(figsize=(10, 8))
-    ax.imshow2d(cm)
+    ax.imshow(cm)
     ax.set_xyt("Predicted", "True", "Confusion Matrix")
     return fig
 
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rng_manager=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Plot confusion matrix"""
-    predictions = stx.io.load("./scripts/mnist/04_clf_svm_out/predictions.npy")
-    labels = stx.io.load("./scripts/mnist/04_clf_svm_out/labels.npy")
+    predictions = stx.io.load("./data/mnist/predictions.npy")
+    labels = stx.io.load("./data/mnist/labels.npy")
     fig = plot_confusion_matrix(labels, predictions, CONFIG)
     stx.io.save(
         fig,
