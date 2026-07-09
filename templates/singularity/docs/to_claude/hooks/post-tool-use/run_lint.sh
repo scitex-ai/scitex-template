@@ -64,15 +64,17 @@ lint_python() {
     local file="$1"
 
     # SciTeX pattern check (runs first, blocks on structural errors)
-    local stx_lint=""
-    if command -v scitex-linter &>/dev/null; then
-        stx_lint="scitex-linter"
-    elif command -v scitex &>/dev/null && scitex linter --help &>/dev/null; then
-        stx_lint="scitex linter"
-    fi
-    if [ -n "$stx_lint" ]; then
-        $stx_lint check "$file" --severity error --no-color >&2 || exit 2
-        $stx_lint check "$file" --severity warning --no-color >&2 || true
+    # SciTeX pattern check — LIVE command. The legacy scitex-linter (archived)
+    # / scitex linter (dropped in #95 umbrella-thinning) chain silently no-op'd
+    # when neither was on PATH. Pillar 0 (scitex-dev#TBD) fixes the silent skip.
+    if command -v scitex-dev &>/dev/null; then
+        scitex-dev linter check-files "$file" --severity error --no-color >&2 || exit 2
+        scitex-dev linter check-files "$file" --severity warning --no-color >&2 || true
+    elif command -v scitex-linter &>/dev/null; then
+        scitex-linter check "$file" --severity error --no-color >&2 || exit 2
+        scitex-linter check "$file" --severity warning --no-color >&2 || true
+    else
+        echo "WARN: scitex-dev not on PATH — SciTeX pattern checks SKIPPED. pip install scitex-dev." >&2
     fi
 
     # Standard linting

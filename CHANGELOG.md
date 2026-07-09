@@ -4,6 +4,28 @@ All notable changes to `scitex-template` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [SemVer](https://semver.org/).
 
+## [0.6.8] – 2026-07-08
+
+### Fixed
+- `clone_scitex_minimal`: import the scholar ensure callable explicitly
+  (`from scitex_scholar.ensure_workspace import ensure_workspace`). The old
+  `from scitex_scholar import ensure_workspace` bound the SUBMODULE (no
+  released scitex-scholar 1.2.4/1.3.1/1.4.x re-exports the function at top
+  level), so every clone raised `TypeError: 'module' object is not callable`
+  and returned False — quarantining all visitor slots on scitex.ai
+  prod+staging ("Template clone returned falsy").
+- `clone_scitex_minimal`: failure path now logs with `logger.exception`
+  (full traceback) instead of `logger.error(str(e))`, so downstream
+  consumers (hub `quarantine_reason`) can see the real cause. The bool
+  return contract is unchanged (TEMPLATES dispatcher + CLI exit code rely
+  on it).
+
+### Added
+- `tests/scitex_template/_project/test_clone_scitex_minimal.py`: regression
+  suite — asserts the imported ensure callables are functions
+  (`inspect.isfunction`) and exercises the clone against hand-rolled fake
+  modules mirroring the released scholar/writer package layout.
+
 ## [0.5.1] – 2026-04-25
 
 ### Fixed

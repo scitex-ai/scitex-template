@@ -155,6 +155,69 @@ class TestCloneTemplateFromCache:
 
 
 # ---------------------------------------------------------------------------
+# Provenance manifest — written into prepared template at clone time
+# ---------------------------------------------------------------------------
+
+
+class TestCloneWritesManifest:
+    import yaml as _yaml
+
+    def _manifest(self, target: Path) -> dict:
+        path = target / ".scitex" / "template" / "MANIFEST.yaml"
+        return self._yaml.safe_load(path.read_text())
+
+    def test_manifest_file_is_written(self, tmp_path, fake_cache):
+        # Arrange
+        target = tmp_path / "out"
+        # Act
+        _cache.clone_template_from_cache("alpha", target)
+        # Assert
+        assert (target / ".scitex" / "template" / "MANIFEST.yaml").is_file()
+
+    def test_manifest_records_template_id(self, tmp_path, fake_cache):
+        # Arrange
+        target = tmp_path / "out"
+        # Act
+        _cache.clone_template_from_cache("alpha", target)
+        # Assert
+        assert self._manifest(target)["template"]["id"] == "alpha"
+
+    def test_manifest_records_template_version(self, tmp_path, fake_cache):
+        # Arrange
+        target = tmp_path / "out"
+        # Act
+        _cache.clone_template_from_cache("alpha", target)
+        # Assert
+        assert self._manifest(target)["template"]["version"] == "0.0.1"
+
+    def test_manifest_records_branch_in_source(self, tmp_path, fake_cache):
+        # Arrange
+        target = tmp_path / "out"
+        # Act
+        _cache.clone_template_from_cache("alpha", target, branch="develop")
+        # Assert
+        assert self._manifest(target)["source"]["branch"] == "develop"
+
+    def test_manifest_commit_is_unknown_for_non_git_cache(self, tmp_path, fake_cache):
+        # The fake cache fixture has no .git, so the sha is best-effort "unknown"
+        # rather than an exception.
+        # Arrange
+        target = tmp_path / "out"
+        # Act
+        _cache.clone_template_from_cache("alpha", target)
+        # Assert
+        assert self._manifest(target)["source"]["commit"] == "unknown"
+
+    def test_manifest_has_schema_tag(self, tmp_path, fake_cache):
+        # Arrange
+        target = tmp_path / "out"
+        # Act
+        _cache.clone_template_from_cache("alpha", target)
+        # Assert
+        assert self._manifest(target)["schema"] == "scitex-template/manifest@v1"
+
+
+# ---------------------------------------------------------------------------
 # ensure_cache — pull path with hand-rolled subprocess fake
 # ---------------------------------------------------------------------------
 
