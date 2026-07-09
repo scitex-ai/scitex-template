@@ -4,6 +4,18 @@ All notable changes to `scitex-template` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [SemVer](https://semver.org/).
 
+## [0.6.8] – 2026-07-09
+
+### Fixed
+- `clone_scitex_minimal`: import the scholar workspace helper from its
+  submodule (`from scitex_scholar.ensure_workspace import ensure_workspace`).
+  On scitex-scholar >=1.4 the bare `from scitex_scholar import ensure_workspace`
+  binds the **submodule** (a module object, not callable); calling it raised
+  `'module' object is not callable`, which the function swallowed into a falsy
+  return — quarantining every SciTeX-Hub visitor slot. `scitex_writer` exports
+  the helper at top level, hence the asymmetry. Regression-locked by
+  `tests/scitex_template/_project/test__clone_scitex_minimal.py`.
+
 ## [0.5.1] – 2026-04-25
 
 ### Fixed

@@ -66,8 +66,18 @@ def clone_scitex_minimal(
             **kwargs,
         )
 
-        # Ensure scholar workspace (directory scaffold)
-        from scitex_scholar import ensure_workspace as ensure_scholar
+        # Ensure scholar workspace (directory scaffold).
+        # Import the function from its submodule explicitly: on
+        # scitex-scholar >=1.4 the top-level name `scitex_scholar.ensure_workspace`
+        # resolves to the SUBMODULE (a module object, not callable), so
+        # `from scitex_scholar import ensure_workspace` then calling it raises
+        # "'module' object is not callable" — which this function swallows into a
+        # falsy return, quarantining every visitor slot. The callable lives at
+        # scitex_scholar.ensure_workspace.ensure_workspace. (scitex_writer above
+        # DOES export the function at top level, hence the asymmetry.)
+        from scitex_scholar.ensure_workspace import (
+            ensure_workspace as ensure_scholar,
+        )
 
         ensure_scholar(str(project_path))
 
