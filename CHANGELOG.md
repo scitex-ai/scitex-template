@@ -4,6 +4,37 @@ All notable changes to `scitex-template` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [SemVer](https://semver.org/).
 
+## [0.7.0] – 2026-08-11
+
+### Added
+- `clone_template_result(...) -> CloneOutcome` — a clone that can say WHY it
+  failed. `CloneOutcome` is a frozen dataclass with each signal in its own named
+  field: `ok`, `status` (`cloned` | `failed`), `template_id`, `project_dir`, and
+  a three-valued `reason` where `None` means "this template did not say" rather
+  than "fine".
+- `CloneOutcome` is exported at package top level alongside
+  `clone_template_result`.
+
+### Why
+0.6.8 (below) fixed the scholar import that was quarantining every visitor slot
+on scitex.ai, and explicitly left the `bool` contract alone. That left the other
+half of the incident unfixed: the reason existed at the failure site and was
+destroyed one frame later, so the whole operator-visible explanation for 14 dead
+visitor slots was, for five days:
+
+    "reset failed: Template clone returned falsy for default-project"
+
+There is no possible follow-up from that message. 0.6.8 made the failure path log
+its traceback — but a log line is not a return value, and the consumer three
+frames up still received `False`. A `bool` has nowhere to put a sentence.
+
+### Unchanged
+- `clone_template(...) -> bool` keeps its exact published contract. It has live
+  callers (scitex-hub, the CLI's exit code, and tests asserting `result is True`
+  by identity), so this is a MIGRATION and not a rename: the new verb sits beside
+  the old one, and `CloneOutcome.__bool__` lets the same object drop into any
+  legacy `if success:` unchanged.
+
 ## [0.6.8] – 2026-07-08
 
 ### Fixed
