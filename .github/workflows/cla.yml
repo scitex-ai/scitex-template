@@ -31,4 +31,37 @@ jobs:
     uses: scitex-ai/.github/.github/workflows/cla.yml@main
     with:
       owner_allowlist: "bot*,ywatanabe1989,LLEmacs"
-    secrets: inherit
+      # PIN THE DESTINATION EXPLICITLY. Read from the callee 2026-08-11:
+      # `runs_on` defaults to
+      #     '["self-hosted","Linux","X64","spartan-cpu"]'
+      # and this caller passed no `runs_on`, so this job HAS BEEN RUNNING ON
+      # THE PERSISTENT POOL. Neither file showed it alone — the caller names
+      # no runner and the callee's default is invisible from here. That is
+      # what PS-224 reports, and it is reporting a true thing.
+      #
+      # WHY EPHEMERAL IS THE SAFER DESTINATION FOR THIS JOB SPECIFICALLY:
+      #   * the triggers are outsider-reachable — `pull_request_target` runs
+      #     in the BASE repo's context and `issue_comment` is not gated at
+      #     all; these are the documented way AROUND the fork-PR approval gate
+      #   * our self-hosted runners are PERSISTENT and share a real $HOME
+      #     holding the live fleet credential, so a compromise there costs the
+      #     credential, not one machine
+      #   * a hosted VM is destroyed after the run: a compromise costs one
+      #     disposable runner
+      # This repo is public, so hosted minutes are free.
+      #
+      # NOT a general "move CI to hosted runners" position — this is about a
+      # job an outsider can trigger. Everything else belongs on our hardware.
+      #
+      # Same fix and same reasoning as scitex-hub's own cla.yml, which hit
+      # this on 2026-08-09; its .scitex/dev/config.yaml records that an
+      # EXEMPTION was drafted first and would have frozen the unsafe state
+      # behind a well-written justification. Pinning makes PS-224 stop firing
+      # on its own, so no exemption is needed here either.
+      runs_on: '["ubuntu-latest"]'
+    # ONE SECRET, NOT ALL OF THEM. `secrets: inherit` forwarded EVERY secret
+    # this repo holds — including the fleet PAT — into a job an outsider can
+    # start by commenting on an issue. The callee declares exactly one
+    # required secret precisely so callers need not inherit.
+    secrets:
+      GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
