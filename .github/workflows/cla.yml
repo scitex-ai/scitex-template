@@ -1,5 +1,19 @@
 name: CLA Assistant
 
+# PILOT: org-level reusable-workflow caller (scitex-ai/.github, 2026-07-10).
+# Triggers/permissions preserved verbatim from the prior local file.
+# Reusable workflow defaults (owner_login=ywatanabe1989,
+# owner_allowlist="bot*,ywatanabe1989", default_branch=main) do NOT match
+# this repo's prior hardcoded allowlist (adds LLEmacs), so `owner_allowlist`
+# is overridden below.
+#
+# NOTE (discovered during migration, not caused by it): the prior local
+# job read `secrets.CLA_PERSONAL_ACCESS_TOKEN`, but this repo's actual
+# configured secret is named `GH_PERSONAL_ACCESS_TOKEN` (confirmed via
+# `gh secret list`) — so the PAT env var was previously resolving empty.
+# The reusable workflow reads `secrets.GH_PERSONAL_ACCESS_TOKEN`, which
+# DOES exist here, so this migration incidentally fixes that latent bug.
+
 on:
   issue_comment:
     types: [created]
@@ -13,21 +27,41 @@ permissions:
   statuses: write
 
 jobs:
-  CLAssistant:
-    runs-on: ubuntu-latest
-    steps:
-      - name: CLA Assistant
-        uses: contributor-assistant/github-action@v2.6.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.CLA_PERSONAL_ACCESS_TOKEN }}
-        with:
-          path-to-signatures: "signatures/cla.json"
-          path-to-document: "https://github.com/ywatanabe1989/scitex-template/blob/main/CLA.md"
-          branch: "cla-signatures"
-          allowlist: bot*,ywatanabe1989,LLEmacs
-          custom-allsigned-prcomment: |
-            Thank you for signing the SciTeX CLA. Your contribution can now be reviewed.
-          custom-notsigned-prcomment: |
-            Please sign the [SciTeX CLA](https://github.com/ywatanabe1989/scitex-template/blob/main/CLA.md) before your contribution can be merged.
-            Comment `I have read and agree to the SciTeX CLA.` to sign.
+  call:
+    uses: scitex-ai/.github/.github/workflows/cla.yml@main
+    with:
+      owner_allowlist: "bot*,ywatanabe1989,LLEmacs"
+      # PIN THE DESTINATION EXPLICITLY. Read from the callee 2026-08-11:
+      # `runs_on` defaults to
+      #     '["self-hosted","Linux","X64","spartan-cpu"]'
+      # and this caller passed no `runs_on`, so this job HAS BEEN RUNNING ON
+      # THE PERSISTENT POOL. Neither file showed it alone — the caller names
+      # no runner and the callee's default is invisible from here. That is
+      # what PS-224 reports, and it is reporting a true thing.
+      #
+      # WHY EPHEMERAL IS THE SAFER DESTINATION FOR THIS JOB SPECIFICALLY:
+      #   * the triggers are outsider-reachable — `pull_request_target` runs
+      #     in the BASE repo's context and `issue_comment` is not gated at
+      #     all; these are the documented way AROUND the fork-PR approval gate
+      #   * our self-hosted runners are PERSISTENT and share a real $HOME
+      #     holding the live fleet credential, so a compromise there costs the
+      #     credential, not one machine
+      #   * a hosted VM is destroyed after the run: a compromise costs one
+      #     disposable runner
+      # This repo is public, so hosted minutes are free.
+      #
+      # NOT a general "move CI to hosted runners" position — this is about a
+      # job an outsider can trigger. Everything else belongs on our hardware.
+      #
+      # Same fix and same reasoning as scitex-hub's own cla.yml, which hit
+      # this on 2026-08-09; its .scitex/dev/config.yaml records that an
+      # EXEMPTION was drafted first and would have frozen the unsafe state
+      # behind a well-written justification. Pinning makes PS-224 stop firing
+      # on its own, so no exemption is needed here either.
+      runs_on: '["ubuntu-latest"]'
+    # ONE SECRET, NOT ALL OF THEM. `secrets: inherit` forwarded EVERY secret
+    # this repo holds — including the fleet PAT — into a job an outsider can
+    # start by commenting on an issue. The callee declares exactly one
+    # required secret precisely so callers need not inherit.
+    secrets:
+      GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
