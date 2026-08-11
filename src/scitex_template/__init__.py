@@ -54,7 +54,8 @@ from ._code._code_templates import (
     get_code_template,
     list_code_templates,
 )
-from ._project._clone_template import clone_template
+from ._project._clone_outcome import CloneOutcome
+from ._project._clone_template import clone_template, clone_template_result
 from ._project._customize import customize_minimal_template, customize_template
 from ._project._directory_structure import (
     PROJECT_STRUCTURE,
@@ -223,6 +224,8 @@ def get_available_templates_info():
 __all__ = [
     "__version__",
     "clone_template",
+    "clone_template_result",
+    "CloneOutcome",
     "clone_module",
     "clone_research",
     "clone_research_minimal",

@@ -11,8 +11,10 @@ Django, MCP, and CLI all delegate to this function.
 
 from __future__ import annotations
 
+import traceback
 from typing import Any, Optional
 
+from ._clone_outcome import CloneOutcome
 from .clone_app import clone_app
 from .clone_module import clone_module
 from .clone_pip_project import clone_pip_project
@@ -86,18 +88,96 @@ def clone_template(
     ValueError
         If template_id is unknown.
     """
-    resolved_id = ALIASES.get(template_id, template_id)
-    func = TEMPLATES.get(resolved_id)
-    if not func:
-        raise ValueError(
-            f"Unknown template: {template_id}. Available: {list(TEMPLATES)}"
-        )
+    _resolved_id, func = _resolve_template(template_id)
     return func(
         project_dir=project_dir,
         git_strategy=git_strategy,
         branch=branch,
         tag=tag,
         **kwargs,
+    )
+
+
+def _resolve_template(template_id: str):
+    """Resolve an id (or alias) to ``(canonical_id, clone_function)``.
+
+    Shared by both entry points so the alias table cannot drift between them.
+    """
+    resolved_id = ALIASES.get(template_id, template_id)
+    func = TEMPLATES.get(resolved_id)
+    if not func:
+        raise ValueError(
+            f"Unknown template: {template_id}. Available: {list(TEMPLATES)}"
+        )
+    return resolved_id, func
+
+
+def clone_template_result(
+    template_id: str,
+    project_dir: str,
+    git_strategy: Optional[str] = "child",
+    branch: Optional[str] = None,
+    tag: Optional[str] = None,
+    **kwargs: Any,
+) -> CloneOutcome:
+    """Clone a template and report WHY if it did not work.
+
+    Same dispatch as :func:`clone_template`; the difference is the answer. This
+    returns a :class:`CloneOutcome` carrying ``status`` / ``template_id`` /
+    ``project_dir`` / ``reason`` / ``detail`` instead of a bare bool, so a caller
+    can put the actual cause in front of an operator.
+
+    That is not hypothetical. scitex-hub wrote this function's bool straight into
+    ``VisitorAllocation.quarantine_reason``, so 14 dead visitor slots were
+    explained for five days as "Template clone returned falsy for
+    default-project" — a sentence with no possible follow-up. See
+    ``_clone_outcome.py`` for the full account.
+
+    :func:`clone_template` is UNCHANGED and still returns ``bool``: it is a
+    published contract with live callers, and a contract change is a migration,
+    not a rename. Prefer this function in new code.
+
+    Notes
+    -----
+    Exception policy differs DELIBERATELY. ``clone_template`` lets a template's
+    exception propagate; callers such as hub's workspace reset catch it and
+    report it separately. This function converts an exception into a ``failed``
+    outcome carrying the type, message and traceback — because its whole purpose
+    is that the caller never has to reconstruct the cause. An unknown
+    ``template_id`` still RAISES ``ValueError`` in both: that is a programming
+    error in the caller, not a clone that failed.
+    """
+    resolved_id, func = _resolve_template(template_id)
+
+    try:
+        raw = func(
+            project_dir=project_dir,
+            git_strategy=git_strategy,
+            branch=branch,
+            tag=tag,
+            **kwargs,
+        )
+    except Exception as exc:
+        return CloneOutcome.failed(
+            template_id=resolved_id,
+            project_dir=project_dir,
+            reason=f"{type(exc).__name__}: {exc}",
+            detail=traceback.format_exc(),
+        )
+
+    # A template that already speaks the richer contract passes straight through.
+    if isinstance(raw, CloneOutcome):
+        return raw
+
+    if raw:
+        return CloneOutcome.cloned(
+            template_id=resolved_id, project_dir=project_dir
+        )
+
+    # Falsy from a bool-returning template: it failed and did NOT say why.
+    # reason=None is that "unknown", kept distinct from an empty string.
+    return CloneOutcome.failed(
+        template_id=resolved_id, project_dir=project_dir, reason=None
     )
 
 
@@ -113,6 +193,8 @@ def get_all_template_ids():
 
 __all__ = [
     "clone_template",
+    "clone_template_result",
+    "CloneOutcome",
     "TEMPLATES",
     "ALIASES",
     "get_template_ids",
