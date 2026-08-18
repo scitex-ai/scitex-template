@@ -52,14 +52,12 @@ class TestAdd:
         result = add(small_num, small_num)
         assert abs(result - 2e-10) < 1e-15
 
-    def test_main_function(self):
+    def test_main_function(self, capsys):
         """Test the main function execution."""
-        from unittest.mock import patch
         from pip_project_template.utils._add import main
-        
-        with patch('builtins.print') as mock_print:
-            main()
-            mock_print.assert_called_once_with("2 + 3 = 5")
+
+        main()
+        assert capsys.readouterr().out.strip() == "2 + 3 = 5"
 
     def test_module_execution(self):
         """Test module execution as script."""
