@@ -68,16 +68,13 @@ class TestDatacontainer:
         assert container1.to_dict() == {"name": "hello", "value": 100}
         assert container2.to_dict() == {"name": "world", "value": -50}
 
-    def test_datacontainer_main_function(self):
+    def test_datacontainer_main_function(self, capsys):
         """Test the main function execution."""
-        from unittest.mock import patch
         from pip_project_template.types._DataContainer import main
-        
-        # Test the main function with mocked print
-        with patch('builtins.print') as mock_print:
-            main()
-            # Verify print was called with the expected dict
-            mock_print.assert_called_once_with({"name": "test", "value": 42})
+
+        main()
+        # Real stdout capture (no mock): print() renders the dict via str().
+        assert capsys.readouterr().out.strip() == str({"name": "test", "value": 42})
 
     def test_datacontainer_module_execution(self):
         """Test module execution as script."""
