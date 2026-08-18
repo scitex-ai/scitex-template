@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 from io import StringIO
 import contextlib
-from unittest.mock import patch
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parents[3] / "src"))
@@ -103,11 +102,11 @@ class TestInfo:
         assert 'Pip Project Template - FastMCP Edition' in result.stdout
         assert 'Framework: FastMCP 2.0' in result.stdout
 
-    @patch('builtins.open', side_effect=OSError("File not found"))
-    def test_main_function_version_file_error(self, mock_open):
-        """Test main function handles version file read errors."""
+    def test_main_function_version_file_error(self, tmp_path):
+        """Test main function falls back when the version file cannot be read."""
+        missing = tmp_path / "no-such-package" / "__init__.py"
         with contextlib.redirect_stdout(StringIO()) as captured:
-            result = main()
+            result = main(version_file=str(missing))
             
         assert result == 0
         output = captured.getvalue()
