@@ -196,7 +196,7 @@ verify-claims:
 	$(PYTHON) scripts/verify/check_schema.py
 
 clean-clew:
-	@rm -f .scitex/clew/db.sqlite .scitex/clew/runtime/db.sqlite 2>/dev/null || true
+	@rm -f .scitex/clew/runtime/clew.db* 2>/dev/null || true
 
 # ============================================
 # Cleaning

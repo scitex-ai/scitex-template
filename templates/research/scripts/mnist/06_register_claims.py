@@ -10,7 +10,7 @@ Emits three artefacts under ``data/results/``:
 
 1. ``claims.json`` — canonical clew output contract (the file the
    submission validator + cohort verifier read).
-2. Registers each claim into ``.scitex/clew/db.sqlite`` via
+2. Registers each claim into the Clew claim store via
    ``scitex_clew.add_claim`` so the claim back-propagates through the
    Clew DAG to source data. That's the validity gate the verifier runs.
 3. ``clew_dag.html`` — interactive Mermaid.js visualisation of the
