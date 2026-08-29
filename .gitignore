@@ -23,3 +23,6 @@ logs/
 *.log
 .DS_Store
 /.worktrees/
+# sphinx-build's incremental-build scratch. The served bundle
+# src/<pkg>/_sphinx_html/ itself stays tracked; .doctrees is not part of it.
+src/*/_sphinx_html/.doctrees/
