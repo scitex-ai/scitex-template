@@ -557,7 +557,7 @@ templates/research/
 ```bash
 make solve              # downloads MNIST (once), trains SVM, emits claims.json
 make verify-claims      # plain-Python schema check on claims.json
-make clean-clew         # drop the local Clew store only
+make clean-clew         # drop the Clew store only
 ```
 
 The recipe (`solve: clean-clew`):

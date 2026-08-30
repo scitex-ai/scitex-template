@@ -24,8 +24,9 @@ logs/
 .DS_Store
 /.worktrees/
 
-# Sphinx build cache. `sphinx-build -b html <src> <out>` writes its internal
-# doctree cache to <out>/.doctrees; it is never served, and it embeds the
-# intersphinx inventory of CPython's own stdlib docs. Keep it out of the
-# committed HTML bundle.
+# sphinx-build's incremental-build scratch. `sphinx-build -b html <src> <out>`
+# writes its doctree cache to <out>/.doctrees, so it rode along when the HTML
+# bundle was copied into src/. It is never served, and it embeds the
+# intersphinx inventory of CPython's own stdlib docs. The served bundle
+# src/<pkg>/_sphinx_html/ itself stays tracked; .doctrees is not part of it.
 src/*/_sphinx_html/.doctrees/
