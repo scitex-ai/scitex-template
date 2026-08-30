@@ -97,7 +97,6 @@ data/*
 **/*.txt
 **/*.log
 **/*.db
-**/*.sqlite
 **/*.xml
 **/*.JNB
 **/*.jnb
@@ -163,8 +162,6 @@ cover/
 # Django stuff:
 *.log
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
 
 # Flask stuff:
 instance/
@@ -683,7 +680,6 @@ data/mnist/*
 !data/mnist/.gitkeep
 
 # scitex local-state (added by clew-adapt)
-.scitex/clew/db.sqlite
 .scitex/clew/runtime/
 # clew DAG outputs vs source
 data/results/*
