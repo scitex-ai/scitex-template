@@ -26,13 +26,15 @@ class GlobalArgumentParser:
     """Central argument parser for all CLI commands."""
 
     @classmethod
-    def get_command_parsers(cls):
+    def get_command_parsers(cls, package_path=None, package_name="pip_project_template.cli"):
         """Dynamically discover and load parsers from command modules."""
         parsers = {}
         descriptions = {}
 
         # Get the directory of this CLI package
-        cli_package_path = os.path.dirname(__file__)
+        # Test seams: point these at a real package to exercise discovery
+        # without patching pkgutil/importlib.
+        cli_package_path = package_path or os.path.dirname(__file__)
 
         # Scan all Python files in the CLI directory
         for importer, modname, ispkg in pkgutil.iter_modules(
@@ -45,7 +47,7 @@ class GlobalArgumentParser:
             try:
                 # Dynamic import
                 module = importlib.import_module(
-                    f".{modname}", package="pip_project_template.cli"
+                    f".{modname}", package=package_name
                 )
 
                 # Check if module has create_parser function

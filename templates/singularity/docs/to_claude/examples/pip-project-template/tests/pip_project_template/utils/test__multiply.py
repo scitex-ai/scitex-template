@@ -58,14 +58,12 @@ class TestMultiply:
         assert multiply(0.25, 4) == 1.0
         assert multiply(2.5, 0.4) == 1.0
 
-    def test_main_function(self):
+    def test_main_function(self, capsys):
         """Test the main function execution."""
-        from unittest.mock import patch
         from pip_project_template.utils._multiply import main
-        
-        with patch('builtins.print') as mock_print:
-            main()
-            mock_print.assert_called_once_with("4 * 5 = 20")
+
+        main()
+        assert capsys.readouterr().out.strip() == "4 * 5 = 20"
 
     def test_module_execution(self):
         """Test module execution as script."""

@@ -87,21 +87,16 @@ class TestCalculator:
             abs(result - 0.3) < 1e-10
         )  # Account for floating point precision
 
-    def test_main_function(self):
+    def test_main_function(self, capsys):
         """Test the main function execution."""
-        from unittest.mock import patch
-
         from pip_project_template.core._Calculator import main
 
-        # Test the main function with mocked print
-        with patch("builtins.print") as mock_print:
-            main()
-            # Verify print was called with expected results
-            assert mock_print.call_count == 2
-            # Check the calls contain the expected results
-            calls = [call.args[0] for call in mock_print.call_args_list]
-            assert 15 in calls  # 10 + 5
-            assert 12 in calls  # 3 * 4
+        main()
+        # Real stdout capture (no mock): main() prints one result per line.
+        lines = capsys.readouterr().out.splitlines()
+        assert len(lines) == 2
+        assert "15" in lines  # 10 + 5
+        assert "12" in lines  # 3 * 4
 
     def test_module_execution(self):
         """Test module execution as script."""

@@ -4,7 +4,7 @@
 import pytest
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from contextlib import contextmanager
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parents[2] / "src"))
@@ -16,6 +16,28 @@ except ImportError:
     FASTMCP_AVAILABLE = False
 
 import pip_project_template.mcp_servers.McpServer02 as mcp_module
+
+class _Recorder:
+    """Records calls instead of performing them — a real callable, not a mock."""
+
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, *args, **kwargs):
+        self.calls.append((args, kwargs))
+
+
+@contextmanager
+def _swapped(obj, name):
+    """Swap an attribute for a _Recorder and restore it. No ``unittest.mock``."""
+    recorder = _Recorder()
+    original = getattr(obj, name)
+    setattr(obj, name, recorder)
+    try:
+        yield recorder
+    finally:
+        setattr(obj, name, original)
+
 
 
 class TestMcpserver02:
@@ -183,9 +205,9 @@ class TestMcpserver02:
 
     def test_main_function(self):
         """Test main function execution with mocked run_server."""
-        with patch.object(mcp_module, 'run_server') as mock_run:
+        with _swapped(mcp_module, "run_server") as mock_run:
             mcp_module.main()
-            mock_run.assert_called_once()
+            assert len(mock_run.calls) == 1
 
     def test_calculator_instance(self):
         """Test that calculator is properly initialized."""
@@ -194,21 +216,21 @@ class TestMcpserver02:
 
     def test_run_server_stdio_transport(self):
         """Test run_server with stdio transport."""
-        with patch.object(mcp_module.mcp, 'run') as mock_run:
+        with _swapped(mcp_module.mcp, "run") as mock_run:
             mcp_module.run_server("stdio")
-            mock_run.assert_called_once_with(transport="stdio")
+            assert mock_run.calls == [((), {"transport": "stdio"})]
 
     def test_run_server_http_transport(self):
         """Test run_server with http transport."""
-        with patch.object(mcp_module.mcp, 'run') as mock_run:
+        with _swapped(mcp_module.mcp, "run") as mock_run:
             mcp_module.run_server("http", host="127.0.0.1", port=9999)
-            mock_run.assert_called_once_with(transport="http", host="127.0.0.1", port=9999, path="/mcp")
+            assert mock_run.calls == [((), {"transport": "http", "host": "127.0.0.1", "port": 9999, "path": "/mcp"})]
 
     def test_run_server_sse_transport(self):
         """Test run_server with sse transport."""
-        with patch.object(mcp_module.mcp, 'run') as mock_run:
+        with _swapped(mcp_module.mcp, "run") as mock_run:
             mcp_module.run_server("sse", host="0.0.0.0", port=8888)
-            mock_run.assert_called_once_with(transport="sse", host="0.0.0.0", port=8888)
+            assert mock_run.calls == [((), {"transport": "sse", "host": "0.0.0.0", "port": 8888})]
 
     def test_module_main_execution(self):
         """Test module execution as script."""

@@ -25,13 +25,17 @@ def create_parser():
     return parser
 
 
-def main(args=None):
+def main(args=None, version_file=None):
     """Execute info command."""
     import sys
     import os
     
     # Get version from package __init__.py  
-    package_init = os.path.join(os.path.dirname(os.path.dirname(__file__)), '__init__.py')
+    # ``version_file`` is a test seam: pass a path to exercise the fallback
+    # below against a REAL unreadable/missing file rather than a mock.
+    package_init = version_file or os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), '__init__.py'
+    )
     version = "0.1.0"  # default
     try:
         with open(package_init) as f:

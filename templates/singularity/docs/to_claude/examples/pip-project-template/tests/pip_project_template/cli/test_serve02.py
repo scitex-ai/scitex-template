@@ -16,7 +16,6 @@ import contextlib
 import sys
 from io import StringIO
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -24,6 +23,35 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parents[3] / "src"))
 
 from pip_project_template.cli.serve02 import create_parser, main
+
+
+class _Recorder:
+    """Records calls instead of performing them — a real callable."""
+
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, *args, **kwargs):
+        self.calls.append((args, kwargs))
+
+
+@pytest.fixture
+def recorded_run_server():
+    """Swap McpServer02.run_server for a _Recorder, then restore it.
+
+    The fixture installs a real callable and removes it again, so the test
+    still asserts exactly which kwargs main() forwarded.
+    """
+    import pip_project_template.mcp_servers.McpServer02 as server_module
+
+    recorder = _Recorder()
+    original = server_module.run_server
+    server_module.run_server = recorder
+    try:
+        yield recorder
+    finally:
+        server_module.run_server = original
+
 
 
 class TestServe02:
@@ -80,19 +108,17 @@ class TestServe02:
         assert args.host == "localhost"
         assert args.transport == "stdio"
 
-    @patch("pip_project_template.mcp_servers.McpServer02.run_server")
-    def test_main_stdio_transport(self, mock_run_server):
+    def test_main_stdio_transport(self, recorded_run_server):
         """Test main function with stdio transport."""
         with contextlib.redirect_stdout(StringIO()) as captured:
             result = main(["--transport", "stdio"])
 
         assert result == 0
-        mock_run_server.assert_called_once_with(transport="stdio")
+        assert recorded_run_server.calls == [((), {"transport": "stdio"})]
         output = captured.getvalue()
         assert "Server 02" in output
 
-    @patch("pip_project_template.mcp_servers.McpServer02.run_server")
-    def test_main_http_transport(self, mock_run_server):
+    def test_main_http_transport(self, recorded_run_server):
         """Test main function with http transport."""
         with contextlib.redirect_stdout(StringIO()) as captured:
             result = main(
@@ -100,23 +126,18 @@ class TestServe02:
             )
 
         assert result == 0
-        mock_run_server.assert_called_once_with(
-            transport="http", host="test.com", port=9001
-        )
+        assert recorded_run_server.calls == [((), {"transport": "http", "host": "test.com", "port": 9001})]
         output = captured.getvalue()
         assert "Server 02" in output
         assert "HTTP" in output
 
-    @patch("pip_project_template.mcp_servers.McpServer02.run_server")
-    def test_main_sse_transport(self, mock_run_server):
+    def test_main_sse_transport(self, recorded_run_server):
         """Test main function with sse transport."""
         with contextlib.redirect_stdout(StringIO()) as captured:
             result = main(["--transport", "sse"])
 
         assert result == 0
-        mock_run_server.assert_called_once_with(
-            transport="sse", host="localhost", port=8082
-        )
+        assert recorded_run_server.calls == [((), {"transport": "sse", "host": "localhost", "port": 8082})]
         output = captured.getvalue()
         assert "Server 02" in output
         assert "SSE" in output

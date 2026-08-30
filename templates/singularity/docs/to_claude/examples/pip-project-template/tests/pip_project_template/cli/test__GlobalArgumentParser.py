@@ -15,7 +15,6 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -95,53 +94,34 @@ class TestCentralargumentparser:
         assert hasattr(parser, "parse_args")  # ArgumentParser interface
         assert isinstance(subparsers_dict, dict)
 
-    @patch(
-        "pip_project_template.cli._GlobalArgumentParser.pkgutil.iter_modules"
-    )
-    @patch(
-        "pip_project_template.cli._GlobalArgumentParser.importlib.import_module"
-    )
-    @patch("pip_project_template.cli._GlobalArgumentParser.hasattr")
-    def test_get_command_parsers_exception_handling(
-        self, mock_hasattr, mock_import, mock_iter
-    ):
-        """Test exception handling in get_command_parsers."""
-        # Mock module discovery to include a problematic module
-        mock_iter.return_value = [
-            (None, "good_module", False),
-            (None, "bad_module", False),
-        ]
+    def test_get_command_parsers_exception_handling(self, tmp_path):
+        """A module that fails to import is skipped; a good one is loaded.
 
-        # Mock successful import for good_module
-        good_mock = MagicMock()
-        mock_parser = MagicMock()
-        mock_parser.description = "Test parser"
-        good_mock.create_parser.return_value = mock_parser
+        Uses a REAL package on disk instead of patching pkgutil / importlib /
+        hasattr: real discovery, a real ImportError, real underscore-to-hyphen
+        naming. The mocked version this replaces asserted against fakes and had
+        stopped exercising anything -- it returned an empty dict and failed.
+        """
+        pkg = tmp_path / "fake_cli_pkg"
+        pkg.mkdir()
+        (pkg / "__init__.py").write_text("")
+        (pkg / "good_module.py").write_text(
+            "import argparse\n"
+            "def create_parser():\n"
+            "    return argparse.ArgumentParser(description='Test parser')\n"
+        )
+        (pkg / "bad_module.py").write_text("raise ImportError('Module not found')\n")
 
-        # Mock hasattr to return True only for good_module
-        def hasattr_side_effect(obj, name):
-            if name == "create_parser" and obj is good_mock:
-                return True
-            return False
+        sys.path.insert(0, str(tmp_path))
+        try:
+            parsers, descriptions = GlobalArgumentParser.get_command_parsers(
+                package_path=str(pkg), package_name="fake_cli_pkg"
+            )
+        finally:
+            sys.path.remove(str(tmp_path))
 
-        mock_hasattr.side_effect = hasattr_side_effect
-
-        # Mock failed import for bad_module
-        def side_effect(module_name, package=None):
-            if "good_module" in module_name:
-                return good_mock
-            else:
-                raise ImportError("Module not found")
-
-        mock_import.side_effect = side_effect
-
-        # Should handle exceptions gracefully
-        parsers, descriptions = GlobalArgumentParser.get_command_parsers()
-
-        # Should have the good module but not the bad one (underscores converted to hyphens)
         assert "good-module" in parsers
         assert "bad-module" not in parsers
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

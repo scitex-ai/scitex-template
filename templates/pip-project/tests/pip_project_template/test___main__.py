@@ -48,9 +48,8 @@ class TestMain:
         from pip_project_template.cli import main
         assert callable(main)
 
-    def test_main_execution_with_mocked_cli(self):
-        """Test that __main__ execution calls CLI main function."""
-        from unittest.mock import patch, MagicMock
+    def test_main_execution_via_subprocess(self):
+        """Test that __main__ runs as a script (real subprocess, no mock)."""
         import sys
         import subprocess
         
@@ -64,7 +63,6 @@ class TestMain:
 
     def test_main_module_direct_import_and_execution(self):
         """Test that __main__ module can be imported and executed."""
-        from unittest.mock import patch
         
         # Import the module to ensure all lines are executed
         import pip_project_template.__main__ as main_module
