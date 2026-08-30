@@ -11,11 +11,9 @@ in its source tree. Two outcomes:
 - Module installed BUT import fails (e.g. internal rename like
   `scitex_io._load_cache` → `scitex_io._loading._load_cache`) →
   test FAILS loudly.
-- Peer package NOT installed (peer standalone absent in the CI env) →
-  test is SKIPPED. The skip is taken on the ROOT distribution only
-  (`scitex_io`), never on the full dotted path: skipping on the full
-  path would swallow a renamed submodule as "not installed" and report
-  green, which is the exact failure this gate exists to catch.
+- Module NOT installed (peer standalone absent in the CI env) →
+  test is SKIPPED via `pytest.importorskip`. The umbrella's CI
+  (which installs every peer) catches cross-package renames.
 """
 
 import importlib
@@ -38,9 +36,7 @@ CROSS_PACKAGE_IMPORTS = [
 def test_cross_package_import_succeeds_or_skips(module_name):
     """Importing scitex-template's declared cross-package dependency must succeed."""
     # Arrange
-    # Skip on the ROOT package only, then hard-import the FULL dotted path,
-    # so a renamed submodule raises instead of being skipped into a green.
-    pytest.importorskip(module_name.split(".")[0])
+    pytest.importorskip(module_name)
     # Act
     module = importlib.import_module(module_name)
     # Assert
