@@ -10,7 +10,7 @@ This directory contains SciTeX-managed resources for your research project.
 ```
 scitex/
 ├── .scitex-structure-version  # Structure version (0.1.0)
-├── metadata.db                 # SQLite database (persistent state)
+├── metadata.db                 # Project metadata store (persistent state)
 ├── writer/                     # Academic manuscripts (CLONED VIA COMMAND)
 ├── scholar/                    # Research notes and references
 ├── vis/                        # Figure editing with provenance

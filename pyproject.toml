@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scitex-template"
-version = "0.6.8"
+version = "0.7.1"
 description = "Project template cloner + code snippet library for the SciTeX ecosystem — six templates vendored, shallow-cloned on demand to ~/.scitex/template/cache/"
 readme = "README.md"
 license = "AGPL-3.0-only"
@@ -75,9 +75,19 @@ docs = [
     "sphinx-copybutton>=0.5",
     "sphinx-autodoc-typehints>=1.25",
 ]
+# PS-221 §3: every PUBLIC extra must be a SUBSET of `all`, so that the
+# documented "give me everything" install actually installs everything public.
+# `dev` and `docs` were public but absent here, so `pip install
+# scitex-template[all]` silently under-installed them. Referenced by name
+# (closure-by-inclusion) rather than duplicating the requirement lists, so this
+# cannot drift out of step with the extras above.
+# Not solved by renaming them `_dev`/`_docs`: PEP 508/685 forbid leading
+# underscores in extra names and setuptools/hatchling/pip/uv all reject them.
 all = [
     "scitex-template[legacy]",
     "scitex-template[mcp]",
+    "scitex-template[dev]",
+    "scitex-template[docs]",
 ]
 
 [project.scripts]

@@ -4,6 +4,71 @@ All notable changes to `scitex-template` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [SemVer](https://semver.org/).
 
+## [0.7.1] – 2026-09-02
+
+### Fixed
+- `clone_scitex_minimal` discarded the cause of its own failures. Its handler
+  logged the exception and then `return False`, with a comment claiming it
+  preserved the traceback "for downstream consumers (e.g. hub slot-reset
+  quarantine_reason)" — but `logger.exception` writes to the log while the
+  caller receives a bare bool, so `clone_template_result` one frame up could
+  only report `reason=None`. On 2026-08-28 that quarantined 16 visitor slots on
+  scitex.ai with no explanation, and visitors were silently downgraded to
+  read-only. The template now returns a falsy `CloneOutcome` carrying the
+  exception type, message and traceback.
+- `clone_template` did not enforce its own `-> bool` contract. It did a bare
+  `return func(...)`, so the annotation was true only because every template
+  happened to return a bool; the moment one returned the richer `CloneOutcome`,
+  that type leaked out of the published bool API — past callers that check
+  `result is True` by identity, including the CLI's exit code. It now coerces
+  with `bool(...)`, which is exact because `CloneOutcome.__bool__` mirrors `.ok`.
+
+### Changed
+- A falsy return from a bool-only template no longer yields `reason=None`. It
+  yields a sentence naming which template returned falsy without raising and
+  that its clone function discards the cause.
+
+  This REFINES, and does not remove, the three-valued `reason` documented under
+  0.7.0 below. `ok` / `status` still carry the unknown; what changed is that the
+  human-facing field now DESCRIBES the silence instead of being empty. An absent
+  reason reaches an operator as a dead end; a stated one tells them where to
+  look. No caller is asked to invent a cause it does not have.
+
+### Compatibility
+- No API signature changed. `clone_template` still returns `bool`, and every
+  `if clone_scitex_minimal(...):` caller behaves as before.
+
+## [0.7.0] – 2026-08-11
+
+### Added
+- `clone_template_result(...) -> CloneOutcome` — a clone that can say WHY it
+  failed. `CloneOutcome` is a frozen dataclass with each signal in its own named
+  field: `ok`, `status` (`cloned` | `failed`), `template_id`, `project_dir`, and
+  a three-valued `reason` where `None` means "this template did not say" rather
+  than "fine".
+- `CloneOutcome` is exported at package top level alongside
+  `clone_template_result`.
+
+### Why
+0.6.8 (below) fixed the scholar import that was quarantining every visitor slot
+on scitex.ai, and explicitly left the `bool` contract alone. That left the other
+half of the incident unfixed: the reason existed at the failure site and was
+destroyed one frame later, so the whole operator-visible explanation for 14 dead
+visitor slots was, for five days:
+
+    "reset failed: Template clone returned falsy for default-project"
+
+There is no possible follow-up from that message. 0.6.8 made the failure path log
+its traceback — but a log line is not a return value, and the consumer three
+frames up still received `False`. A `bool` has nowhere to put a sentence.
+
+### Unchanged
+- `clone_template(...) -> bool` keeps its exact published contract. It has live
+  callers (scitex-hub, the CLI's exit code, and tests asserting `result is True`
+  by identity), so this is a MIGRATION and not a rename: the new verb sits beside
+  the old one, and `CloneOutcome.__bool__` lets the same object drop into any
+  legacy `if success:` unchanged.
+
 ## [0.6.8] – 2026-07-08
 
 ### Fixed
