@@ -15,7 +15,10 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+import traceback
 from typing import Optional
+
+from ._clone_outcome import CloneOutcome
 
 import logging
 
@@ -30,8 +33,14 @@ def clone_scitex_minimal(
     branch: Optional[str] = None,
     tag: Optional[str] = None,
     **kwargs,
-) -> bool:
+) -> "bool | CloneOutcome":
     """Create a minimal scitex project with writer and scholar workspaces.
+
+    Returns ``True`` on success, and on failure a falsy :class:`CloneOutcome`
+    carrying the cause. ``CloneOutcome.__bool__`` mirrors ``.ok``, so legacy
+    ``if clone_scitex_minimal(...):`` callers and the CLI exit code are
+    unaffected, while ``clone_template_result`` passes the outcome through and
+    the operator finally sees WHY.
 
     Parameters
     ----------
@@ -89,12 +98,27 @@ def clone_scitex_minimal(
         return True
 
     except Exception as e:
-        # Keep the bool contract (the TEMPLATES dispatcher and CLI exit code
-        # rely on it) but preserve the full traceback for downstream
-        # consumers (e.g. hub slot-reset quarantine_reason) instead of
-        # swallowing it into a bare str(e).
+        # Carry the cause in the RETURN VALUE, not only in the log.
+        #
+        # This used to `return False` with a comment claiming it preserved the
+        # traceback "for downstream consumers (e.g. hub slot-reset
+        # quarantine_reason)". It did not: logger.exception writes to the LOG,
+        # while the caller received a bare False. One frame up,
+        # clone_template_result saw falsy and could only report reason=None —
+        # which is exactly what scitex-hub quarantined 16 visitor slots with on
+        # 2026-08-28, and the five-day blindness of 2026-08-06 before that.
+        #
+        # CloneOutcome is falsy (__bool__ mirrors .ok), so every legacy
+        # `if clone_scitex_minimal(...):` caller and the CLI exit code behave
+        # exactly as before, while clone_template_result's pass-through branch
+        # hands the real cause to the operator.
         logger.exception(f"Failed to create scitex_minimal project: {e}")
-        return False
+        return CloneOutcome.failed(
+            template_id="scitex_minimal",
+            project_dir=str(project_dir),
+            reason=f"{type(e).__name__}: {e}",
+            detail=traceback.format_exc(),
+        )
 
 
 def main(args: list = None) -> None:

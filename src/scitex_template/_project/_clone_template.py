@@ -89,12 +89,22 @@ def clone_template(
         If template_id is unknown.
     """
     _resolved_id, func = _resolve_template(template_id)
-    return func(
-        project_dir=project_dir,
-        git_strategy=git_strategy,
-        branch=branch,
-        tag=tag,
-        **kwargs,
+    # bool() is LOAD-BEARING, not decoration. This function's published
+    # contract is `-> bool` and it has live callers (the CLI's exit code, and
+    # tests asserting `result is True` by identity). A template is ALLOWED to
+    # return the richer CloneOutcome -- clone_template_result passes those
+    # straight through -- so without this coercion the richer type leaks out of
+    # the bool API the moment any template adopts it. That is exactly what this
+    # change does to clone_scitex_minimal. CloneOutcome.__bool__ mirrors .ok,
+    # so the conversion is exact and lossless.
+    return bool(
+        func(
+            project_dir=project_dir,
+            git_strategy=git_strategy,
+            branch=branch,
+            tag=tag,
+            **kwargs,
+        )
     )
 
 
@@ -174,10 +184,22 @@ def clone_template_result(
             template_id=resolved_id, project_dir=project_dir
         )
 
-    # Falsy from a bool-returning template: it failed and did NOT say why.
-    # reason=None is that "unknown", kept distinct from an empty string.
+    # Falsy from a bool-returning template. The cause was discarded one frame
+    # below, so it genuinely is not available here — but "unknown" must be
+    # REPORTED, not left absent. An empty reason reaches an operator as a dead
+    # end (scitex-hub quarantined 16 visitor slots with one on 2026-08-28), so
+    # say what IS known: which template, and that it returned falsy without
+    # raising. `ok`/`status` still carry the three-valued signal; this only
+    # stops the human-facing field being blank.
     return CloneOutcome.failed(
-        template_id=resolved_id, project_dir=project_dir, reason=None
+        template_id=resolved_id,
+        project_dir=project_dir,
+        reason=(
+            f"template {resolved_id!r} returned falsy without raising, so it "
+            f"reported no cause; its clone function still returns a bare bool "
+            f"and discards the reason. Check that template's logs for the "
+            f"underlying error."
+        ),
     )
 
 
