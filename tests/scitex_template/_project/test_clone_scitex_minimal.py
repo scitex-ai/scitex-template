@@ -285,13 +285,29 @@ class TestCloneScitexMinimalFailureLogging:
     """The hub surfaces this log as quarantine_reason; a bare str(e)
     (0.6.7 behaviour) hid the real cause. The traceback must be logged."""
 
-    def test_failure_returns_false(self, clone_failure_outcome):
+    def test_failure_is_falsy(self, clone_failure_outcome):
         # Arrange
         outcome = clone_failure_outcome
+
         # Act
         result = outcome["result"]
-        # Assert
-        assert result is False
+
+        # Assert -- falsy, not `is False`. The template now returns a
+        # CloneOutcome so the cause survives the return; __bool__ mirrors .ok,
+        # so every `if clone_scitex_minimal(...):` caller is unaffected.
+        assert not result
+
+    def test_failure_carries_the_cause(self, clone_failure_outcome):
+        # Arrange
+        outcome = clone_failure_outcome
+
+        # Act
+        result = outcome["result"]
+
+        # Assert -- the whole point: production saw reason=None and
+        # quarantined 16 visitor slots with no explanation.
+        assert result.reason
+        assert "boom-from-writer" in result.reason
 
     def test_failure_logs_exactly_one_error_record(
         self, clone_failure_outcome

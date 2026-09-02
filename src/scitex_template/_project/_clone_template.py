@@ -89,12 +89,22 @@ def clone_template(
         If template_id is unknown.
     """
     _resolved_id, func = _resolve_template(template_id)
-    return func(
-        project_dir=project_dir,
-        git_strategy=git_strategy,
-        branch=branch,
-        tag=tag,
-        **kwargs,
+    # bool() is LOAD-BEARING, not decoration. This function's published
+    # contract is `-> bool` and it has live callers (the CLI's exit code, and
+    # tests asserting `result is True` by identity). A template is ALLOWED to
+    # return the richer CloneOutcome -- clone_template_result passes those
+    # straight through -- so without this coercion the richer type leaks out of
+    # the bool API the moment any template adopts it. That is exactly what this
+    # change does to clone_scitex_minimal. CloneOutcome.__bool__ mirrors .ok,
+    # so the conversion is exact and lossless.
+    return bool(
+        func(
+            project_dir=project_dir,
+            git_strategy=git_strategy,
+            branch=branch,
+            tag=tag,
+            **kwargs,
+        )
     )
 
 

@@ -221,3 +221,48 @@ class TestLegacyContractIsUntouched:
         # Assert
         with pytest.raises(RuntimeError):
             clone_template(SLOT, TARGET)
+
+
+class TestCloneTemplateKeepsItsBoolContract:
+    """`clone_template` is declared `-> bool` and callers check it by identity.
+
+    This class exists because the change that let templates return CloneOutcome
+    broke that contract and NO test noticed. `clone_template` did a bare
+    `return func(...)`, so the richer type leaked straight out of the bool API;
+    the only failure was in a template-level test, which pointed at the wrong
+    layer. These two assert the boundary itself.
+    """
+
+    def test_a_failed_outcome_does_not_leak_through_as_an_object(
+        self, install_template
+    ):
+        # Arrange
+        install_template(
+            _returns(
+                CloneOutcome.failed(
+                    template_id=SLOT, project_dir=TARGET, reason="boom"
+                )
+            )
+        )
+
+        # Act
+        result = clone_template(SLOT, TARGET)
+
+        # Assert -- `is False`, not merely falsy. A CloneOutcome is falsy too,
+        # so `assert not result` would pass while the contract was broken.
+        assert result is False
+
+    def test_a_cloned_outcome_is_true_by_identity(self, install_template):
+        # Arrange
+        install_template(
+            _returns(
+                CloneOutcome.cloned(template_id=SLOT, project_dir=TARGET)
+            )
+        )
+
+        # Act
+        result = clone_template(SLOT, TARGET)
+
+        # Assert
+        assert result is True
+
