@@ -4,6 +4,40 @@ All notable changes to `scitex-template` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [SemVer](https://semver.org/).
 
+## [0.7.1] – 2026-09-02
+
+### Fixed
+- `clone_scitex_minimal` discarded the cause of its own failures. Its handler
+  logged the exception and then `return False`, with a comment claiming it
+  preserved the traceback "for downstream consumers (e.g. hub slot-reset
+  quarantine_reason)" — but `logger.exception` writes to the log while the
+  caller receives a bare bool, so `clone_template_result` one frame up could
+  only report `reason=None`. On 2026-08-28 that quarantined 16 visitor slots on
+  scitex.ai with no explanation, and visitors were silently downgraded to
+  read-only. The template now returns a falsy `CloneOutcome` carrying the
+  exception type, message and traceback.
+- `clone_template` did not enforce its own `-> bool` contract. It did a bare
+  `return func(...)`, so the annotation was true only because every template
+  happened to return a bool; the moment one returned the richer `CloneOutcome`,
+  that type leaked out of the published bool API — past callers that check
+  `result is True` by identity, including the CLI's exit code. It now coerces
+  with `bool(...)`, which is exact because `CloneOutcome.__bool__` mirrors `.ok`.
+
+### Changed
+- A falsy return from a bool-only template no longer yields `reason=None`. It
+  yields a sentence naming which template returned falsy without raising and
+  that its clone function discards the cause.
+
+  This REFINES, and does not remove, the three-valued `reason` documented under
+  0.7.0 below. `ok` / `status` still carry the unknown; what changed is that the
+  human-facing field now DESCRIBES the silence instead of being empty. An absent
+  reason reaches an operator as a dead end; a stated one tells them where to
+  look. No caller is asked to invent a cause it does not have.
+
+### Compatibility
+- No API signature changed. `clone_template` still returns `bool`, and every
+  `if clone_scitex_minimal(...):` caller behaves as before.
+
 ## [0.7.0] – 2026-08-11
 
 ### Added
