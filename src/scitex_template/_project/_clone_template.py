@@ -174,10 +174,22 @@ def clone_template_result(
             template_id=resolved_id, project_dir=project_dir
         )
 
-    # Falsy from a bool-returning template: it failed and did NOT say why.
-    # reason=None is that "unknown", kept distinct from an empty string.
+    # Falsy from a bool-returning template. The cause was discarded one frame
+    # below, so it genuinely is not available here — but "unknown" must be
+    # REPORTED, not left absent. An empty reason reaches an operator as a dead
+    # end (scitex-hub quarantined 16 visitor slots with one on 2026-08-28), so
+    # say what IS known: which template, and that it returned falsy without
+    # raising. `ok`/`status` still carry the three-valued signal; this only
+    # stops the human-facing field being blank.
     return CloneOutcome.failed(
-        template_id=resolved_id, project_dir=project_dir, reason=None
+        template_id=resolved_id,
+        project_dir=project_dir,
+        reason=(
+            f"template {resolved_id!r} returned falsy without raising, so it "
+            f"reported no cause; its clone function still returns a bare bool "
+            f"and discards the reason. Check that template's logs for the "
+            f"underlying error."
+        ),
     )
 
 
