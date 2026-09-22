@@ -17,7 +17,11 @@ Create a new paper directory from the scitex-writer template.
 import sys
 from typing import Optional
 
+import scitex_logging as slogging
+
 from ._clone_project import clone_project
+
+log = slogging.getLogger(__name__)
 
 TEMPLATE_REPO_URL = "https://github.com/ywatanabe1989/scitex-writer.git"
 
@@ -82,17 +86,15 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print("Usage: python -m scitex clone_writer_directory <project-dir>")
-        print("")
-        print("Arguments:")
-        print("  project-dir   Path to project directory (will be created)")
-        print(
-            "                Can be a simple name like 'my_paper' or a full path like './papers/my_paper'"
+        log.error(
+            "Usage: python -m scitex clone_writer_directory <project-dir>\n"
+            "Arguments:\n"
+            "  project-dir   Path to project directory (will be created)\n"
+            "                Can be a simple name like 'my_paper' or a full path like './papers/my_paper'\n"
+            "Example:\n"
+            "  python -m scitex clone_writer_directory my_paper\n"
+            "  python -m scitex clone_writer_directory ./papers/my_paper"
         )
-        print("")
-        print("Example:")
-        print("  python -m scitex clone_writer_directory my_paper")
-        print("  python -m scitex clone_writer_directory ./papers/my_paper")
         sys.exit(1)
 
     project_dir = args[0]

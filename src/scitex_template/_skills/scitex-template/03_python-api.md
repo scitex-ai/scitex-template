@@ -29,7 +29,7 @@ clone_template_from_cache("paper", "./paper", branch="main", force_refresh=True)
 Top-level `clone_<name>` functions still exist and delegate through
 `clone_project()`. Under the hood they now use the cache fast-path when
 the template name is registered, falling back to per-template remote
-clone only with `[legacy]` extra installed.
+clone only with the scitex umbrella installed (`pip install scitex`).
 
 ```python
 from scitex_template import (
@@ -95,9 +95,9 @@ ensure_cache(force_refresh=True)  # wipe + re-clone
 print(CACHE_ROOT)              # ~/.scitex/template/cache/
 ```
 
-## Git helpers (optional — via `[legacy]` extra)
+## Git helpers (optional — via `pip install scitex`)
 
-When `scitex-template[legacy]` is installed, these re-exports are real
+When the scitex umbrella is installed, these re-exports are real
 functions; otherwise they raise `ImportError` when called.
 
 ```python
