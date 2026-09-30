@@ -33,10 +33,12 @@ def main() -> int:
         return 1
     for i, c in enumerate(payload["claims"]):
         if not isinstance(c, dict):
-            print(f"FAIL: claim[{i}] not an object", file=sys.stderr); return 1
+            print(f"FAIL: claim[{i}] not an object", file=sys.stderr)
+            return 1
         missing = {"question", "answer"} - c.keys()
         if missing:
-            print(f"FAIL: claim[{i}] missing {missing}", file=sys.stderr); return 1
+            print(f"FAIL: claim[{i}] missing {missing}", file=sys.stderr)
+            return 1
         at = c.get("answer_type")
         if at is not None and at not in ANSWER_TYPES:
             print(f"FAIL: claim[{i}] answer_type={at!r} invalid", file=sys.stderr)

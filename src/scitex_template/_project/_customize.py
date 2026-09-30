@@ -9,10 +9,9 @@ After a template is cloned, these functions replace placeholder values
 All functions accept a plain metadata dict — no Django dependencies.
 """
 
+import logging
 from pathlib import Path
 from typing import Dict
-
-import logging
 
 getLogger = logging.getLogger
 
@@ -71,7 +70,7 @@ def customize_minimal_template(
     """Customise a minimal (scitex-writer) template with project metadata.
 
     Writes ``title.tex`` and ``authors.tex`` under ``00_shared/``
-    (direct clone) or ``scitex/writer/00_shared/`` (nested layout).
+    (direct clone) or ``.scitex/writer/00_shared/`` (nested layout).
 
     Parameters
     ----------
@@ -85,6 +84,7 @@ def customize_minimal_template(
 
     # Try direct clone path first, then nested layout
     for title_file in [
+        path / ".scitex" / "writer" / "00_shared" / "title.tex",
         path / "00_shared" / "title.tex",
         path / "scitex" / "writer" / "00_shared" / "title.tex",
     ]:
@@ -97,6 +97,7 @@ def customize_minimal_template(
     author_name = meta["owner_full_name"] or meta["owner"]
     if author_name:
         for author_file in [
+            path / ".scitex" / "writer" / "00_shared" / "authors.tex",
             path / "00_shared" / "authors.tex",
             path / "scitex" / "writer" / "00_shared" / "authors.tex",
         ]:
@@ -134,6 +135,7 @@ def _update_readme(path: Path, meta: Dict) -> None:
 def _update_title_tex(path: Path, meta: Dict) -> None:
     """Write project name to title.tex if found."""
     for candidate in [
+        path / ".scitex" / "writer" / "00_shared" / "title.tex",
         path / "00_shared" / "title.tex",
         path / "paper" / "manuscript" / "src" / "title.tex",
         path / "scitex" / "writer" / "00_shared" / "title.tex",
@@ -150,6 +152,7 @@ def _update_authors_tex(path: Path, meta: Dict) -> None:
         return
 
     for candidate in [
+        path / ".scitex" / "writer" / "00_shared" / "authors.tex",
         path / "00_shared" / "authors.tex",
         path / "paper" / "manuscript" / "src" / "authors.tex",
         path / "scitex" / "writer" / "00_shared" / "authors.tex",

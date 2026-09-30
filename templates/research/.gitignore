@@ -95,6 +95,7 @@ data/*
 **/*.ppt
 **/*.pptx
 **/*.txt
+!requirements*.txt
 **/*.log
 **/*.db
 **/*.xml
@@ -646,26 +647,13 @@ mgmt
 ./docs/to_claude
 .claude
 
-### SciTeX-specific patterns (v0.1.0-alpha) ###
-# Writer projects (cloned on-demand via: make setup-writer)
-
-# SciTeX cache files (all regenerable)
-scitex/cache/
-
-# Recent symlinks (regenerable)
-scitex/recent/
-
-# Mount points (external resources)
-scitex/mnt/
-scitex/opt/
-
-# Optional: ignore uploads inbox (uncomment to gitignore before organizing)
-
-# Optional: ignore conversations (uncomment for privacy)
-
-# Optional: commit metadata.db for team collaboration (already gitignored by **/*.db above)
-# To track metadata.db, add explicit exception:
-# !scitex/metadata.db
+### SciTeX package-local files ###
+# Configuration and research content under .scitex/ are versioned.
+# Regenerable runtime files are ignored; keep the directory seeds.
+.scitex/*/runtime/*
+!.scitex/*/runtime/.gitkeep
+!.scitex/*/runtime/README.md
+# Credentials belong in the user's secret store, never in this template.
 
 ### Added by scitex-template consolidation ###
 # MNIST scaffold outputs — regenerable via ./scripts/mnist/main.sh
@@ -679,8 +667,6 @@ scripts/mnist/plot_umap_space_out/
 data/mnist/*
 !data/mnist/.gitkeep
 
-# scitex local-state (added by clew-adapt)
-.scitex/clew/runtime/
 # clew DAG outputs vs source
 data/results/*
 !data/results/.gitkeep

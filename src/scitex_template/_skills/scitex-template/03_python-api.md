@@ -21,7 +21,7 @@ find_template("research")   # TemplateEntry | None
 
 # Populate a target
 clone_template_from_cache("research", "./my-proj")        # raises on unknown id
-clone_template_from_cache("paper", "./paper", branch="main", force_refresh=True)
+clone_template_from_cache("paper", "./paper", branch="develop", force_refresh=True)
 ```
 
 ## Legacy path — kept for back-compat
@@ -90,7 +90,7 @@ See [14_scholar-writer-integration.md](14_scholar-writer-integration.md).
 ```python
 from scitex_template._cache import ensure_cache, CACHE_ROOT, MONOREPO_URL
 
-ensure_cache()                 # idempotent; pulls existing checkout
+ensure_cache()                 # idempotent; fetches the requested branch
 ensure_cache(force_refresh=True)  # wipe + re-clone
 print(CACHE_ROOT)              # ~/.scitex/template/cache/
 ```

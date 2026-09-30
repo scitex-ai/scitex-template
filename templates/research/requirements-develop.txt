@@ -1,0 +1,15 @@
+# Use the current scitex-ai develop implementations, then freeze the resolved
+# commits in your project's environment lock before reporting results.
+-r requirements.txt
+scitex-session @ git+https://github.com/scitex-ai/scitex-session.git@develop
+scitex-io @ git+https://github.com/scitex-ai/scitex-io.git@develop
+scitex-clew @ git+https://github.com/scitex-ai/scitex-clew.git@develop
+scitex-dev @ git+https://github.com/scitex-ai/scitex-dev.git@develop
+scitex-writer @ git+https://github.com/scitex-ai/scitex-writer.git@develop
+scitex-scholar @ git+https://github.com/scitex-ai/scitex-scholar.git@develop
+scitex-config @ git+https://github.com/scitex-ai/scitex-config.git@develop
+scitex-logging @ git+https://github.com/scitex-ai/scitex-logging.git@develop
+scitex-repro @ git+https://github.com/scitex-ai/scitex-repro.git@develop
+scitex-plt @ git+https://github.com/scitex-ai/scitex-plt.git@develop
+scitex-ui @ git+https://github.com/scitex-ai/scitex-ui.git@develop
+figrecipe @ git+https://github.com/scitex-ai/figrecipe.git@develop

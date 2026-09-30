@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-11-18 11:38:35 (ywatanabe)"
-# File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/mnist/02_plot_digits.py
 
 
 """Visualizes MNIST dataset samples"""
 
 # Imports
-import scitex as stx
+import figrecipe as plotting
+import scitex_io as io
+import scitex_session as session
 from torch.utils.data import DataLoader
 
 
 # Functions and Classes
 def plot_samples(loader: DataLoader, CONFIG, plt, n_samples: int = 25) -> None:
     images, labels = next(iter(loader))
-    fig, axes = stx.plt.subplots(5, 5, figsize=(10, 10))
+    fig, axes = plotting.subplots(5, 5, figsize=(10, 10))
 
     for idx, ax in enumerate(axes.flat):
         if idx < n_samples:
@@ -28,7 +27,7 @@ def plot_samples(loader: DataLoader, CONFIG, plt, n_samples: int = 25) -> None:
 
 def plot_label_examples(loader: DataLoader, CONFIG, plt) -> None:
     images, labels = next(iter(loader))
-    fig, axes = stx.plt.subplots(2, 5, figsize=(15, 6))
+    fig, axes = plotting.subplots(2, 5, figsize=(15, 6))
 
     label_examples = {}
     for img, label in zip(images, labels):
@@ -46,25 +45,25 @@ def plot_label_examples(loader: DataLoader, CONFIG, plt) -> None:
     return fig
 
 
-@stx.session
+@session.session
 def main(
-    CONFIG=stx.session.INJECTED,
-    plt=stx.session.INJECTED,
-    COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
-    logger=stx.session.INJECTED,
+    CONFIG=session.INJECTED,
+    plt=session.INJECTED,
+    COLORS=session.INJECTED,
+    rngg=session.INJECTED,
+    logger=session.INJECTED,
 ):
     """Visualize MNIST samples"""
-    train_loader = stx.io.load(CONFIG.PATH.MNIST.LOADER.TRAIN)
+    train_loader = io.load(CONFIG.PATH.MNIST.LOADER.TRAIN)
     fig = plot_samples(train_loader, CONFIG, plt)
-    stx.io.save(
+    io.save(
         fig,
         "mnist_samples.jpg",
         symlink_to="./data/mnist",
     )
 
     fig = plot_label_examples(train_loader, CONFIG, plt)
-    stx.io.save(
+    io.save(
         fig,
         "mnist_digits.jpg",
         symlink_to="./data/mnist",

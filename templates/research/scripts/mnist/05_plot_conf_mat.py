@@ -1,39 +1,40 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-11-18 10:47:55 (ywatanabe)"
-# File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/mnist/05_plot_conf_mat.py
 
 
 """Plots confusion matrix from saved predictions and labels"""
 
 # Imports
-import scitex as stx
+import figrecipe as plotting
 import numpy as np
+import scitex_io as io
+import scitex_session as session
 from sklearn.metrics import confusion_matrix
 
 
 # Functions and Classes
 def plot_confusion_matrix(labels: np.ndarray, predictions: np.ndarray, CONFIG) -> None:
     cm = confusion_matrix(labels, predictions)
-    fig, ax = stx.plt.subplots(figsize=(10, 8))
+    fig, ax = plotting.subplots(figsize=(10, 8))
     ax.imshow(cm)
-    ax.set_xyt("Predicted", "True", "Confusion Matrix")
+    ax.set_xlabel("Predicted")
+    ax.set_ylabel("True")
+    ax.set_title("Confusion Matrix")
     return fig
 
 
-@stx.session
+@session.session
 def main(
-    CONFIG=stx.session.INJECTED,
-    plt=stx.session.INJECTED,
-    COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
-    logger=stx.session.INJECTED,
+    CONFIG=session.INJECTED,
+    plt=session.INJECTED,
+    COLORS=session.INJECTED,
+    rngg=session.INJECTED,
+    logger=session.INJECTED,
 ):
     """Plot confusion matrix"""
-    predictions = stx.io.load("./data/mnist/predictions.npy")
-    labels = stx.io.load("./data/mnist/labels.npy")
+    predictions = io.load("./data/mnist/predictions.npy")
+    labels = io.load("./data/mnist/labels.npy")
     fig = plot_confusion_matrix(labels, predictions, CONFIG)
-    stx.io.save(
+    io.save(
         fig,
         CONFIG.PATH.MNIST.FIGURES + "confusion_matrix.jpg",
         symlink_to="./data/mnist",

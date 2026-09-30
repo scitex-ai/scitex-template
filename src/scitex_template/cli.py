@@ -184,7 +184,7 @@ def info_cmd(ctx: click.Context, template_id: str, as_json: bool) -> None:
 )
 @click.option(
     "--branch",
-    default="main",
+    default="develop",
     show_default=True,
     help="Branch of the scitex-template monorepo to track in the cache.",
 )
@@ -230,7 +230,7 @@ def clone_cmd(
 
 
 @main.command("refresh-cache")
-@click.option("--branch", default="main", show_default=True)
+@click.option("--branch", default="develop", show_default=True)
 @click.option("--dry-run", is_flag=True, help="Print refresh plan without writing.")
 @click.option(
     "-y", "--yes", is_flag=True, help="Suppress interactive confirmation (assume yes)."

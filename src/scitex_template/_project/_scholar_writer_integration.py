@@ -8,10 +8,10 @@ between scitex.scholar and scitex.writer components.
 
 Structure:
     project/
-    ├── scholar/
+    ├── .scitex/scholar/
     │   └── bib_files/
     │       └── merged_scholar.bib      ← Scholar writes here
-    └── 00_shared/  (or scitex/writer/00_shared/)
+    └── 00_shared/  (or .scitex/writer/00_shared/)
         └── bib_files/
             └── merged_scholar.bib      ← Symlink to scholar's file
 
@@ -21,11 +21,10 @@ This enables:
 - Single source of truth, no duplication
 """
 
+import logging
 import os
 from pathlib import Path
 from typing import Dict
-
-import logging
 
 getLogger = logging.getLogger
 
@@ -42,12 +41,12 @@ def setup_scholar_writer_integration(
     Handles two project layouts:
 
     1. Standalone writer (flat): 00_shared/ at project root
-       Creates: scholar/bib_files/
+       Creates: .scitex/scholar/bib_files/
        Symlink: 00_shared/bib_files/merged_scholar.bib
 
-    2. Nested writer (scitex ecosystem): scitex/writer/00_shared/
-       Creates: scitex/scholar/bib_files/
-       Symlink: scitex/writer/00_shared/bib_files/merged_scholar.bib
+    2. Nested writer (scitex ecosystem): .scitex/writer/00_shared/
+       Creates: .scitex/scholar/bib_files/
+       Symlink: .scitex/writer/00_shared/bib_files/merged_scholar.bib
 
     Parameters
     ----------
@@ -74,18 +73,18 @@ def setup_scholar_writer_integration(
 
         # Detect project layout
         nested_writer_bib = (
-            project_path / "scitex" / "writer" / "00_shared" / "bib_files"
+            project_path / ".scitex" / "writer" / "00_shared" / "bib_files"
         )
         standalone_writer_bib = project_path / "00_shared" / "bib_files"
 
         if nested_writer_bib.exists():
             result["layout"] = "nested"
             writer_bib_dir = nested_writer_bib
-            scholar_bib_dir = project_path / "scitex" / "scholar" / "bib_files"
+            scholar_bib_dir = project_path / ".scitex" / "scholar" / "bib_files"
         elif standalone_writer_bib.exists():
             result["layout"] = "standalone"
             writer_bib_dir = standalone_writer_bib
-            scholar_bib_dir = project_path / "scholar" / "bib_files"
+            scholar_bib_dir = project_path / ".scitex" / "scholar" / "bib_files"
         else:
             result["layout"] = "unknown"
             logger.debug("Writer bib_files not found, skipping scholar setup")

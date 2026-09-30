@@ -1,11 +1,11 @@
 """Populate ``~/.scitex/template/cache/`` with a shallow clone of
-``ywatanabe1989/scitex-template`` so the vendored ``templates/`` subtree is
+``scitex-ai/scitex-template`` so the vendored ``templates/`` subtree is
 available locally.
 
 Wheel-installed users don't have ``templates/`` on disk (it's intentionally
 excluded from the wheel to keep the download tiny). The first cloner call
 triggers ``ensure_cache()`` which populates the cache; subsequent calls
-``git pull`` to stay current.
+fetch the requested branch to stay current.
 
 Directory names follow general/01_arch_06: ``<pkg-short>`` = ``template``
 (``scitex-`` prefix stripped; singular, not plural).
@@ -17,19 +17,21 @@ import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+
 from scitex_config._ecosystem import local_state
 
-MONOREPO_URL = "https://github.com/ywatanabe1989/scitex-template.git"
+MONOREPO_URL = "https://github.com/scitex-ai/scitex-template.git"
 CACHE_ROOT = local_state.runtime_path("template", "cache")
 
 
-def ensure_cache(branch: str = "main", force_refresh: bool = False) -> Path:
+def ensure_cache(branch: str = "develop", force_refresh: bool = False) -> Path:
     """Ensure the scitex-template monorepo is shallow-cloned at ``CACHE_ROOT``.
 
     Returns the cache root. Raises ``RuntimeError`` on clone/pull failure.
 
-    Idempotent: subsequent calls ``git pull`` the existing checkout rather
-    than re-cloning. Pass ``force_refresh=True`` to wipe and re-clone.
+    Subsequent calls fetch and check out the requested branch, including
+    caches created with the historical main default. A failed refresh raises
+    instead of presenting stale cached files as the requested revision.
     """
     CACHE_ROOT.parent.mkdir(parents=True, exist_ok=True)
 
@@ -61,23 +63,31 @@ def ensure_cache(branch: str = "main", force_refresh: bool = False) -> Path:
             )
     else:
         result = subprocess.run(
-            ["git", "-C", str(CACHE_ROOT), "pull", "--ff-only", "--depth", "1"],
+            [
+                "git",
+                "-C",
+                str(CACHE_ROOT),
+                "fetch",
+                "--depth",
+                "1",
+                "origin",
+                f"refs/heads/{branch}",
+            ],
             capture_output=True,
             text=True,
         )
-        # pull can fail if the remote rebased; treat as non-fatal and keep
-        # existing cache so offline workflows still proceed
         if result.returncode != 0:
-            # Try a deeper fetch + reset to recover
-            subprocess.run(
-                ["git", "-C", str(CACHE_ROOT), "fetch", "origin", branch],
-                capture_output=True,
-                text=True,
+            raise RuntimeError(
+                f"failed to refresh template branch {branch}: {result.stderr.strip()}"
             )
-            subprocess.run(
-                ["git", "-C", str(CACHE_ROOT), "reset", "--hard", f"origin/{branch}"],
-                capture_output=True,
-                text=True,
+        result = subprocess.run(
+            ["git", "-C", str(CACHE_ROOT), "checkout", "-B", branch, "FETCH_HEAD"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"failed to check out template branch {branch}: {result.stderr.strip()}"
             )
 
     return CACHE_ROOT
@@ -86,7 +96,7 @@ def ensure_cache(branch: str = "main", force_refresh: bool = False) -> Path:
 def clone_template_from_cache(
     template_id: str,
     target: str | Path,
-    branch: str = "main",
+    branch: str = "develop",
     force_refresh: bool = False,
 ) -> Path:
     """Populate ``target`` with the contents of ``templates/<template_id>/``.
@@ -143,7 +153,7 @@ def clone_template_from_cache(
         else:
             shutil.copy2(child, dst, follow_symlinks=False)
 
-    _write_manifest(target_path, entry, branch=branch, cache_root=cache_root)
+    _write_manifest(target_path, entry, branch=branch, cache_root=source)
 
     return target_path
 
@@ -174,6 +184,15 @@ def _generator_version() -> str:
         return "unknown"
 
 
+def _source_branch(source: Path, requested: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(source), "rev-parse", "--abbrev-ref", "HEAD"],
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else requested
+
+
 def _write_manifest(target_path: Path, entry, *, branch: str, cache_root: Path) -> Path:
     """Stamp a provenance manifest into the prepared template so a consumer
     can later tell exactly what was pulled and pin it for reproducibility.
@@ -192,7 +211,8 @@ def _write_manifest(target_path: Path, entry, *, branch: str, cache_root: Path) 
         },
         "source": {
             "monorepo": MONOREPO_URL,
-            "branch": branch,
+            "branch": _source_branch(cache_root, branch),
+            "requested_branch": branch,
             "commit": _cache_commit_sha(cache_root),
         },
         "generator": {
