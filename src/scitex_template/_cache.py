@@ -193,6 +193,15 @@ def _source_branch(source: Path, requested: str) -> str:
     return result.stdout.strip() if result.returncode == 0 else requested
 
 
+def _source_dirty(source: Path) -> bool | None:
+    result = subprocess.run(
+        ["git", "-C", str(source), "status", "--porcelain", "--", "."],
+        capture_output=True,
+        text=True,
+    )
+    return bool(result.stdout.strip()) if result.returncode == 0 else None
+
+
 def _write_manifest(target_path: Path, entry, *, branch: str, cache_root: Path) -> Path:
     """Stamp a provenance manifest into the prepared template so a consumer
     can later tell exactly what was pulled and pin it for reproducibility.
@@ -214,6 +223,7 @@ def _write_manifest(target_path: Path, entry, *, branch: str, cache_root: Path) 
             "branch": _source_branch(cache_root, branch),
             "requested_branch": branch,
             "commit": _cache_commit_sha(cache_root),
+            "working_tree_dirty": _source_dirty(cache_root),
         },
         "generator": {
             "scitex_template_version": _generator_version(),

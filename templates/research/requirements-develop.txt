@@ -12,4 +12,11 @@ scitex-logging @ git+https://github.com/scitex-ai/scitex-logging.git@develop
 scitex-repro @ git+https://github.com/scitex-ai/scitex-repro.git@develop
 scitex-plt @ git+https://github.com/scitex-ai/scitex-plt.git@develop
 scitex-ui @ git+https://github.com/scitex-ai/scitex-ui.git@develop
+# Track transitive SciTeX implementations too: equal versions can have new code.
+scitex-app @ git+https://github.com/scitex-ai/scitex-app.git@develop
+scitex-browser @ git+https://github.com/scitex-ai/scitex-browser.git@develop
+scitex-context @ git+https://github.com/scitex-ai/scitex-context.git@develop
+scitex-dict @ git+https://github.com/scitex-ai/scitex-dict.git@develop
+scitex-ssh @ git+https://github.com/scitex-ai/scitex-ssh.git@develop
+scitex-str @ git+https://github.com/scitex-ai/scitex-str.git@develop
 figrecipe @ git+https://github.com/scitex-ai/figrecipe.git@develop
