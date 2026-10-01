@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-11-18 10:47:54 (ywatanabe)"
-# File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/mnist/04_clf_svm.py
 
 
 """Trains and evaluates SVM classifier on MNIST dataset"""
 
 # Imports
-import scitex as stx
 from typing import Dict
+
 import numpy as np
+import scitex_io as io
+import scitex_session as session
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
 
@@ -29,9 +28,9 @@ def evaluate(
     predictions = model.predict(features)
     report = classification_report(labels, predictions, output_dict=True)
 
-    stx.io.save(report, "./classification_report.csv", symlink_to="./data/mnist")
-    stx.io.save(predictions, "./predictions.npy", symlink_to="./data/mnist")
-    stx.io.save(labels, "./labels.npy", symlink_to="./data/mnist")
+    io.save(report, "./classification_report.csv", symlink_to="./data/mnist")
+    io.save(predictions, "./predictions.npy", symlink_to="./data/mnist")
+    io.save(labels, "./labels.npy", symlink_to="./data/mnist")
 
     # Compact, stable JSON the clew-DAG-terminus (stage 06) reads.
     # The dataframe-flattened CSV above is for the writer / paper, this
@@ -40,24 +39,24 @@ def evaluate(
         "accuracy": float(report["accuracy"]),
         "macro_f1": float(report["macro avg"]["f1-score"]),
     }
-    stx.io.save(metrics, "./metrics.json", symlink_to="./data/mnist")
+    io.save(metrics, "./metrics.json", symlink_to="./data/mnist")
 
     return metrics
 
 
-@stx.session
+@session.session
 def main(
-    CONFIG=stx.session.INJECTED,
-    plt=stx.session.INJECTED,
-    COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
-    logger=stx.session.INJECTED,
+    CONFIG=session.INJECTED,
+    plt=session.INJECTED,
+    COLORS=session.INJECTED,
+    rngg=session.INJECTED,
+    logger=session.INJECTED,
 ):
     """Train SVM classifier on MNIST"""
-    train_data = stx.io.load(CONFIG.PATH.MNIST.FLATTENED.TRAIN)
-    train_labels = stx.io.load(CONFIG.PATH.MNIST.LABELS.TRAIN)
-    test_data = stx.io.load(CONFIG.PATH.MNIST.FLATTENED.TEST)
-    test_labels = stx.io.load(CONFIG.PATH.MNIST.LABELS.TEST)
+    train_data = io.load(CONFIG.PATH.MNIST.FLATTENED.TRAIN)
+    train_labels = io.load(CONFIG.PATH.MNIST.LABELS.TRAIN)
+    test_data = io.load(CONFIG.PATH.MNIST.FLATTENED.TEST)
+    test_labels = io.load(CONFIG.PATH.MNIST.LABELS.TEST)
 
     # Optional subsample so the template's `make solve` is tractable
     # (full MNIST + RBF SVM is hours). Set CONFIG.MNIST.SVM_TRAIN_SUBSET
@@ -75,7 +74,7 @@ def main(
         f"Test Accuracy: {metrics['accuracy']:.4f}, Macro F1: {metrics['macro_f1']:.4f}"
     )
 
-    stx.io.save(model, eval(CONFIG.PATH.MNIST.MODEL_SVM), symlink_to="./data/mnist")
+    io.save(model, CONFIG.PATH.MNIST.MODEL_SVM, symlink_to="./data/mnist")
     return 0
 
 

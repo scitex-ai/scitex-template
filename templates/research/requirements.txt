@@ -1,7 +1,10 @@
-# Runtime dependencies for the clew-aware MNIST example.
-# `pip install -r requirements.txt` or `uv pip install -r requirements.txt`.
-scitex>=2.0
-scitex-clew>=0.2
+# Standalone packages: the umbrella currently pins older leaf versions.
+scitex-session>=0.3.1
+scitex-io>=0.4.1
+scitex-clew>=0.20.1
+scitex-dev>=0.60.2
+scitex-writer>=2.43.7
+figrecipe>=0.34.2
 numpy>=1.24
 matplotlib>=3.7
 scikit-learn>=1.3

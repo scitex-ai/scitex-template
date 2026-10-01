@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-11-18 10:47:57 (ywatanabe)"
-# File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/mnist/01_download.py
 
 
 """Downloads MNIST dataset and saves preprocessed versions"""
 
 # Imports
-import scitex as stx
 from typing import Dict
+
 import numpy as np
+import scitex_io as io
+import scitex_session as session
 import torch
 from torch.utils.data import DataLoader
-from torchvision import datasets
-from torchvision import transforms
+from torchvision import datasets, transforms
 
 
 # Functions and Classes
@@ -22,8 +20,8 @@ def download_mnist(CONFIG) -> Dict[str, torch.utils.data.Dataset]:
         [
             transforms.ToTensor(),
             transforms.Normalize(
-                eval(CONFIG.MNIST.NORMALIZE.MEAN),
-                eval(CONFIG.MNIST.NORMALIZE.STD),
+                tuple(CONFIG.MNIST.NORMALIZE.MEAN),
+                tuple(CONFIG.MNIST.NORMALIZE.STD),
             ),
         ]
     )
@@ -63,45 +61,45 @@ def prepare_flattened_data(
     return {"data": flattened_data, "labels": labels}
 
 
-@stx.session
+@session.session
 def main(
-    CONFIG=stx.session.INJECTED,
-    plt=stx.session.INJECTED,
-    COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
-    logger=stx.session.INJECTED,
+    CONFIG=session.INJECTED,
+    plt=session.INJECTED,
+    COLORS=session.INJECTED,
+    rngg=session.INJECTED,
+    logger=session.INJECTED,
 ):
     """Download and preprocess MNIST dataset"""
     datasets = download_mnist(CONFIG)
     loaders = create_loaders(datasets, CONFIG)
     flat_data = prepare_flattened_data(datasets)
 
-    stx.io.save(
+    io.save(
         loaders["train"],
         CONFIG.PATH.MNIST.LOADER.TRAIN,
         symlink_to="./data/mnist",
     )
-    stx.io.save(
+    io.save(
         loaders["test"],
         CONFIG.PATH.MNIST.LOADER.TEST,
         symlink_to="./data/mnist",
     )
-    stx.io.save(
+    io.save(
         flat_data["data"]["train"],
         CONFIG.PATH.MNIST.FLATTENED.TRAIN,
         symlink_to="./data/mnist",
     )
-    stx.io.save(
+    io.save(
         flat_data["data"]["test"],
         CONFIG.PATH.MNIST.FLATTENED.TEST,
         symlink_to="./data/mnist",
     )
-    stx.io.save(
+    io.save(
         flat_data["labels"]["train"],
         CONFIG.PATH.MNIST.LABELS.TRAIN,
         symlink_to="./data/mnist",
     )
-    stx.io.save(
+    io.save(
         flat_data["labels"]["test"],
         CONFIG.PATH.MNIST.LABELS.TEST,
         symlink_to="./data/mnist",

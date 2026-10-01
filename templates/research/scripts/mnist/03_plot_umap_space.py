@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-11-18 11:43:04 (ywatanabe)"
-# File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/mnist/03_plot_umap_space.py
 
 
 """Creates UMAP visualization of MNIST dataset"""
 
 # Imports
-import scitex as stx
+import figrecipe as plotting
 import numpy as np
+import scitex_io as io
+import scitex_session as session
 import umap
 
 
@@ -20,7 +19,7 @@ def create_umap_embedding(data: np.ndarray, CONFIG) -> np.ndarray:
 
 
 def plot_umap(embedding: np.ndarray, labels: np.ndarray, CONFIG, plt) -> None:
-    fig, ax = stx.plt.subplots(figsize=(12, 8))
+    fig, ax = plotting.subplots(figsize=(12, 8))
     scatter = ax.scatter(
         embedding[:, 0], embedding[:, 1], c=labels, cmap="tab10", alpha=0.5
     )
@@ -31,22 +30,20 @@ def plot_umap(embedding: np.ndarray, labels: np.ndarray, CONFIG, plt) -> None:
     return fig
 
 
-@stx.session
+@session.session
 def main(
-    CONFIG=stx.session.INJECTED,
-    plt=stx.session.INJECTED,
-    COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
-    logger=stx.session.INJECTED,
+    CONFIG=session.INJECTED,
+    plt=session.INJECTED,
+    COLORS=session.INJECTED,
+    rngg=session.INJECTED,
+    logger=session.INJECTED,
 ):
     """Create UMAP visualization of MNIST"""
-    train_data = stx.io.load(CONFIG.PATH.MNIST.FLATTENED.TRAIN)
-    train_labels = stx.io.load(CONFIG.PATH.MNIST.LABELS.TRAIN)
+    train_data = io.load(CONFIG.PATH.MNIST.FLATTENED.TRAIN)
+    train_labels = io.load(CONFIG.PATH.MNIST.LABELS.TRAIN)
     embedding = create_umap_embedding(train_data, CONFIG)
     fig = plot_umap(embedding, train_labels, CONFIG, plt)
-    stx.io.save(
-        fig, CONFIG.PATH.MNIST.FIGURES + "umap.jpg", symlink_to="./data/mnist"
-    )
+    io.save(fig, CONFIG.PATH.MNIST.FIGURES + "umap.jpg", symlink_to="./data/mnist")
 
     return 0
 

@@ -16,17 +16,22 @@ See [CLA.md](CLA.md) for full details.
 
 ## Reporting Issues
 
-- Search [existing issues](https://github.com/ywatanabe1989/scitex-scholar/issues)
+- Search [existing issues](https://github.com/scitex-ai/scitex-template/issues)
   before opening a new one.
 - Include a minimal reproducible example when reporting bugs.
-- Specify your Python version, OS, and `scitex` version.
+- Specify your Python version, OS, and `scitex-template` version.
 
 ## Development Setup
 
+Start with the [template workflow](src/scitex_template/_skills/scitex-template/SKILL.md).
+Keep the main checkout on `develop`; use a separate worktree for feature work.
+
 ```bash
-git clone git@github.com:ywatanabe1989/scitex-scholar.git
-cd scitex-scholar
-pip install -e ".[dev]"
+git clone --branch develop git@github.com:scitex-ai/scitex-template.git
+git -C scitex-template fetch origin develop
+git -C scitex-template worktree add ../scitex-template-feature -b feature/my-change origin/develop
+cd scitex-template-feature
+python -m pip install -e ".[all,dev]"
 ```
 
 ## Branch Workflow
@@ -35,13 +40,8 @@ pip install -e ".[dev]"
 - `develop` — integration branch. PRs target here.
 - Feature branches — create from `develop`, name as `feature/<description>`.
 
-```bash
-git checkout develop
-git checkout -b feature/my-change
-# ... make changes ...
-git push origin feature/my-change
-# Open PR targeting develop
-```
+Push the feature branch from its worktree and open a PR targeting `develop`.
+Release promotion and tag publication follow a separate tested workflow.
 
 ## Code Style
 

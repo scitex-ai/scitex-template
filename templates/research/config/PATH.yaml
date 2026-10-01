@@ -24,6 +24,6 @@ MNIST:
   MODELS:
     "./data/mnist/models/"
   MODEL_SVM:
-    f"{CONFIG.PATH.MNIST.MODELS}/mnist_svm.pkl"
+    "./data/mnist/models/mnist_svm.pkl"
 
 # EOF

@@ -14,9 +14,9 @@ UMAP_RANDOM_STATE:
   42
 NORMALIZE:
   MEAN:
-    (0.1307,)
+    [0.1307]
   STD:
-    (0.3081,)
+    [0.3081]
 LABELS:
   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 

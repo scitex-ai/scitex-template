@@ -25,7 +25,7 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
-import logging
+from scitex_logging import getLogger
 
 # scitex (umbrella) is an optional dep (install alongside
 # scitex-template[legacy]). Callers that reach apply_git_strategy()
@@ -39,7 +39,6 @@ scitex = try_import_optional("scitex", pkg="scitex")
 if scitex is not None:  # pragma: no cover
     try_import_optional("scitex.git", pkg="scitex")
 
-getLogger = logging.getLogger
 
 from ._logging_helpers import log_group
 

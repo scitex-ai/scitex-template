@@ -240,7 +240,7 @@ class _RecordingSubprocessRun:
 
 
 class TestEnsureCachePullPath:
-    """When ``.git`` exists, ``ensure_cache`` runs ``git pull`` instead of clone."""
+    """An existing cache fetches the requested branch instead of cloning."""
 
     def test_returns_existing_cache_path(self, tmp_path):
         # Arrange
@@ -278,7 +278,7 @@ class TestEnsureCachePullPath:
             for restore in reversed(restores):
                 restore()
 
-    def test_first_subprocess_call_includes_pull_subcommand(self, tmp_path):
+    def test_first_subprocess_call_fetches_requested_develop_branch(self, tmp_path):
         # Arrange
         cache = tmp_path / "cache"
         (cache / ".git").mkdir(parents=True)
@@ -291,7 +291,8 @@ class TestEnsureCachePullPath:
             # Act
             _cache.ensure_cache()
             # Assert
-            assert "pull" in runner.calls[0]
+            assert "fetch" in runner.calls[0]
+            assert runner.calls[0][-1] == "refs/heads/develop"
         finally:
             for restore in reversed(restores):
                 restore()

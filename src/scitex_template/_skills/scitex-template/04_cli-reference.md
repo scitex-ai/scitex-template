@@ -45,14 +45,14 @@ Populate `<target>` with the contents of `<template_id>` from the cache.
 ```
 scitex-template clone pip-project ./my-pip
 scitex-template clone research ./my-experiment --force-refresh
-scitex-template clone paper ./paper --branch main
+scitex-template clone paper ./paper --branch develop
 ```
 
 Flags:
 
 | flag | default | meaning |
 |---|---|---|
-| `--branch` | `main` | Monorepo branch to track in the cache |
+| `--branch` | `develop` | Monorepo branch to track in the cache |
 | `--force-refresh` | `false` | Wipe + re-clone cache before copying |
 
 Exit codes: 0 success, 1 unknown id, 2 target exists and non-empty.
@@ -60,7 +60,7 @@ Exit codes: 0 success, 1 unknown id, 2 target exists and non-empty.
 ## `refresh-cache`
 
 ```
-scitex-template refresh-cache [--branch main]
+scitex-template refresh-cache [--branch develop]
 ```
 
 Force-refresh `~/.scitex/template/cache/` (wipes it, re-clones the
