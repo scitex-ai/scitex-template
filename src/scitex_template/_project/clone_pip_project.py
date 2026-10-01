@@ -17,7 +17,11 @@ Create a new pip project from the pip-project-template.
 import sys
 from typing import Optional
 
+from scitex_logging import getLogger
+
 from ._clone_project import clone_project
+
+logger = getLogger(__name__)
 
 TEMPLATE_REPO_URL = "https://github.com/ywatanabe1989/pip-project-template.git"
 
@@ -82,17 +86,7 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print("Usage: python -m scitex clone_pip_project <project-dir>")
-        print("")
-        print("Arguments:")
-        print("  project-dir   Path to project directory (will be created)")
-        print(
-            "                Can be a simple name like 'my_project' or a full path like './projects/my_project'"
-        )
-        print("")
-        print("Example:")
-        print("  python -m scitex clone_pip_project my_pip_project")
-        print("  python -m scitex clone_pip_project ./projects/my_project")
+        logger.fail("Usage: python -m scitex clone_pip_project <project-dir>\n\nArguments:\n  project-dir   Path to project directory (will be created)\n                Can be a simple name like 'my_project' or a full path like './projects/my_project'\n\nExample:\n  python -m scitex clone_pip_project my_pip_project\n  python -m scitex clone_pip_project ./projects/my_project")
         sys.exit(1)
 
     project_dir = args[0]

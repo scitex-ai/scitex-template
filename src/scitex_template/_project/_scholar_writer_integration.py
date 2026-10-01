@@ -21,12 +21,11 @@ This enables:
 - Single source of truth, no duplication
 """
 
-import logging
 import os
 from pathlib import Path
 from typing import Dict
 
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 logger = getLogger(__name__)
 

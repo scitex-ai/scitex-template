@@ -18,6 +18,11 @@ import sys
 from pathlib import Path
 
 import click
+from scitex_logging import get_level, getConsole, getLogger, getPlainConsole
+
+logger = getLogger(__name__)
+console = getConsole(__name__ + ".console", level=get_level())
+plain = getPlainConsole(__name__)
 
 
 def _version() -> str:
@@ -76,12 +81,13 @@ def _show_recursive_help(ctx: click.Context) -> None:
 def main(ctx: click.Context, help_recursive: bool, as_json: bool) -> None:
     """scitex-template — clone scitex-* project templates from the monorepo cache.
 
-    \b
-    Config is loaded with the SciTeX precedence chain:
-      config.yaml -> $SCITEX_TEMPLATE_CONFIG -> ~/.scitex/template/config.yaml -> defaults
+    Resources resolve through scitex-config project/user scopes.
+    Output uses the shared scitex_logging settings.
     """
     ctx.ensure_object(dict)
     ctx.obj["as_json"] = as_json
+    # Reuse the shared handler and honor the current ecosystem log threshold.
+    getConsole(__name__ + ".console", level=get_level())
     if help_recursive:
         _show_recursive_help(ctx)
         ctx.exit(0)
@@ -111,7 +117,7 @@ def list_cmd(ctx: click.Context, as_json: bool) -> None:
 
     entries = load_registry()
     if as_json:
-        click.echo(
+        plain.emit(
             _json.dumps(
                 [
                     {
@@ -129,7 +135,7 @@ def list_cmd(ctx: click.Context, as_json: bool) -> None:
 
     width = max((len(e.id) for e in entries), default=12)
     for e in entries:
-        click.echo(f"  {e.id:<{width}}  v{e.version}  {e.description}")
+        console.info(f"{e.id:<{width}}  v{e.version}  {e.description}")
 
 
 @main.command("show-info")
@@ -151,12 +157,12 @@ def info_cmd(ctx: click.Context, template_id: str, as_json: bool) -> None:
     e = find_template(template_id)
     if e is None:
         if as_json:
-            click.echo(_json.dumps({"error": f"unknown template id: {template_id}"}))
+            plain.emit(_json.dumps({"error": f"unknown template id: {template_id}"}))
         else:
-            click.echo(f"unknown template id: {template_id}", err=True)
+            logger.fail(f"Unknown template id: {template_id}")
         sys.exit(1)
     if as_json:
-        click.echo(
+        plain.emit(
             _json.dumps(
                 {
                     "id": e.id,
@@ -168,10 +174,10 @@ def info_cmd(ctx: click.Context, template_id: str, as_json: bool) -> None:
             )
         )
         return
-    click.echo(f"id          : {e.id}")
-    click.echo(f"version     : {e.version}")
-    click.echo(f"description : {e.description}")
-    click.echo(f"path        : {e.path}")
+    console.info(f"id          : {e.id}")
+    console.info(f"version     : {e.version}")
+    console.info(f"description : {e.description}")
+    console.info(f"path        : {e.path}")
 
 
 @main.command("clone")
@@ -209,7 +215,7 @@ def clone_cmd(
       $ scitex-template clone app ./my-app --dry-run
     """
     if dry_run:
-        click.echo(
+        console.info(
             f"DRY RUN — would clone template '{template_id}' to {target} "
             f"(branch={branch}, force_refresh={force_refresh})"
         )
@@ -221,12 +227,12 @@ def clone_cmd(
             template_id, target, branch=branch, force_refresh=force_refresh
         )
     except KeyError as e:
-        click.echo(str(e), err=True)
+        logger.fail(str(e))
         sys.exit(1)
     except FileExistsError as e:
-        click.echo(str(e), err=True)
+        logger.fail(str(e))
         sys.exit(2)
-    click.echo(f"cloned {template_id} → {out}")
+    console.success(f"cloned {template_id} → {out}")
 
 
 @main.command("refresh-cache")
@@ -236,7 +242,7 @@ def clone_cmd(
     "-y", "--yes", is_flag=True, help="Suppress interactive confirmation (assume yes)."
 )
 def cache_refresh_cmd(branch: str, dry_run: bool, yes: bool) -> None:
-    """Force-refresh the ~/.scitex/template/cache/ shallow clone.
+    """Force-refresh the ~/.scitex/template/runtime/cache/ shallow clone.
 
     \b
     Example:
@@ -245,12 +251,12 @@ def cache_refresh_cmd(branch: str, dry_run: bool, yes: bool) -> None:
       $ scitex-template refresh-cache --dry-run
     """
     if dry_run:
-        click.echo(f"DRY RUN — would refresh cache (branch={branch})")
+        console.info(f"DRY RUN — would refresh cache (branch={branch})")
         return
     from ._cache import ensure_cache
 
     root = ensure_cache(branch=branch, force_refresh=True)
-    click.echo(f"refreshed cache at {root}")
+    console.success(f"refreshed cache at {root}")
 
 
 @main.command(
@@ -261,11 +267,10 @@ def cache_refresh_cmd(branch: str, dry_run: bool, yes: bool) -> None:
 @click.pass_context
 def version_cmd(ctx) -> None:
     """(deprecated) Use `scitex-template --version` instead."""
-    click.echo(
-        "error: `scitex-template version` was replaced by "
+    logger.error(
+        "`scitex-template version` was replaced by "
         "`scitex-template --version`.\n"
         "Re-run with: scitex-template --version",
-        err=True,
     )
     ctx.exit(2)
 
@@ -281,11 +286,10 @@ def version_cmd(ctx) -> None:
 @click.pass_context
 def _deprecated_list(ctx) -> None:
     """(deprecated) renamed to `list-templates`."""
-    click.echo(
-        "error: `scitex-template list` was renamed to "
+    logger.error(
+        "`scitex-template list` was renamed to "
         "`scitex-template list-templates`.\n"
         "Re-run with: scitex-template list-templates",
-        err=True,
     )
     ctx.exit(2)
 
@@ -298,11 +302,10 @@ def _deprecated_list(ctx) -> None:
 @click.pass_context
 def _deprecated_info(ctx) -> None:
     """(deprecated) renamed to `show-info`."""
-    click.echo(
-        "error: `scitex-template info` was renamed to "
+    logger.error(
+        "`scitex-template info` was renamed to "
         "`scitex-template show-info`.\n"
         "Re-run with: scitex-template show-info <id>",
-        err=True,
     )
     ctx.exit(2)
 
@@ -315,11 +318,10 @@ def _deprecated_info(ctx) -> None:
 @click.pass_context
 def _deprecated_cache_refresh(ctx) -> None:
     """(deprecated) renamed to `refresh-cache`."""
-    click.echo(
-        "error: `scitex-template cache-refresh` was renamed to "
+    logger.error(
+        "`scitex-template cache-refresh` was renamed to "
         "`scitex-template refresh-cache`.\n"
         "Re-run with: scitex-template refresh-cache",
-        err=True,
     )
     ctx.exit(2)
 
@@ -364,15 +366,15 @@ def list_python_apis(ctx: click.Context, verbose: int, as_json: bool) -> None:
         apis.append(entry)
 
     if as_json:
-        click.echo(_json.dumps({"module": "scitex_template", "apis": apis}, indent=2))
+        plain.emit(_json.dumps({"module": "scitex_template", "apis": apis}, indent=2))
         return
 
-    click.secho("scitex_template Python APIs", fg="cyan", bold=True)
+    console.info("scitex_template Python APIs")
     for api in apis:
         sig = api.get("signature", "")
-        click.echo(f"  {click.style(api['name'], fg='green')}{sig}")
+        console.info(f"{api['name']}{sig}", indent=1)
         if verbose >= 2 and api.get("doc"):
-            click.echo(f"    {api['doc']}")
+            console.info(api["doc"], indent=2)
 
 
 # -- MCP --------------------------------------------------------------------
@@ -400,7 +402,9 @@ def mcp_start(dry_run: bool, yes: bool) -> None:
       $ scitex-template mcp start --dry-run
     """
     if dry_run:
-        click.echo("DRY RUN — would start scitex-template MCP server (stdio transport)")
+        console.info(
+            "DRY RUN — would start scitex-template MCP server (stdio transport)"
+        )
         return
     from scitex_template.mcp_server import main as mcp_main
 
@@ -424,7 +428,11 @@ def mcp_list_tools(ctx: click.Context, verbose: int, as_json: bool) -> None:
 
     as_json = as_json or bool(ctx.obj.get("as_json"))
 
-    tools = get_tool_schemas()
+    try:
+        tools = get_tool_schemas()
+    except ImportError as exc:
+        logger.fail(str(exc))
+        raise click.exceptions.Exit(1) from exc
 
     if as_json:
         payload = {
@@ -437,17 +445,17 @@ def mcp_list_tools(ctx: click.Context, verbose: int, as_json: bool) -> None:
                 for t in tools
             ],
         }
-        click.echo(_json.dumps(payload, indent=2))
+        plain.emit(_json.dumps(payload, indent=2))
         return
 
-    click.secho(f"scitex-template MCP: {len(tools)} tools", fg="cyan", bold=True)
+    console.info(f"scitex-template MCP: {len(tools)} tools")
     for t in sorted(tools, key=lambda x: getattr(x, "name", str(x))):
         name = getattr(t, "name", str(t))
         desc = getattr(t, "description", "") or ""
-        click.echo(f"  {name}")
+        console.info(name, indent=1)
         if verbose >= 1 and desc:
             line = desc.split("\n")[0] if verbose == 1 else desc.strip()
-            click.echo(f"    {line}")
+            console.info(line, indent=2)
 
 
 @mcp.command("doctor")
@@ -458,32 +466,29 @@ def mcp_doctor() -> None:
     Example:
       $ scitex-template mcp doctor
     """
-    click.secho("Checking MCP dependencies...", fg="cyan")
+    console.info("Checking MCP dependencies...")
 
     try:
-        import fastmcp
+        from importlib.metadata import version
 
-        click.secho("  OK ", fg="green", nl=False)
-        click.echo(f"fastmcp {fastmcp.__version__}")
+        import mcp as mcp_package
+
+        console.success(f"mcp {version(mcp_package.__name__)}", indent=1)
     except ImportError:
-        click.secho("  NG ", fg="red", nl=False)
-        click.echo("fastmcp not installed")
-        click.echo("     Install: pip install scitex-template[mcp]")
-        return
+        logger.fail("MCP not installed. Install: pip install scitex-template[mcp]")
+        raise click.exceptions.Exit(1)
 
     try:
         from scitex_template._mcp.tool_schemas import get_tool_schemas
 
         n_tools = len(get_tool_schemas())
-        click.secho("  OK ", fg="green", nl=False)
-        click.echo(f"scitex-template MCP server ({n_tools} tools)")
+        console.success(f"scitex-template MCP server ({n_tools} tools)", indent=1)
     except Exception as exc:
-        click.secho("  NG ", fg="red", nl=False)
-        click.echo(f"MCP server error: {exc}")
-        return
+        logger.fail(f"MCP server error: {exc}")
+        raise click.exceptions.Exit(1)
 
-    click.secho("\nMCP server ready.", fg="green")
-    click.echo("Run: scitex-template mcp start")
+    console.success("MCP server ready.")
+    console.info("Run: scitex-template mcp start")
 
 
 @mcp.command("install")
@@ -497,20 +502,23 @@ def mcp_install(claude_code: bool) -> None:
       $ scitex-template mcp install --claude-code
     """
     if claude_code:
-        click.secho("Add to Claude Code MCP config:", fg="cyan")
-        click.echo()
-        click.echo('  "scitex-template": {')
-        click.echo('    "command": "scitex-template",')
-        click.echo('    "args": ["mcp", "start"]')
-        click.echo("  }")
+        plain.emit(
+            _json.dumps(
+                {
+                    "scitex-template": {
+                        "command": "scitex-template",
+                        "args": ["mcp", "start"],
+                    }
+                },
+                indent=2,
+            )
+        )
         return
 
-    click.secho("scitex-template MCP Server Installation", fg="cyan", bold=True)
-    click.echo("=" * 40)
-    click.echo()
-    click.echo("1. Install: pip install scitex-template[mcp]")
-    click.echo("2. Config:  scitex-template mcp install --claude-code")
-    click.echo("3. Test:    scitex-template mcp doctor")
+    console.info("scitex-template MCP Server Installation")
+    console.info("1. Install: pip install scitex-template[mcp]", indent=1)
+    console.info("2. Config:  scitex-template mcp install --claude-code", indent=1)
+    console.info("3. Test:    scitex-template mcp doctor", indent=1)
 
 
 # §1a: install-shell-completion + print-shell-completion (canonical leaves)

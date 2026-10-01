@@ -21,6 +21,10 @@ from __future__ import annotations
 
 import warnings
 
+from scitex_logging import getLogger
+
+logger = getLogger(__name__)
+
 warnings.warn(
     "scitex.template.mcp_server is deprecated. Use 'scitex serve' or "
     "'from scitex.mcp_server import run_server' for the unified MCP server.",
@@ -189,15 +193,10 @@ def main():
     if not MCP_AVAILABLE:
         import sys
 
-        print("=" * 60)
-        print("MCP Server 'scitex-template' requires the 'mcp' package.")
-        print()
-        print("Install with:")
-        print("  pip install mcp")
-        print()
-        print("Or install scitex with MCP support:")
-        print("  pip install scitex[mcp]")
-        print("=" * 60)
+        logger.fail(
+            "MCP Server 'scitex-template' requires the 'mcp' package.\n"
+            "Install: pip install scitex-template[mcp]"
+        )
         sys.exit(1)
 
     asyncio.run(_run_server())

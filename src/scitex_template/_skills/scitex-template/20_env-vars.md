@@ -1,8 +1,8 @@
 ---
 description: |
   [TOPIC] Environment Variables
-  [DETAILS] Environment variables read by scitex-template. Currently only
-  SCITEX_DIR (ecosystem-wide state-directory override).
+  [DETAILS] SCITEX_DIR resource settings and the shared SCITEX_LOGGING_*
+  output settings read by scitex-template.
 tags: [scitex-template-env-vars, scitex-template, scitex-package]
 ---
 
@@ -22,7 +22,15 @@ export SCITEX_DIR=/fast/ssd/scitex-state
 scitex-template clone research ./my-proj   # cache now at /fast/ssd/scitex-state/template/cache/
 ```
 
-## No other env vars
+## Shared logging settings
+
+`SCITEX_LOGGING_LEVEL`, `SCITEX_LOGGING_FORMAT`, and
+`SCITEX_LOGGING_FORCE_COLOR` configure the shared logger. Human CLI results
+use stdout; status and failure diagnostics use stderr. JSON, MCP frames,
+and shell completion output stay plain and independent of the human log
+threshold. Configure the environment before importing logging.
+
+## Package-specific env vars
 
 Per general/01_arch_04, packages read only `SCITEX_<MODULE>_*` or
 `SCITEX_DIR`. scitex-template currently has no

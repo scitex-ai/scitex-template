@@ -20,9 +20,8 @@ from typing import Optional
 
 from ._clone_outcome import CloneOutcome
 
-import logging
+from scitex_logging import getLogger
 
-getLogger = logging.getLogger
 
 logger = getLogger(__name__)
 
@@ -127,9 +126,7 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print("Usage: python -m scitex clone_scitex_minimal <project-dir>")
-        print("")
-        print("Creates a minimal scitex project with writer + scholar.")
+        logger.fail('Usage: python -m scitex clone_scitex_minimal <project-dir>\n\nCreates a minimal scitex project with writer + scholar.')
         sys.exit(1)
 
     success = clone_scitex_minimal(args[0])

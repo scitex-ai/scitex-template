@@ -41,6 +41,7 @@ dependencies = [
     # scitex_template/__init__.py, mcp_server.py, _utils/_git_strategy.py
     # and _project/_clone_project.py. Light: scitex-config + tomli.
     "scitex-dev>=0.11.0",
+    "scitex-logging>=0.2.1",
 ]
 
 # scitex.git / scitex.scholar / scitex.writer are still imported by a few

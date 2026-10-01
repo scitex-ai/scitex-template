@@ -25,7 +25,7 @@ import tempfile
 from pathlib import Path
 from typing import List, Optional
 
-import logging
+from scitex_logging import getLogger
 
 # scitex (umbrella) is an optional dep (install alongside
 # scitex-template[legacy]). The cache fast-path for registered templates
@@ -39,7 +39,6 @@ if scitex is not None:  # pragma: no cover
     try_import_optional("scitex.git", pkg="scitex")
 
 
-getLogger = logging.getLogger
 
 from .._utils._copy import copy_template
 from .._utils._customize import update_references

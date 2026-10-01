@@ -9,11 +9,10 @@ After a template is cloned, these functions replace placeholder values
 All functions accept a plain metadata dict — no Django dependencies.
 """
 
-import logging
 from pathlib import Path
 from typing import Dict
 
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 logger = getLogger(__name__)
 

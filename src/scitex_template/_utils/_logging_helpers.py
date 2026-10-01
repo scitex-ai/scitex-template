@@ -8,21 +8,7 @@ Provides utilities for grouped operations with visual hierarchy.
 
 from contextlib import contextmanager
 
-import logging
-
-# scitex.logging's .success / .fail methods are not in stdlib. Install
-# thin shims on the Logger class so existing .success(...)/.fail(...)
-# calls work when scitex is not installed.
-if not hasattr(logging.Logger, "success"):
-    logging.Logger.success = (  # type: ignore[attr-defined]
-        lambda self, msg, *a, **kw: self.info(msg, *a, **kw)
-    )
-if not hasattr(logging.Logger, "fail"):
-    logging.Logger.fail = (  # type: ignore[attr-defined]
-        lambda self, msg, *a, **kw: self.error(msg, *a, **kw)
-    )
-
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 logger = getLogger(__name__)
 
@@ -40,7 +26,7 @@ class LogContext:
         """
         self.title = title
         self.emoji = emoji
-        self.indent = "   "
+        self.indent = 1
 
     def __enter__(self):
         """Start the operation."""
@@ -63,8 +49,8 @@ class LogContext:
             message: Step message
             success: Whether step succeeded
         """
-        symbol = "✓" if success else "✗"
-        logger.info(f"{self.indent}{symbol} {message}")
+        method = logger.success if success else logger.fail
+        method(message, indent=self.indent)
 
     def substep(self, message: str):
         """
@@ -73,7 +59,7 @@ class LogContext:
         Args:
             message: Sub-step message
         """
-        logger.info(f"{self.indent}  {message}")
+        logger.info(message, indent=self.indent + 1)
 
 
 @contextmanager
@@ -105,11 +91,10 @@ def log_step(message: str, success: bool = True, indent: int = 1):
     Args:
         message: Step message
         success: Whether step succeeded
-        indent: Indentation level (spaces = indent * 3)
+        indent: Indentation level rendered by the shared SciTeX formatter
     """
-    symbol = "✓" if success else "✗"
-    prefix = "   " * indent
-    logger.info(f"{prefix}{symbol} {message}")
+    method = logger.success if success else logger.fail
+    method(message, indent=indent)
 
 
 def log_final(message: str, success: bool = True):
@@ -121,9 +106,9 @@ def log_final(message: str, success: bool = True):
         success: Whether operation succeeded
     """
     if success:
-        logger.success(f"✓ {message}")
+        logger.success(message)
     else:
-        logger.error(f"✗ {message}")
+        logger.fail(message)
 
 
 __all__ = [

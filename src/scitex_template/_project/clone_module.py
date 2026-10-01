@@ -23,9 +23,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-import logging
+from scitex_logging import getLogger
 
-getLogger = logging.getLogger
 
 logger = getLogger(__name__)
 
@@ -223,9 +222,7 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print("Usage: python -m scitex clone_module <project-dir>")
-        print("")
-        print("Creates a SciTeX module template project.")
+        logger.fail('Usage: python -m scitex clone_module <project-dir>\n\nCreates a SciTeX module template project.')
         sys.exit(1)
 
     success = clone_module(args[0])

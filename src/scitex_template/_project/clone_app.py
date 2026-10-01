@@ -46,9 +46,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-import logging
+from scitex_logging import getLogger
 
-getLogger = logging.getLogger
 
 from . import _app_templates as T
 
@@ -193,9 +192,7 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print("Usage: python -m scitex clone_app <project-dir>")
-        print("")
-        print("Creates a SciTeX app template project.")
+        logger.fail('Usage: python -m scitex clone_app <project-dir>\n\nCreates a SciTeX app template project.')
         sys.exit(1)
 
     success = clone_app(args[0])
