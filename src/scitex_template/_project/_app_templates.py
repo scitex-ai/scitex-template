@@ -20,7 +20,7 @@ readme = "README.md"
 license = "AGPL-3.0"
 requires-python = ">=3.10"
 dependencies = [
-    "scitex-app>=0.1.0",
+    "scitex-sdk>=0.3.0",
 ]
 
 [project.optional-dependencies]
@@ -97,10 +97,10 @@ MANIFEST_JSON = """\
   "license": "AGPL-3.0",
   "standalone": true,
   "frontend_type": "react",
-  "bridge": {{
+  "bridge": {
     "entry": "src/bridge/bridge-init.ts",
     "source_root": "src"
-  }}
+  }
 }
 """
 
@@ -127,7 +127,7 @@ __all__ = ["default_app_config"]
 
 APPS_PY = """\
 #!/usr/bin/env python3
-from scitex_app._django import ScitexAppConfig
+from scitex_sdk.app._django import ScitexAppConfig
 
 
 class {app_class}Config(ScitexAppConfig):
@@ -142,7 +142,7 @@ VIEWS_PY = '''\
 
 from pathlib import Path
 
-from scitex_app._django import scitex_api_dispatch, scitex_editor_page
+from scitex_sdk.app._django import scitex_api_dispatch, scitex_editor_page
 
 from .handlers import HANDLERS
 
@@ -160,7 +160,7 @@ URLS_PY = '''\
 #!/usr/bin/env python3
 """URL patterns for {app_label}."""
 
-from scitex_app._django import scitex_urlpatterns
+from scitex_sdk.app._django import scitex_urlpatterns
 
 from . import views
 
@@ -273,7 +273,7 @@ class Editor:
         self._data = {}
 
     def ping(self) -> dict:
-        return {{"status": "ok"}}
+        return {"status": "ok"}
 '''
 
 CLI_INIT = '''\
@@ -310,33 +310,33 @@ BRIDGE_INIT_TS = """\
 /**
  * {app_label} bridge init — entry point for mounting into scitex-cloud workspace.
  */
-import "scitex-ui/css/app.css";
+import "@scitex/sdk/ui/css/app.css";
 
-import {{ mountApp, unmountApp }} from "./MountPoint";
+import { mountApp, unmountApp } from "./MountPoint";
 
 const MOUNT_ID = "app-mount";
 
-function init(): void {{
+function init(): void {
   const mount = document.getElementById(MOUNT_ID);
   if (!mount) return;
 
   const isEmbedded = mount.dataset.embedded === "true";
   const workingDir = mount.dataset.workingDir;
 
-  if (isEmbedded) {{
-    mountApp({{
+  if (isEmbedded) {
+    mountApp({
       container: mount,
       workingDir,
       darkMode: document.body.classList.contains("dark-theme"),
-    }});
-  }}
-}}
+    });
+  }
+}
 
-if (document.readyState === "loading") {{
+if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
-}} else {{
+} else {
   init();
-}}
+}
 """
 
 BRIDGE_MOUNT_POINT_TS = """\
@@ -344,62 +344,62 @@ BRIDGE_MOUNT_POINT_TS = """\
  * {app_label} mount point — React root + fetch override.
  */
 import React from "react";
-import {{
+import {
   installFetchOverride,
   mountReactApp,
   unmountReactApp,
-}} from "scitex-ui/react/app/bridge";
-import type {{ BridgeConfig, BridgeMountOptions }} from "scitex-ui/react/app/bridge";
+} from "@scitex/sdk/ui/react/app/bridge";
+import type { BridgeConfig, BridgeMountOptions } from "@scitex/sdk/ui/react/app/bridge";
 import App from "../App";
 
-const BRIDGE_CONFIG: BridgeConfig = {{
+const BRIDGE_CONFIG: BridgeConfig = {
   slug: "{app_name}",
   mountId: "app-mount",
   apiPaths: ["/ping", "/status"],
   fileExtensions: [],
-}};
+};
 
-export function mountApp(options: BridgeMountOptions): void {{
+export function mountApp(options: BridgeMountOptions): void {
   installFetchOverride(BRIDGE_CONFIG);
   mountReactApp(
     options.container,
-    React.createElement(App, {{
-      apiBaseUrl: `/apps/${{BRIDGE_CONFIG.slug}}/${{BRIDGE_CONFIG.slug}}`,
+    React.createElement(App, {
+      apiBaseUrl: `/apps/${BRIDGE_CONFIG.slug}/${BRIDGE_CONFIG.slug}`,
       workingDir: options.workingDir,
       darkMode: options.darkMode,
-    }}),
+    }),
   );
-}}
+}
 
-export function unmountApp(): void {{
+export function unmountApp(): void {
   unmountReactApp();
-}}
+}
 """
 
 BRIDGE_EVENT_BUS_TS = """\
 /**
  * {app_label} event bus — typed wrapper around generic bridge events.
  */
-import {{ emitBridgeEvent, onBridgeEvent }} from "scitex-ui/react/app/bridge";
+import { emitBridgeEvent, onBridgeEvent } from "@scitex/sdk/ui/react/app/bridge";
 
 const SLUG = "{app_name}";
 
-export function emitEvent(name: string, detail: unknown): void {{
+export function emitEvent(name: string, detail: unknown): void {
   emitBridgeEvent(SLUG, name, detail);
-}}
+}
 
 export function onEvent(
   name: string,
   handler: (detail: unknown) => void,
-): () => void {{
+): () => void {
   return onBridgeEvent(SLUG, name, handler);
-}}
+}
 """
 
 BRIDGE_INDEX_TS = """\
 /** {app_label} bridge — barrel export. */
-export {{ mountApp, unmountApp }} from "./MountPoint";
-export {{ emitEvent, onEvent }} from "./EventBus";
+export { mountApp, unmountApp } from "./MountPoint";
+export { emitEvent, onEvent } from "./EventBus";
 """
 
 # EOF
