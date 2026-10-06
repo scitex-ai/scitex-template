@@ -27,8 +27,8 @@ from typing import List, Optional
 
 import logging
 
-# scitex (umbrella) is an optional dep (install alongside
-# scitex-template[legacy]). The cache fast-path for registered templates
+# scitex (umbrella) is an optional dep (install via `pip install scitex`).
+# The cache fast-path for registered templates
 # doesn't need it at all. The remote-clone fallback does — when
 # unavailable, that path raises a clear error via _require_scitex_git()
 # below.

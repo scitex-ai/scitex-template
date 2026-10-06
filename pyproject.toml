@@ -37,24 +37,23 @@ dependencies = [
     "gitpython",
     "pyyaml",
     "scitex-config>=0.3.0",
+    # Structured stderr logging (PS-220): all CLI usage/error output goes
+    # through scitex-logging instead of print().
+    "scitex-logging>=0.2.0",
     # try_import_optional is the canonical optional-dep gate used by
     # scitex_template/__init__.py, mcp_server.py, _utils/_git_strategy.py
     # and _project/_clone_project.py. Light: scitex-config + tomli.
-    "scitex-dev>=0.11.0",
+    "scitex-dev>=0.11.5",
 ]
 
 # scitex.git / scitex.scholar / scitex.writer are still imported by a few
 # legacy cloners (clone_scitex_minimal, clone_module, clone_app, clone_project
-# remote-fallback path). Install with `pip install scitex-template[legacy]`
-# to enable those codepaths. The cache fast-path for the 6 vendored
-# templates needs none of this.
+# remote-fallback path). Per PS139 (no umbrella in standalone pyproject),
+# install the umbrella separately with `pip install scitex` to enable those
+# codepaths. The cache fast-path for the 6 vendored templates needs none
+# of this.
 
 [project.optional-dependencies]
-# Legacy cloners (clone_scitex_minimal, clone_module, clone_app, clone_project
-# remote-fallback path) historically required the umbrella `scitex` package.
-# Per PS139 (no umbrella in standalone pyproject), install scitex separately:
-# `pip install scitex` alongside `pip install scitex-template[legacy]`.
-legacy = []
 mcp = [
     "mcp>=1.0.0",
 ]
@@ -66,7 +65,7 @@ dev = [
     # tests/develop/test_audit.py: gates on shutil.which("scitex-dev")
     # and imports scitex_dev.testing.audit_all_for_package — the
     # [cli-audit] extra installs both the CLI shim and audit helpers.
-    "scitex-dev[cli-audit]>=0.11.0",
+    "scitex-dev[cli-audit]>=0.11.5",
 ]
 docs = [
     "sphinx>=7.0",
@@ -84,7 +83,6 @@ docs = [
 # Not solved by renaming them `_dev`/`_docs`: PEP 508/685 forbid leading
 # underscores in extra names and setuptools/hatchling/pip/uv all reject them.
 all = [
-    "scitex-template[legacy]",
     "scitex-template[mcp]",
     "scitex-template[dev]",
     "scitex-template[docs]",

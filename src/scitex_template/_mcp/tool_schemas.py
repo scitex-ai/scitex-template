@@ -14,11 +14,20 @@ Defines available tools for project scaffolding:
 
 from __future__ import annotations
 
-import mcp.types as types
+from scitex_dev import try_import_optional
+
+# `mcp` ships in the `[mcp]` extra — import lazily so a standalone
+# `pip install scitex-template` stays import-clean (PS-233/PS-148).
+types = try_import_optional("mcp.types", extra="mcp", pkg="scitex-template")
 
 
-def get_tool_schemas() -> list[types.Tool]:
+def get_tool_schemas() -> list:  # elements are mcp.types.Tool when [mcp] is installed
     """Return list of available MCP tools for template operations."""
+    if types is None:  # pragma: no cover — needs `pip install scitex-template[mcp]`
+        raise ImportError(
+            "MCP support requires the 'mcp' package. "
+            "Install with: pip install scitex-template[mcp]"
+        )
     return [
         # List available templates
         types.Tool(
