@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-11-18 11:38:35 (ywatanabe)"
 # File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/mnist/02_plot_digits.py
 
@@ -51,7 +50,7 @@ def main(
     CONFIG=stx.session.INJECTED,
     plt=stx.session.INJECTED,
     COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
     logger=stx.session.INJECTED,
 ):
     """Visualize MNIST samples"""
@@ -59,15 +58,15 @@ def main(
     fig = plot_samples(train_loader, CONFIG, plt)
     stx.io.save(
         fig,
-        "mnist_samples.jpg",
-        symlink_to="./data/mnist",
+        CONFIG.PATH.MNIST.FIGURES + "mnist_samples.jpg",
+        symlink_from_cwd=True,
     )
 
     fig = plot_label_examples(train_loader, CONFIG, plt)
     stx.io.save(
         fig,
-        "mnist_digits.jpg",
-        symlink_to="./data/mnist",
+        CONFIG.PATH.MNIST.FIGURES + "mnist_digits.jpg",
+        symlink_from_cwd=True,
     )
 
     return 0

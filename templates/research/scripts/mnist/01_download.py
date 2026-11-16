@@ -68,7 +68,7 @@ def main(
     CONFIG=stx.session.INJECTED,
     plt=stx.session.INJECTED,
     COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
     logger=stx.session.INJECTED,
 ):
     """Download and preprocess MNIST dataset"""
@@ -79,32 +79,32 @@ def main(
     stx.io.save(
         loaders["train"],
         CONFIG.PATH.MNIST.LOADER.TRAIN,
-        symlink_to="./data/mnist",
+        symlink_from_cwd=True,
     )
     stx.io.save(
         loaders["test"],
         CONFIG.PATH.MNIST.LOADER.TEST,
-        symlink_to="./data/mnist",
+        symlink_from_cwd=True,
     )
     stx.io.save(
         flat_data["data"]["train"],
         CONFIG.PATH.MNIST.FLATTENED.TRAIN,
-        symlink_to="./data/mnist",
+        symlink_from_cwd=True,
     )
     stx.io.save(
         flat_data["data"]["test"],
         CONFIG.PATH.MNIST.FLATTENED.TEST,
-        symlink_to="./data/mnist",
+        symlink_from_cwd=True,
     )
     stx.io.save(
         flat_data["labels"]["train"],
         CONFIG.PATH.MNIST.LABELS.TRAIN,
-        symlink_to="./data/mnist",
+        symlink_from_cwd=True,
     )
     stx.io.save(
         flat_data["labels"]["test"],
         CONFIG.PATH.MNIST.LABELS.TEST,
-        symlink_to="./data/mnist",
+        symlink_from_cwd=True,
     )
     return 0
 

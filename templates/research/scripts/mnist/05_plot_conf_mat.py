@@ -26,7 +26,7 @@ def main(
     CONFIG=stx.session.INJECTED,
     plt=stx.session.INJECTED,
     COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
     logger=stx.session.INJECTED,
 ):
     """Plot confusion matrix"""
@@ -36,7 +36,7 @@ def main(
     stx.io.save(
         fig,
         CONFIG.PATH.MNIST.FIGURES + "confusion_matrix.jpg",
-        symlink_to="./data/mnist",
+        symlink_from_cwd=True,
     )
 
     return 0

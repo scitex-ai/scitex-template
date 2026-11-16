@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-11-18 10:41:15 (ywatanabe)"
 # File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/template.py
 
@@ -18,11 +17,11 @@ import scitex as stx
 def main(
     # arg1,
     # kwarg1="value1",
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Help message for `$ python __file__ --help`"""
     return 0
