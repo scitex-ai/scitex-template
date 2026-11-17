@@ -20,9 +20,7 @@ Handles copying template directories with proper symlink handling.
 import shutil
 from pathlib import Path
 
-import logging
-
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 logger = getLogger(__name__)
 
