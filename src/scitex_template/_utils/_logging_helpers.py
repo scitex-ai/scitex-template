@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Logging helpers for clean, hierarchical output during template operations.
 
@@ -8,21 +7,7 @@ Provides utilities for grouped operations with visual hierarchy.
 
 from contextlib import contextmanager
 
-import logging
-
-# scitex.logging's .success / .fail methods are not in stdlib. Install
-# thin shims on the Logger class so existing .success(...)/.fail(...)
-# calls work when scitex is not installed.
-if not hasattr(logging.Logger, "success"):
-    logging.Logger.success = (  # type: ignore[attr-defined]
-        lambda self, msg, *a, **kw: self.info(msg, *a, **kw)
-    )
-if not hasattr(logging.Logger, "fail"):
-    logging.Logger.fail = (  # type: ignore[attr-defined]
-        lambda self, msg, *a, **kw: self.error(msg, *a, **kw)
-    )
-
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 logger = getLogger(__name__)
 
@@ -128,9 +113,9 @@ def log_final(message: str, success: bool = True):
 
 __all__ = [
     "LogContext",
+    "log_final",
     "log_group",
     "log_step",
-    "log_final",
 ]
 
 # EOF

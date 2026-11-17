@@ -10,9 +10,7 @@ import json
 from pathlib import Path
 from typing import Dict
 
-import logging
-
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 logger = getLogger(__name__)
 
