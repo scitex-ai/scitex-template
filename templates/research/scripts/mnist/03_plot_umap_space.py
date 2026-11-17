@@ -36,7 +36,7 @@ def main(
     CONFIG=stx.session.INJECTED,
     plt=stx.session.INJECTED,
     COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
     logger=stx.session.INJECTED,
 ):
     """Create UMAP visualization of MNIST"""
@@ -45,7 +45,7 @@ def main(
     embedding = create_umap_embedding(train_data, CONFIG)
     fig = plot_umap(embedding, train_labels, CONFIG, plt)
     stx.io.save(
-        fig, CONFIG.PATH.MNIST.FIGURES + "umap.jpg", symlink_to="./data/mnist"
+        fig, CONFIG.PATH.MNIST.FIGURES + "umap.jpg", symlink_from_cwd=True
     )
 
     return 0

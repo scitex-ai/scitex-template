@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-11-18 10:47:54 (ywatanabe)"
 # File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/mnist/04_clf_svm.py
 
@@ -7,9 +6,8 @@
 """Trains and evaluates SVM classifier on MNIST dataset"""
 
 # Imports
-import scitex as stx
-from typing import Dict
 import numpy as np
+import scitex as stx
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC
 
@@ -25,13 +23,15 @@ def evaluate(
     model: SVC,
     features: np.ndarray,
     labels: np.ndarray,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     predictions = model.predict(features)
     report = classification_report(labels, predictions, output_dict=True)
 
-    stx.io.save(report, "./classification_report.csv", symlink_to="./data/mnist")
-    stx.io.save(predictions, "./predictions.npy", symlink_to="./data/mnist")
-    stx.io.save(labels, "./labels.npy", symlink_to="./data/mnist")
+    # Relative paths are anchored to this script's _out/ dir;
+    # symlink_from_cwd=True adds the stable link ./data/mnist/<name>.
+    stx.io.save(report, "./data/mnist/classification_report.csv", symlink_from_cwd=True)
+    stx.io.save(predictions, "./data/mnist/predictions.npy", symlink_from_cwd=True)
+    stx.io.save(labels, "./data/mnist/labels.npy", symlink_from_cwd=True)
 
     # Compact, stable JSON the clew-DAG-terminus (stage 06) reads.
     # The dataframe-flattened CSV above is for the writer / paper, this
@@ -40,7 +40,7 @@ def evaluate(
         "accuracy": float(report["accuracy"]),
         "macro_f1": float(report["macro avg"]["f1-score"]),
     }
-    stx.io.save(metrics, "./metrics.json", symlink_to="./data/mnist")
+    stx.io.save(metrics, "./data/mnist/metrics.json", symlink_from_cwd=True)
 
     return metrics
 
@@ -50,7 +50,7 @@ def main(
     CONFIG=stx.session.INJECTED,
     plt=stx.session.INJECTED,
     COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
     logger=stx.session.INJECTED,
 ):
     """Train SVM classifier on MNIST"""
@@ -75,7 +75,7 @@ def main(
         f"Test Accuracy: {metrics['accuracy']:.4f}, Macro F1: {metrics['macro_f1']:.4f}"
     )
 
-    stx.io.save(model, eval(CONFIG.PATH.MNIST.MODEL_SVM), symlink_to="./data/mnist")
+    stx.io.save(model, eval(CONFIG.PATH.MNIST.MODEL_SVM), symlink_from_cwd=True)
     return 0
 
 

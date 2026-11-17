@@ -1,29 +1,27 @@
 #!/usr/bin/env python3
 """Stage 06 — Clew DAG terminus.
 
-Reads stage 04's classification report (if MNIST pipeline has been
-run end-to-end via ``make run-mnist``), or falls back to a synthetic
-demo metric (so ``make solve`` is GREEN on a fresh checkout without
-needing a multi-hour SVM training first).
+Reads stage 04's ``data/mnist/metrics.json`` through ``stx.io.load`` (so
+the read is recorded as an input of this run) and turns each metric into
+a claim. If stage 04 has not run, this stage fails loudly: a claim is
+only ever made from a number the pipeline actually computed — never from
+a placeholder.
 
-Emits three artefacts under ``data/results/``:
+Emits under ``data/results/``:
 
-1. ``claims.json`` — canonical clew output contract (the file the
-   submission validator + cohort verifier read).
-2. Registers each claim into the Clew claim store via
-   ``scitex_clew.add_claim`` so the claim back-propagates through the
-   Clew DAG to source data. That's the validity gate the verifier runs.
-3. ``clew_dag.html`` — interactive Mermaid.js visualisation of the
-   registered-claims DAG (rendered via ``scitex_clew.render_dag``).
-   Open in any browser to inspect ``claim -> source_file -> raw inputs``.
-   Best-effort artefact: if render fails on older scitex-clew, the
-   DONE signal is unaffected.
+1. ``claims.json`` — the ``{"claims": [{question, answer, answer_type}]}``
+   output contract read by ``scripts/verify/check_schema.py``. Saved via
+   ``stx.io.save`` so Clew records it as an output of this run.
+2. One Clew claim per metric via ``scitex_clew.add_claim(...,
+   source_file=<metrics.json>)``. Because stage 04 wrote ``metrics.json``
+   with ``stx.io.save`` inside its ``@stx.session``, each claim
+   back-traces through the recorded runs to the source data.
+3. ``clew_dag.html`` — interactive Mermaid.js view of the registered-claims
+   DAG (``scitex_clew.render_dag``): ``claim -> source_file -> raw inputs``.
 """
 
 from __future__ import annotations
 
-import json
-import os
 from pathlib import Path
 
 import scitex as stx
@@ -31,72 +29,47 @@ import scitex_clew as clew
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-# Stage 04 output — when the full MNIST pipeline has run, this is a CSV
-# with sklearn's classification_report (accuracy, precision/recall/F1 per
-# class, macro/weighted averages). When the user has only run ``make
-# solve`` on a fresh checkout, the file is absent and we fall back to a
-# deterministic synthetic claim so the DAG itself is exercised end-to-end.
-CLF_REPORT  = PROJECT_ROOT / "data/mnist/classification_report.csv"  # paper artefact
-METRICS_JSON = PROJECT_ROOT / "data/mnist/metrics.json"  # clew DAG node consumed by this stage
+# Stage 04 output: compact ``{accuracy, macro_f1}`` written by
+# ``04_clf_svm.py`` with ``stx.io.save(..., symlink_from_cwd=True)``.
+METRICS_JSON = PROJECT_ROOT / "data/mnist/metrics.json"
 
-# Where claims.json lives. Stable cross-stage location; the agent-prompt
-# contract (``capsule_id``-less since the host adds identification
-# out-of-band) prescribes exactly this shape:
-#   { "claims": [ {question, answer, answer_type}, ... ] }
-CLAIMS = PROJECT_ROOT / "data/results/claims.json"
+# Stable path of this stage's claims (a symlink created by stx.io.save).
+CLAIMS_JSON = PROJECT_ROOT / "data/results/claims.json"
 
-# Visualised clew DAG (interactive HTML via Mermaid.js). Saves alongside
-# claims.json so the back-propagation (claim -> source_file -> raw inputs)
-# is inspectable by a human in a browser, not just by the verifier. The
-# graph is built from the *registered* claims (claims=True), so it stays
-# in sync with what the verifier will see.
+# Visualised clew DAG (interactive HTML via Mermaid.js).
 CLEW_DAG_HTML = PROJECT_ROOT / "data/results/clew_dag.html"
 
-
 # Map output-contract answer_type -> scitex_clew claim_type vocab
-# (statistic|figure|table|text|value). Collapses to identity once
-# scitex_clew broadens its vocabulary.
+# (statistic|figure|table|text|value).
 _TYPE_MAP = {
-    "number":   "statistic",
+    "number": "statistic",
     "interval": "statistic",
-    "string":   "text",
-    "list":     "value",
-    "bool":     "value",
+    "string": "text",
+    "list": "value",
+    "bool": "value",
 }
 
 
-def _read_real_metrics() -> tuple[dict, Path] | None:
-    """Return (metrics dict, source-file path) if stage 04 ran, else None.
+def load_metrics(path: Path = METRICS_JSON) -> dict:
+    """Load stage 04's metrics; raise if stage 04 has not produced them.
 
-    Reads ``data/mnist/metrics.json`` (the compact stable DAG node stage
-    04 emits alongside the writer-friendly classification_report.csv).
+    No fallback: a missing or malformed upstream output is an error the
+    researcher must see, not something to paper over with made-up values.
     """
-    if not METRICS_JSON.is_file():
-        return None
-    try:
-        metrics = json.loads(METRICS_JSON.read_text())
-        return (
-            {
-                "accuracy": float(metrics["accuracy"]),
-                "macro_f1": float(metrics["macro_f1"]),
-            },
-            METRICS_JSON,
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Upstream output missing: {path}. Stage 06 registers claims "
+            "only from metrics the pipeline computed. Run stage 04 first "
+            "(`python scripts/mnist/04_clf_svm.py`, or `make solve`)."
         )
-    except Exception:
-        return None
-
-
-def _synthetic_demo_metrics() -> tuple[dict, Path]:
-    """Deterministic fallback when stage 04 hasn't run yet.
-
-    Writes a tiny stub source file so the Clew DAG's back-propagation
-    (claim -> source_file) lands on a real on-disk node, not a phantom.
-    """
-    src = PROJECT_ROOT / "data/results/_synthetic_metrics.json"
-    src.parent.mkdir(parents=True, exist_ok=True)
-    metrics = {"accuracy": 0.93, "macro_f1": 0.92, "_provenance": "synthetic"}
-    src.write_text(json.dumps(metrics, indent=2))
-    return (metrics, src)
+    metrics = stx.io.load(str(path))
+    missing = {"accuracy", "macro_f1"} - set(metrics)
+    if missing:
+        raise KeyError(f"{path} lacks required metric(s): {sorted(missing)}")
+    return {
+        "accuracy": float(metrics["accuracy"]),
+        "macro_f1": float(metrics["macro_f1"]),
+    }
 
 
 @stx.session
@@ -104,74 +77,55 @@ def main(
     CONFIG=stx.session.INJECTED,
     plt=stx.session.INJECTED,
     COLORS=stx.session.INJECTED,
-    rng_manager=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
     logger=stx.session.INJECTED,
 ):
-    real = _read_real_metrics()
-    if real is not None:
-        metrics, source = real
-        logger.success(f"Registering real metrics from {source}: {metrics}")
-    else:
-        metrics, source = _synthetic_demo_metrics()
-        logger.warning(
-            "Stage 04 (clf_svm) output not found; using deterministic "
-            f"synthetic metrics: {metrics}. Run `make run-mnist` for the "
-            "real MNIST+SVM pipeline."
-        )
+    metrics = load_metrics()
+    logger.success(f"Registering metrics from {METRICS_JSON}: {metrics}")
 
-    claims_payload = {
-        "claims": [
-            {
-                "question":    "test_accuracy",
-                "answer":      f"{metrics['accuracy']:.6f}",
-                "answer_type": "number",
-            },
-            {
-                "question":    "test_macro_f1",
-                "answer":      f"{metrics['macro_f1']:.6f}",
-                "answer_type": "number",
-            },
-        ]
-    }
+    claims = [
+        {
+            "question": "test_accuracy",
+            "answer": f"{metrics['accuracy']:.6f}",
+            "answer_type": "number",
+        },
+        {
+            "question": "test_macro_f1",
+            "answer": f"{metrics['macro_f1']:.6f}",
+            "answer_type": "number",
+        },
+    ]
 
-    CLAIMS.parent.mkdir(parents=True, exist_ok=True)
-    CLAIMS.write_text(json.dumps(claims_payload, indent=2))
-    logger.info(
-        f"Wrote {len(claims_payload['claims'])} claims -> {CLAIMS}"
-    )
+    # Saved through stx.io so this run records claims.json as its output;
+    # The file lands in this script's _out/ dir; symlink_from_cwd=True adds
+    # the stable link data/results/claims.json (run from the project root).
+    stx.io.save({"claims": claims}, "./data/results/claims.json", symlink_from_cwd=True)
+    logger.info(f"Wrote {len(claims)} claims -> {CLAIMS_JSON}")
 
     # --- Clew claims registration (validity gate) ----------------------
-    rel_claims = os.path.relpath(CLAIMS,  PROJECT_ROOT)
-    rel_source = os.path.relpath(source,  PROJECT_ROOT)
-    for entry in claims_payload["claims"]:
+    # source_file is the stx.io-saved output of stage 04, so each claim
+    # resolves to the run that produced it (no NO_LINEAGE warning).
+    for entry in claims:
         clew.add_claim(
-            file_path=rel_claims,
-            claim_type=_TYPE_MAP.get(entry["answer_type"], "value"),
+            file_path=str(CLAIMS_JSON),
+            claim_type=_TYPE_MAP[entry["answer_type"]],
             claim_value=entry["answer"],
-            source_file=rel_source,
+            source_file=str(METRICS_JSON),
         )
 
     # --- Clew DAG visualization (human-inspectable artefact) -----------
-    # Renders the registered-claims DAG to an interactive HTML file via
-    # Mermaid.js (no extra deps beyond scitex-clew itself). Open in any
-    # browser to see claim -> source_file -> raw inputs back-propagation.
-    # If rendering fails (e.g. older scitex-clew without render_dag),
-    # we log and continue — DONE signal must NOT depend on the viz.
-    try:
-        clew.render_dag(
-            output_path=CLEW_DAG_HTML,
-            claims=True,
-            title="MNIST — clew claims DAG",
-        )
-        logger.info(f"Rendered clew DAG -> {CLEW_DAG_HTML}")
-    except Exception as exc:  # pragma: no cover — best-effort artefact
-        logger.warning(f"clew.render_dag skipped: {exc}")
+    clew.render_dag(
+        output_path=CLEW_DAG_HTML,
+        claims=True,
+        title="MNIST — clew claims DAG",
+    )
+    logger.info(f"Rendered clew DAG -> {CLEW_DAG_HTML}")
 
-    n = len(claims_payload["claims"])
-    print(f"DONE n_claims={n}")
+    print(f"DONE n_claims={len(claims)}")
     return 0
 
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())
