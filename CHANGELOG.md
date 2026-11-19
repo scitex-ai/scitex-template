@@ -4,6 +4,15 @@ All notable changes to `scitex-template` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Export the documented `clone_template_from_cache`, `load_registry` and
+  `find_template` functions from the package root. The installed standalone
+  cache-clone path is now available through the Python imports shown in the
+  quick start. Existing clone and registry checks exercise these public imports.
+- Correct the quick-start links to the Python, CLI and MCP reference pages.
+
 ## [0.7.1] – 2026-09-02
 
 ### Fixed

@@ -14,8 +14,7 @@ from typing import Any, List
 
 import pytest
 
-from scitex_template import _cache, registry
-
+from scitex_template import _cache, clone_template_from_cache, registry
 
 # ---------------------------------------------------------------------------
 # Hand-rolled module-attribute swap helpers (no monkeypatch, no mock).
@@ -91,7 +90,7 @@ class TestCloneTemplateFromCache:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert (target / "file.txt").read_text() == "hello"
 
@@ -99,7 +98,7 @@ class TestCloneTemplateFromCache:
         # Arrange
         target = tmp_path / "out"
         # Act
-        result = _cache.clone_template_from_cache("alpha", target)
+        result = clone_template_from_cache("alpha", target)
         # Assert
         assert result == target
 
@@ -107,7 +106,7 @@ class TestCloneTemplateFromCache:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert (target / "sub" / "deep.txt").read_text() == "deep"
 
@@ -115,7 +114,7 @@ class TestCloneTemplateFromCache:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert (target / "link").is_symlink()
 
@@ -123,7 +122,7 @@ class TestCloneTemplateFromCache:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert (target / "link").resolve() == (target / "file.txt").resolve()
 
@@ -133,7 +132,7 @@ class TestCloneTemplateFromCache:
 
         # Act
         def _call():
-            _cache.clone_template_from_cache("bogus", target)
+            clone_template_from_cache("bogus", target)
 
         # Assert
         with pytest.raises(KeyError, match="bogus"):
@@ -147,7 +146,7 @@ class TestCloneTemplateFromCache:
 
         # Act
         def _call():
-            _cache.clone_template_from_cache("alpha", target)
+            clone_template_from_cache("alpha", target)
 
         # Assert
         with pytest.raises(FileExistsError):
@@ -170,7 +169,7 @@ class TestCloneWritesManifest:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert (target / ".scitex" / "template" / "MANIFEST.yaml").is_file()
 
@@ -178,7 +177,7 @@ class TestCloneWritesManifest:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert self._manifest(target)["template"]["id"] == "alpha"
 
@@ -186,7 +185,7 @@ class TestCloneWritesManifest:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert self._manifest(target)["template"]["version"] == "0.0.1"
 
@@ -194,7 +193,7 @@ class TestCloneWritesManifest:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target, branch="develop")
+        clone_template_from_cache("alpha", target, branch="develop")
         # Assert
         assert self._manifest(target)["source"]["branch"] == "develop"
 
@@ -204,7 +203,7 @@ class TestCloneWritesManifest:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert self._manifest(target)["source"]["commit"] == "unknown"
 
@@ -212,7 +211,7 @@ class TestCloneWritesManifest:
         # Arrange
         target = tmp_path / "out"
         # Act
-        _cache.clone_template_from_cache("alpha", target)
+        clone_template_from_cache("alpha", target)
         # Assert
         assert self._manifest(target)["schema"] == "scitex-template/manifest@v1"
 

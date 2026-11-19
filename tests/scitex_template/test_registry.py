@@ -10,8 +10,7 @@ from typing import Any
 
 import pytest
 
-from scitex_template import registry
-
+from scitex_template import find_template, load_registry, registry
 
 _MISSING = object()
 
@@ -96,13 +95,13 @@ class TestLoadRegistry:
             "paper",
         }
         # Act
-        ids = {e.id for e in registry.load_registry()}
+        ids = {e.id for e in load_registry()}
         # Assert
         assert ids == expected
 
     def test_every_entry_has_non_empty_id(self):
         # Arrange
-        entries = list(registry.load_registry())
+        entries = list(load_registry())
         # Act
         all_have_id = all(bool(e.id) for e in entries)
         # Assert
@@ -110,7 +109,7 @@ class TestLoadRegistry:
 
     def test_every_entry_has_non_empty_description(self):
         # Arrange
-        entries = list(registry.load_registry())
+        entries = list(load_registry())
         # Act
         all_have_desc = all(bool(e.description) for e in entries)
         # Assert
@@ -118,7 +117,7 @@ class TestLoadRegistry:
 
     def test_every_entry_has_non_empty_version(self):
         # Arrange
-        entries = list(registry.load_registry())
+        entries = list(load_registry())
         # Act
         all_have_version = all(bool(e.version) for e in entries)
         # Assert
@@ -126,7 +125,7 @@ class TestLoadRegistry:
 
     def test_every_entry_path_is_pathlib_path(self):
         # Arrange
-        entries = list(registry.load_registry())
+        entries = list(load_registry())
         # Act
         all_path = all(isinstance(e.path, Path) for e in entries)
         # Assert
@@ -141,7 +140,7 @@ class TestLoadRegistry:
 
         # Act
         def _call():
-            registry.load_registry()
+            load_registry()
 
         # Assert
         try:
@@ -156,13 +155,13 @@ class TestFindTemplate:
     def test_find_template_known_id_returns_entry_with_matching_id(self):
         # Arrange
         # Act
-        entry = registry.find_template("pip-project")
+        entry = find_template("pip-project")
         # Assert
         assert entry is not None and entry.id == "pip-project"
 
     def test_find_template_unknown_id_returns_none(self):
         # Arrange
         # Act
-        entry = registry.find_template("does-not-exist")
+        entry = find_template("does-not-exist")
         # Assert
         assert entry is None
