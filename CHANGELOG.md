@@ -4,6 +4,14 @@ All notable changes to `scitex-template` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [SemVer](https://semver.org/).
 
+## [0.7.3] – 2026-11-20
+
+### Fixed
+- Use the canonical hosted, CI-gated release workflow instead of the legacy
+  Spartan-only wrapper, which required an unavailable `/data/gpfs` path on
+  fleet runners. Version 0.7.2 stopped before building or publishing; its tag
+  remains unchanged. The MNIST research showcase is unchanged.
+
 ## [0.7.2] – 2026-11-20
 
 ### Added
