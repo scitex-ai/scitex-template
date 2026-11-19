@@ -43,14 +43,14 @@ def main(
 ):
     """Fetch MNIST (checksummed) and save the training subset and test set."""
     record = scitex_dataset.fetch_reference(
-        CONFIG.MNIST.DATASET, CONFIG.PATH.MNIST.RAW_DIR
+        CONFIG.MNIST.DATASET, eval(CONFIG.PATH.MNIST.RAW_DIR)
     )
     logger.info(
         f"{CONFIG.MNIST.DATASET}: {record.path} sha256={record.sha256} "
         f"cached={record.cached}"
     )
 
-    raw = sio.load(CONFIG.PATH.MNIST.RAW_NPZ)
+    raw = sio.load(eval(CONFIG.PATH.MNIST.RAW_NPZ))
     indices = draw_training_subset(
         raw["y_train"], CONFIG.MNIST.N_TRAIN, CONFIG.MNIST.SPLIT_SEED
     )
@@ -60,18 +60,18 @@ def main(
     X_test = scale_pixels(raw["x_test"], CONFIG.MNIST.PIXEL_SCALE)
     y_test = raw["y_test"].astype(np.int64)
 
-    derived = [CONFIG.PATH.MNIST.RAW_NPZ]
+    derived = [eval(CONFIG.PATH.MNIST.RAW_NPZ)]
     sio.save(
-        X_train, CONFIG.PATH.MNIST.X_TRAIN, symlink_from_cwd=True, derived_from=derived
+        X_train, eval(CONFIG.PATH.MNIST.X_TRAIN), symlink_from_cwd=True, derived_from=derived
     )
     sio.save(
-        y_train, CONFIG.PATH.MNIST.Y_TRAIN, symlink_from_cwd=True, derived_from=derived
+        y_train, eval(CONFIG.PATH.MNIST.Y_TRAIN), symlink_from_cwd=True, derived_from=derived
     )
     sio.save(
-        X_test, CONFIG.PATH.MNIST.X_TEST, symlink_from_cwd=True, derived_from=derived
+        X_test, eval(CONFIG.PATH.MNIST.X_TEST), symlink_from_cwd=True, derived_from=derived
     )
     sio.save(
-        y_test, CONFIG.PATH.MNIST.Y_TEST, symlink_from_cwd=True, derived_from=derived
+        y_test, eval(CONFIG.PATH.MNIST.Y_TEST), symlink_from_cwd=True, derived_from=derived
     )
 
     dataset_record = {
@@ -85,7 +85,7 @@ def main(
     }
     sio.save(
         dataset_record,
-        CONFIG.PATH.MNIST.DATASET_RECORD,
+        eval(CONFIG.PATH.MNIST.DATASET_RECORD),
         symlink_from_cwd=True,
         derived_from=derived,
     )

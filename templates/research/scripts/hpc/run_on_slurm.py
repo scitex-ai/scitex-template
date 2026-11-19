@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # File: scripts/hpc/run_on_slurm.py
-# stx-allow-file: STX-S001  (reason: job orchestration, not an analysis step;
-#   the analysis step it dispatches runs under @scitex_session.session remotely)
+# stx-allow-file: STX-S001  (reason: job orchestration; the step it dispatches is the @scitex_session.session script)
 
 """Run the compute-heavy step on a Slurm cluster through scitex-hpc (`make hpc`).
 

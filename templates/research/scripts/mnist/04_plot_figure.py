@@ -13,6 +13,7 @@ rescaled after rendering.
   C  per-class recall of both classifiers
 """
 
+import math
 from pathlib import Path
 
 import figrecipe as fr
@@ -26,7 +27,7 @@ DIGITS = list(range(10))
 def first_example_per_digit(X_test, y_test):
     """The first test image of each class (documented, not hand-picked)."""
     idx = [int(np.flatnonzero(y_test == d)[0]) for d in DIGITS]
-    side = int(round(np.sqrt(X_test.shape[1])))  # flattened square images
+    side = math.isqrt(X_test.shape[1])  # flattened square images
     return X_test[idx].reshape(len(DIGITS), side, side)
 
 
@@ -98,26 +99,26 @@ def main(
 ):
     """Render panels A-C and compose Figure 1 from their recipes."""
     fr.load_style(CONFIG.FIGURE.STYLE)
-    P = CONFIG.PATH
+    P = CONFIG.PATH  # f-string leaves, resolved with eval() at each use
 
-    X_test = sio.load(P.MNIST.X_TEST)
-    y_test = sio.load(P.MNIST.Y_TEST)
-    conf_mat = sio.load(P.RESULTS.CONF_MAT_SVC).to_numpy()  # header = digits
-    recall = sio.load(P.RESULTS.PER_CLASS_RECALL)
+    X_test = sio.load(eval(P.MNIST.X_TEST))
+    y_test = sio.load(eval(P.MNIST.Y_TEST))
+    conf_mat = sio.load(eval(P.RESULTS.CONF_MAT_SVC)).to_numpy()  # header = digits
+    recall = sio.load(eval(P.RESULTS.PER_CLASS_RECALL))
 
     panels = {
-        P.FIGURES.PANEL_DIGITS: plot_digits(
+        eval(P.FIGURES.PANEL_DIGITS): plot_digits(
             first_example_per_digit(X_test, y_test), CONFIG.FIGURE.DIGITS
         ),
-        P.FIGURES.PANEL_CONF_MAT: plot_conf_mat(conf_mat, CONFIG.FIGURE.CONF_MAT),
-        P.FIGURES.PANEL_RECALL: plot_recall(recall, CONFIG.FIGURE.RECALL),
+        eval(P.FIGURES.PANEL_CONF_MAT): plot_conf_mat(conf_mat, CONFIG.FIGURE.CONF_MAT),
+        eval(P.FIGURES.PANEL_RECALL): plot_recall(recall, CONFIG.FIGURE.RECALL),
     }
     # Each panel carries its caption (set_xytc) in its recipe; the figure
     # caption the reader sees is in the manuscript (figures/caption_and_media).
     for path, fig in panels.items():
         sio.save(fig, path, symlink_from_cwd=True)  # stx-allow: STX-FM019
 
-    order = [P.FIGURES.PANEL_DIGITS, P.FIGURES.PANEL_CONF_MAT, P.FIGURES.PANEL_RECALL]
+    order = [eval(P.FIGURES.PANEL_DIGITS), eval(P.FIGURES.PANEL_CONF_MAT), eval(P.FIGURES.PANEL_RECALL)]
     # Panels keep their rendered mm size; the canvas is sized to fit them.
     fig, _ = fr.compose(
         sources={(0, i): recipe_of(path) for i, path in enumerate(order)},
@@ -126,9 +127,9 @@ def main(
         panel_labels=True,
     )
     sio.save(  # stx-allow: STX-FM019
-        fig, P.FIGURES.FIG1, symlink_from_cwd=True, derived_from=order
+        fig, eval(P.FIGURES.FIG1), symlink_from_cwd=True, derived_from=order
     )
-    logger.success(f"Figure 1 -> {P.FIGURES.FIG1}")
+    logger.success(f"Figure 1 -> {eval(P.FIGURES.FIG1)}")
     return 0
 
 

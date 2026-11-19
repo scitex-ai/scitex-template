@@ -30,7 +30,7 @@ def resolve_pointer(document, pointer):
 
 
 def source_path(CONFIG, dotted):
-    """'RESULTS.METRICS' -> CONFIG.PATH.RESULTS.METRICS."""
+    """'RESULTS.METRICS' -> CONFIG.PATH.RESULTS.METRICS (an f-string literal)."""
     node = CONFIG.PATH
     for part in dotted.split("."):
         node = node[part]
@@ -51,12 +51,12 @@ def main(
     logger=sess.INJECTED,
 ):
     """Register every claim of config/CLAIMS.yaml in the clew store."""
-    workspace = CONFIG.PATH.PAPER.WORKSPACE
+    workspace = eval(CONFIG.PATH.PAPER.WORKSPACE)
     loaded = {}
     for entry in CONFIG.CLAIMS.ITEMS:
         # list items load as plain dicts (keys as written: upper case)
         claim_id, pointer = entry["ID"], entry["POINTER"]
-        path = source_path(CONFIG, entry["SOURCE"])
+        path = eval(source_path(CONFIG, entry["SOURCE"]))
         if path not in loaded:
             loaded[path] = sio.load(path)
         value = stated_value(resolve_pointer(loaded[path], pointer), entry["DIGITS"])

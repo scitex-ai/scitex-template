@@ -12,7 +12,7 @@ def figure():
 
 def test_first_example_per_digit_takes_the_first_image_of_a_class(figure):
     # Arrange: digit 0 appears at index 1 and again at index 10
-    side = figure.IMAGE_SIDE
+    side = 28  # MNIST image side
     y = np.array([3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 0])
     X = np.arange(len(y), dtype=np.float32)[:, None] * np.ones((1, side * side))
     # Act

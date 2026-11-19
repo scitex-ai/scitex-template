@@ -46,9 +46,9 @@ def main(
     logger=sess.INJECTED,
 ):
     """McNemar's test: logistic regression vs RBF-SVM on the test set."""
-    y_test = sio.load(CONFIG.PATH.MNIST.Y_TEST)
-    pred_logreg = sio.load(CONFIG.PATH.RESULTS.PRED_LOGREG)
-    pred_svc = sio.load(CONFIG.PATH.RESULTS.PRED_SVC)
+    y_test = sio.load(eval(CONFIG.PATH.MNIST.Y_TEST))
+    pred_logreg = sio.load(eval(CONFIG.PATH.RESULTS.PRED_LOGREG))
+    pred_svc = sio.load(eval(CONFIG.PATH.RESULTS.PRED_SVC))
 
     table = paired_correctness_table(y_test, pred_logreg, pred_svc)
     cfg = CONFIG.STATS.MCNEMAR
@@ -67,7 +67,7 @@ def main(
         "only_logreg_correct": int(table[1, 0]),
         "only_svc_correct": int(table[0, 1]),
     }
-    sio.save(out, CONFIG.PATH.RESULTS.MCNEMAR, symlink_from_cwd=True)
+    sio.save(out, eval(CONFIG.PATH.RESULTS.MCNEMAR), symlink_from_cwd=True)
     logger.success(
         f"McNemar chi2={out['statistic']} p={out['pvalue']} "
         f"(only SVC right: {out['only_svc_correct']}, "

@@ -56,15 +56,15 @@ def main(
     logger=sess.INJECTED,
 ):
     """Train logistic regression and an RBF-SVM; evaluate both."""
-    X_train = sio.load(CONFIG.PATH.MNIST.X_TRAIN)
-    y_train = sio.load(CONFIG.PATH.MNIST.Y_TRAIN)
-    X_test = sio.load(CONFIG.PATH.MNIST.X_TEST)
-    y_test = sio.load(CONFIG.PATH.MNIST.Y_TEST)
+    X_train = sio.load(eval(CONFIG.PATH.MNIST.X_TRAIN))
+    y_train = sio.load(eval(CONFIG.PATH.MNIST.Y_TRAIN))
+    X_test = sio.load(eval(CONFIG.PATH.MNIST.X_TEST))
+    y_test = sio.load(eval(CONFIG.PATH.MNIST.Y_TEST))
 
     rsm = scitex_repro.RandomStateManager(seed=CONFIG.MNIST.CLASSIFIER_SEED)
     pred_paths = {
-        "LOGREG": CONFIG.PATH.RESULTS.PRED_LOGREG,
-        "SVC": CONFIG.PATH.RESULTS.PRED_SVC,
+        "LOGREG": eval(CONFIG.PATH.RESULTS.PRED_LOGREG),
+        "SVC": eval(CONFIG.PATH.RESULTS.PRED_SVC),
     }
     metrics = {"n_train": len(y_train)}
     predictions = {}
@@ -78,7 +78,7 @@ def main(
         sio.save(y_pred, pred_paths[key], symlink_from_cwd=True)
         logger.success(f"{spec.NAME}: accuracy={metrics[key]['accuracy']:.4f}")
 
-    sio.save(metrics, CONFIG.PATH.RESULTS.METRICS, symlink_from_cwd=True)
+    sio.save(metrics, eval(CONFIG.PATH.RESULTS.METRICS), symlink_from_cwd=True)
 
     labels = sorted(np.unique(y_test).tolist())
     conf_mat = scitex_ml.metrics.calc_conf_mat(
@@ -86,7 +86,7 @@ def main(
     )
     sio.save(
         pd.DataFrame(np.asarray(conf_mat["value"]), index=labels, columns=labels),
-        CONFIG.PATH.RESULTS.CONF_MAT_SVC,
+        eval(CONFIG.PATH.RESULTS.CONF_MAT_SVC),
         symlink_from_cwd=True,
     )
 
@@ -102,7 +102,7 @@ def main(
         }
     )
     sio.save(
-        recall, CONFIG.PATH.RESULTS.PER_CLASS_RECALL, symlink_from_cwd=True, index=False
+        recall, eval(CONFIG.PATH.RESULTS.PER_CLASS_RECALL), symlink_from_cwd=True, index=False
     )
     return 0
 

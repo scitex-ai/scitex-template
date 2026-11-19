@@ -87,11 +87,11 @@ def main(
 ):
     """Enrich the seed bibliography into references.bib via scitex-scholar."""
     cfg = CONFIG.SCHOLAR
-    paths = CONFIG.PATH.LITERATURE
+    paths = CONFIG.PATH.LITERATURE  # f-string leaves, eval() at each use
     handler = BibTeXHandler()
 
-    seed_entries, papers = load_seed_papers(paths.SEED_BIB, handler)
-    logger.info(f"Seed: {len(papers)} entries from {paths.SEED_BIB}")
+    seed_entries, papers = load_seed_papers(eval(paths.SEED_BIB), handler)
+    logger.info(f"Seed: {len(papers)} entries from {eval(paths.SEED_BIB)}")
 
     enriched = enrich_papers(papers, cfg.N_WORKERS)
     full_entries = [handler.paper_to_bibtex_entry(p) for p in enriched]
@@ -100,23 +100,23 @@ def main(
     no_doi = [e["key"] for e in bib_entries if not e["fields"].get("doi")]
     if no_doi:
         logger.warning(f"No DOI resolved for: {no_doi}")
-    sio.save(bib_entries, paths.BIB, add_header=False, symlink_from_cwd=True)
+    sio.save(bib_entries, eval(paths.BIB), add_header=False, symlink_from_cwd=True)
 
     record = {
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "tool": SCHOLAR_DIST,
         "tool_version": importlib.metadata.version(SCHOLAR_DIST),
         "api": "scitex_scholar.pipelines.ScholarPipelineMetadataParallel",
-        "seed": paths.SEED_BIB,
-        "output": paths.BIB,
+        "seed": eval(paths.SEED_BIB),
+        "output": eval(paths.BIB),
         "bib_fields": list(cfg.BIB_FIELDS),
         "entries": [
             describe_entry(s, b, f, p, cfg.NOTE_FIELDS)
             for s, b, f, p in zip(seed_entries, bib_entries, full_entries, enriched)
         ],
     }
-    sio.save(record, paths.BIB_RECORD, symlink_from_cwd=True)
-    logger.success(f"Saved {len(bib_entries)} entries -> {paths.BIB}")
+    sio.save(record, eval(paths.BIB_RECORD), symlink_from_cwd=True)
+    logger.success(f"Saved {len(bib_entries)} entries -> {eval(paths.BIB)}")
     return 0
 
 

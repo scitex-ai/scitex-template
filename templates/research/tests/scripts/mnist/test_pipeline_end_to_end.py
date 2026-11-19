@@ -14,7 +14,6 @@ byte-identical). The subprocess gets an explicit, minimal environment.
 import os
 import shutil
 import subprocess
-from pathlib import Path
 
 import pytest
 from conftest import PROJECT_ROOT
@@ -54,7 +53,7 @@ def make_all(project):
         ["make", "PYTHON=python", "all"],
         cwd=project,
         env=make_env(),
-        capture_output=True,
+        capture_output=True, check=False,
         text=True,
     )
 
@@ -65,7 +64,7 @@ def demo_fault(project, make_all):
         ["make", "PYTHON=python", "demo-fault"],
         cwd=project,
         env=make_env(),
-        capture_output=True,
+        capture_output=True, check=False,
         text=True,
     )
 
