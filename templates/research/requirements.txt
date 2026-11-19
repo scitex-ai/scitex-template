@@ -35,7 +35,8 @@ ipykernel>=6
 # Claims, verification, minimal graphs
 scitex-clew>=0.34.0
 # Manuscript and live paper
-scitex-writer>=2.43.22
+# 2.44.0: claims stored in scitex-clew with locators (\vclaim, value-vs-source)
+scitex-writer>=2.44.0
 scitex-live-paper>=0.5.0
 # Quality gate (`make lint`)
 scitex-dev>=0.64.1
