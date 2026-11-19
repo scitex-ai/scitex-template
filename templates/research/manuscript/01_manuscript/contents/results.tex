@@ -1,0 +1,20 @@
+%% -*- coding: utf-8 -*-
+%% Every number written as \vclaim{<id>} is a REGISTERED claim: scitex-writer
+%% renders its value from the scitex-clew store, and clew checks it against
+%% the file and JSON pointer declared in config/CLAIMS.yaml. Do not type
+%% result numbers here; register them (scripts/mnist/05_register_claims.py).
+
+\section{Results}
+
+Both classifiers were trained on the same \vclaim{n_train} training images
+and evaluated on the official test set (Figure~\ref{fig:01_mnist_overview}).
+Logistic regression reached a test accuracy of \vclaim{logreg_accuracy},
+and the RBF support-vector machine reached \vclaim{svc_accuracy}.
+
+The two classifiers disagreed in correctness on a minority of test images:
+\vclaim{only_svc_correct} images were classified correctly only by the
+support-vector machine, and \vclaim{only_logreg_correct} only by logistic
+regression. McNemar's test on these paired outcomes rejected equal error
+rates ($\chi^2 = $~\vclaim{mcnemar_chi2}, $p < 0.001$).
+
+%%%% EOF

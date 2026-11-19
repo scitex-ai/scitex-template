@@ -1,0 +1,29 @@
+# Figure parameters (figrecipe). Sizes are in millimetres on the
+# 1-column (~85 mm) / 2-column (~180 mm) grid; style SCITEX sets fonts
+# (label 7 pt, tick 6 pt, legend 6 pt, title 8 pt) for every panel.
+STYLE: SCITEX
+
+# Panel A: one example per digit. Selection rule (no cherry-picking):
+# the FIRST test image of each class, in test-set order.
+DIGITS:
+  N_COLS: 5
+  CMAP: gray_r
+  W_MM: 50
+  H_MM: 20
+  CAPTION: The first test image of each digit class.
+
+CONF_MAT:                 # row fractions, fixed 0-1 colour scale
+  CMAP: Blues
+  W_MM: 40
+  H_MM: 40
+  CAPTION: Confusion matrix of the RBF-SVM (row fraction of each true digit).
+
+RECALL:
+  W_MM: 45
+  H_MM: 40
+  Y_MIN: 0.8              # lower y-limit of the per-class recall panel
+  CAPTION: Per-class recall of logistic regression and the RBF-SVM.
+
+COMPOSE:
+  GAP_MM: 6
+  CAPTION: MNIST classification with two classifiers.

@@ -2,82 +2,67 @@
 
 # Writing Experiment Scripts
 
-Every analysis script should use the `@stx.session` decorator for
-reproducibility and automatic output organization.
+Every analysis script is a `@scitex_session.session`-decorated `main`.
+The decorator loads `config/*.yaml` into `CONFIG`, sets up logging and
+matplotlib, and opens the provenance record; scitex-io then records every
+file the script reads or writes.
 
 ## Minimal skeleton
 
 ```python
 #!/usr/bin/env python3
-# File: scripts/my_experiment/01_analyze.py
+# File: scripts/my_topic/01_calc_summary.py
+"""Docstring becomes --help text."""
 
-import scitex as stx
+import scitex_io as sio
+import scitex_session as sess
 
-@stx.session(seed=42)
+
+@sess.session
 def main(
-    # Parameters auto-expose as CLI flags
-    n_samples=1000,        # --n_samples 1000
-    learning_rate=0.01,    # --learning_rate 0.01
-    # Injected objects (do NOT pass manually)
-    CONFIG=stx.INJECTED,   # Session metadata
-    plt=stx.INJECTED,      # Pre-configured matplotlib
-    logger=stx.INJECTED,   # Auto file-logging
+    CONFIG=sess.INJECTED,   # ./config/*.yaml, keys upper-cased
+    plt=sess.INJECTED,
+    COLORS=sess.INJECTED,
+    rngg=sess.INJECTED,
+    logger=sess.INJECTED,
 ):
-    """Docstring becomes --help text."""
-    stx.io.save(results, "results.csv")
-
-    fig, ax = plt.subplots()
-    ax.plot(x, y)
-    stx.io.save(fig, "plot.png")    # also exports plot.csv
-
-    # Centralize via symlink
-    stx.io.save(
-        data, "data/my_experiment/output.npy",
-        symlink_to="../../data/my_experiment/",
-    )
+    data = sio.load(CONFIG.PATH.MY_TOPIC.INPUT)          # recorded input
+    summary = {"mean": float(data.mean()), "n": int(len(data))}
+    sio.save(summary, CONFIG.PATH.MY_TOPIC.SUMMARY,      # recorded output
+             symlink_from_cwd=True)                      # + stable data/ link
     return 0
+
 
 if __name__ == "__main__":
     main()
 ```
 
+## Rules
+
+- Parameters (thresholds, sizes, seeds) live in `config/*.yaml`, never as
+  numbers in the script (scitex-dev STX-S008). Paths live in
+  `config/PATH.yaml`.
+- All I/O goes through `scitex_io`; raw `open`/`np.save`/`df.to_csv` is
+  invisible to provenance.
+- A relative `sio.save` path is anchored to `<script>_out/`;
+  `symlink_from_cwd=True` adds the link at the same path under the project
+  root. Run scripts from the project root (as `make` does).
+- Declare which inputs an output used with `derived_from=[...]` when a
+  script reads more than the output needs (tighter `clew slice --level 2`).
+- Figures: figrecipe with sizes in mm and the SCITEX style; compose panels
+  from their recipes (`fr.compose`), never rescale rendered images.
+- Statistics: scitex-stats (no raw scipy).
+- Seeds: `scitex_repro.RandomStateManager(seed=CONFIG...)`.
+
 ## Output layout
 
-A successful run produces:
-
 ```
-scripts/my_experiment/01_analyze_out/FINISHED_SUCCESS/<session_id>/
-├── logs/{stdout,stderr}.log
-├── CONFIGS/CONFIG.yaml       # Full reproducibility record
-└── <your outputs>
-```
-
-## Adding a new experiment
-
-1. `mkdir scripts/my_experiment`
-2. `cp scripts/template.py scripts/my_experiment/01_preprocess.py`
-3. Number scripts by execution order: `01_`, `02_`, `03_`, …
-4. Optional `main.sh`:
-
-```bash
-#!/bin/bash
-set -e
-DIR="$(cd "$(dirname "$0")" && pwd)"
-python "$DIR/01_preprocess.py" "$@"
-python "$DIR/02_train.py" "$@"
-python "$DIR/03_evaluate.py" "$@"
+scripts/my_topic/01_calc_summary_out/
+├── data/my_topic/summary.json            # the output (data/ links here)
+└── FINISHED_SUCCESS/<session_id>/
+    ├── logs/{stdout,stderr}.log
+    └── CONFIGS/CONFIG.yaml               # frozen config + provenance record
 ```
 
-5. Optional Makefile target:
-
-```makefile
-run-my-experiment:
-	bash scripts/my_experiment/main.sh
-```
-
-## Conventions recap
-
-- `@stx.session(seed=…)` on every experiment entrypoint
-- `stx.io.save / load` for all file I/O (30+ formats, auto-mkdir)
-- `symlink_to=` for centralized `data/` provenance
-- Script name is `NN_description.py`; tests mirror under `tests/`
+Name scripts `NN_<verb>_<object>.py` in execution order; tests mirror them
+under `tests/`.

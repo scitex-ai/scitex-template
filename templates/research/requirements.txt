@@ -1,10 +1,41 @@
-# Runtime dependencies for the clew-aware MNIST example.
-# `pip install -r requirements.txt` or `uv pip install -r requirements.txt`.
-scitex>=2.0
-scitex-clew>=0.2
-numpy>=1.24
-matplotlib>=3.7
+# Runtime dependencies of the MNIST showcase (literature -> data -> analysis
+# -> figures -> claims -> manuscript -> live paper).
+#
+#   uv pip install -r requirements.txt     (or: pip install -r requirements.txt)
+#
+# The scripts import the standalone SciTeX packages directly
+# (`import scitex_session as sess`, `import scitex_io as sio`, ...). The
+# `scitex` umbrella is NOT required; do not install it into the same
+# environment unless its pins match the floors below.
+#
+# Floors are the releases this template was last verified with.
+
+# Literature
+scitex-scholar>=1.29.2
+# Data acquisition (checksummed, cached, recorded)
+scitex-dataset>=0.12.0
+# Session, config, I/O, logging, paths, reproducibility
+scitex-session>=0.6.1
+scitex-io>=0.6.2
+scitex-config>=0.3.11
+scitex-logging>=0.2.7
+scitex-path>=0.1.7
+scitex-repro>=0.1.7
+# Analysis
+scitex-ml>=0.2.0
+scitex-stats>=1.0.0
 scikit-learn>=1.3
-torch>=2.0
-torchvision>=0.15
-umap-learn>=0.5
+numpy>=1.24
+# Figures
+figrecipe>=0.44.7
+# Notebook variant of one step
+scitex-notebook>=0.1.4
+nbconvert>=7
+ipykernel>=6
+# Claims, verification, minimal graphs
+scitex-clew>=0.34.0
+# Manuscript and live paper
+scitex-writer>=2.43.22
+scitex-live-paper>=0.4.0
+# Quality gate (`make lint`)
+scitex-dev>=0.64.1

@@ -1,0 +1,33 @@
+%% -*- coding: utf-8 -*-
+\section{Methods}
+
+\subsection{Data}
+We used the MNIST handwritten-digit database~\citep{lecun1998gradient}.
+MNIST consists of 70,000 grayscale images of 28~$\times$~28 pixels, split
+into 60,000 training and 10,000 test images.
+%% ^ The numbers in the sentence above are typed by hand and NOT registered.
+%%   The live paper therefore gives them no verdict: it only assesses
+%%   registered claims (see the README, "What the live paper does not check").
+The file was fetched with scitex-dataset, which verifies its SHA-256
+checksum, caches it, and records its source URL, license and citation.
+A training subset was drawn at random with a fixed seed; all test images
+were used for evaluation. Pixel values were scaled to $[0, 1]$.
+
+\subsection{Classifiers}
+Logistic regression and a support-vector machine with a radial-basis-function
+kernel~\citep{cortes1995support} were built with scitex-ml on top of
+scikit-learn~\citep{pedregosa2011scikit}. Hyper-parameters, seeds and the
+training-subset size are listed in \texttt{config/MNIST.yaml}.
+
+\subsection{Statistics}
+The classifiers were compared on the same test images with McNemar's
+test~\citep{mcnemar1947note} with continuity correction (scitex-stats),
+which uses only the images exactly one of the two classifiers got wrong.
+
+\subsection{Provenance}
+Every script ran under \texttt{@scitex\_session.session}; every file was read
+and written through scitex-io, so scitex-clew recorded each run's inputs and
+outputs with their SHA-256 hashes. Each number in the Results is a registered
+claim that points to the file and JSON field it was read from.
+
+%%%% EOF

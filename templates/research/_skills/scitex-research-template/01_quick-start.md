@@ -4,68 +4,47 @@
 
 ## 1. Create the project
 
-Preferred route — via the SciTeX CLI:
-
 ```bash
-scitex template clone research ./my_project
-cd my_project
-```
-
-Alternative — clone directly:
-
-```bash
-git clone https://github.com/ywatanabe1989/scitex-research-template.git my_project
+scitex-template clone research ./my_project      # or create it in SciTeX Hub
 cd my_project
 ```
 
 ## 2. Install
 
 ```bash
-pip install scitex        # if not already installed
-make install              # project dependencies
-make setup                # full setup (install + verification)
+make install            # pip install -r requirements.txt (pinned SciTeX floors)
 ```
 
-Requires Python ≥3.10 and scitex ≥2.0.0.
+The manuscript step needs a LaTeX toolchain; scitex-writer provides one as
+an Apptainer image: `scitex-writer containers install texlive -y`.
 
-## 3. Run the MNIST example
+## 3. Run the showcase
 
 ```bash
-make run-mnist
+make all                # fetch -> train -> stats -> figures -> claims -> paper -> live paper -> verify
+make live-paper         # serve the live paper and print a guided tour
+make demo-fault         # plant a fault, see where the evidence breaks, restore
 ```
 
-This exercises the full pipeline: data download, preprocessing,
-training, evaluation, and figure generation. Outputs land in
-`scripts/mnist/*_out/FINISHED_SUCCESS/<session_id>/`.
+`make all` needs network once (the MNIST download, ~11 MB, sha256-checked,
+and the writer workspace). Everything else runs offline on a CPU.
 
-## 4. Clean the example and start your own work
+## 4. Start your own work
 
 ```bash
-make clean-mnist          # remove the MNIST pipeline
-cp scripts/template.py scripts/my_experiment/01_analyze.py
+make clean-outputs      # drop the example's outputs (keeps the scripts)
+mkdir scripts/my_topic
 ```
 
-See [02_structure.md](02_structure.md) for the layout and
-[11_writing-scripts.md](11_writing-scripts.md) for the `@stx.session`
-pattern every script should follow.
+Write `@scitex_session.session` scripts (see
+[11_writing-scripts.md](11_writing-scripts.md)), declare the numbers you
+report in `config/CLAIMS.yaml`, and write them as `\vclaim{<id>}` in
+`manuscript/` (see [12_showcase-flow.md](12_showcase-flow.md)).
 
-## 5. Add a manuscript (optional)
-
-```bash
-make setup-writer
-# or
-scitex writer clone scitex/writer/my_paper
-```
-
-LaTeX manuscripts live under `scitex/writer/` and share resources
-(title, authors, bibliography) across `00_shared/`, `01_manuscript/`,
-`02_supplementary/`, `03_revision/`.
-
-## 6. Day-to-day
+## 5. Day-to-day
 
 ```bash
-make check                # format + lint + test (run before committing)
-make test                 # tests only
-make format               # ruff format + shfmt
-make lint                 # ruff check
+make verify             # clew verify --strict + minimal graph per claim
+make lint               # scitex-dev linter + ruff
+make test               # tests (run the pipeline for real)
 ```

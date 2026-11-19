@@ -1,0 +1,241 @@
+{
+    "generated_at": "2026-11-19T06:10:20+00:00",
+    "tool": "scitex-scholar",
+    "tool_version": "1.29.2",
+    "api": "scitex_scholar.pipelines.ScholarPipelineMetadataParallel",
+    "seed": "./config/references_seed.bib",
+    "output": "./data/literature/references.bib",
+    "bib_fields": [
+        "title",
+        "author",
+        "journal",
+        "year",
+        "volume",
+        "number",
+        "pages",
+        "publisher",
+        "doi",
+        "eprint",
+        "archiveprefix"
+    ],
+    "entries": [
+        {
+            "key": "lecun1998gradient",
+            "doi": "10.1109/5.726791",
+            "added": [
+                "author",
+                "volume"
+            ],
+            "changed": [],
+            "sources": {
+                "citation_count.total": [
+                    "OpenAlex"
+                ],
+                "citation_count.2025": [
+                    "OpenAlex"
+                ],
+                "citation_count.2024": [
+                    "OpenAlex"
+                ],
+                "citation_count.2023": [
+                    "OpenAlex"
+                ],
+                "citation_count.2022": [
+                    "OpenAlex"
+                ],
+                "citation_count.2021": [
+                    "OpenAlex"
+                ],
+                "citation_count.2020": [
+                    "OpenAlex"
+                ],
+                "citation_count.2019": [
+                    "OpenAlex"
+                ],
+                "citation_count.2018": [
+                    "OpenAlex"
+                ],
+                "citation_count.2017": [
+                    "OpenAlex"
+                ],
+                "citation_count.2016": [
+                    "OpenAlex"
+                ],
+                "citation_count.2015": [
+                    "OpenAlex"
+                ]
+            },
+            "citation_count": "72723"
+        },
+        {
+            "key": "cortes1995support",
+            "doi": "10.1007/BF00994018",
+            "added": [
+                "author",
+                "journal",
+                "volume"
+            ],
+            "changed": [],
+            "sources": {
+                "citation_count.total": [
+                    "CrossRef"
+                ],
+                "citation_count.2025": [
+                    "OpenAlex"
+                ],
+                "citation_count.2024": [
+                    "OpenAlex"
+                ],
+                "citation_count.2023": [
+                    "OpenAlex"
+                ],
+                "citation_count.2022": [
+                    "OpenAlex"
+                ],
+                "citation_count.2021": [
+                    "OpenAlex"
+                ],
+                "citation_count.2020": [
+                    "OpenAlex"
+                ],
+                "citation_count.2019": [
+                    "OpenAlex"
+                ],
+                "citation_count.2018": [
+                    "OpenAlex"
+                ],
+                "citation_count.2017": [
+                    "OpenAlex"
+                ],
+                "citation_count.2016": [
+                    "OpenAlex"
+                ],
+                "citation_count.2015": [
+                    "OpenAlex"
+                ],
+                "publication.journal": [
+                    "CrossRef"
+                ]
+            },
+            "citation_count": "31489"
+        },
+        {
+            "key": "pedregosa2011scikit",
+            "doi": "10.48550/arxiv.1201.0490",
+            "added": [
+                "author",
+                "journal",
+                "doi"
+            ],
+            "changed": [
+                "year"
+            ],
+            "sources": {
+                "id.doi": [
+                    "URL",
+                    "OpenAlexLocal",
+                    "Semantic_Scholar",
+                    "CrossRef",
+                    "OpenAlex",
+                    "PubMed"
+                ],
+                "id.arxiv_id": [
+                    "input"
+                ],
+                "citation_count.total": [
+                    "OpenAlex"
+                ],
+                "citation_count.2025": [
+                    "OpenAlex"
+                ],
+                "citation_count.2024": [
+                    "OpenAlex"
+                ],
+                "citation_count.2023": [
+                    "OpenAlex"
+                ],
+                "citation_count.2022": [
+                    "OpenAlex"
+                ],
+                "citation_count.2021": [
+                    "OpenAlex"
+                ],
+                "citation_count.2020": [
+                    "OpenAlex"
+                ],
+                "citation_count.2019": [
+                    "OpenAlex"
+                ],
+                "citation_count.2018": [
+                    "OpenAlex"
+                ],
+                "citation_count.2017": [
+                    "OpenAlex"
+                ],
+                "citation_count.2016": [
+                    "OpenAlex"
+                ],
+                "citation_count.2015": [
+                    "OpenAlex"
+                ],
+                "publication.journal": [
+                    "OpenAlex"
+                ]
+            },
+            "citation_count": "71909"
+        },
+        {
+            "key": "mcnemar1947note",
+            "doi": "10.1007/BF02295996",
+            "added": [
+                "author",
+                "journal",
+                "volume"
+            ],
+            "changed": [],
+            "sources": {
+                "citation_count.total": [
+                    "CrossRef"
+                ],
+                "citation_count.2025": [
+                    "OpenAlex"
+                ],
+                "citation_count.2024": [
+                    "OpenAlex"
+                ],
+                "citation_count.2023": [
+                    "OpenAlex"
+                ],
+                "citation_count.2022": [
+                    "OpenAlex"
+                ],
+                "citation_count.2021": [
+                    "OpenAlex"
+                ],
+                "citation_count.2020": [
+                    "OpenAlex"
+                ],
+                "citation_count.2019": [
+                    "OpenAlex"
+                ],
+                "citation_count.2018": [
+                    "OpenAlex"
+                ],
+                "citation_count.2017": [
+                    "OpenAlex"
+                ],
+                "citation_count.2016": [
+                    "OpenAlex"
+                ],
+                "citation_count.2015": [
+                    "OpenAlex"
+                ],
+                "publication.journal": [
+                    "CrossRef",
+                    "PubMed"
+                ]
+            },
+            "citation_count": "4307"
+        }
+    ]
+}
