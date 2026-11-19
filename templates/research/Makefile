@@ -115,6 +115,9 @@ claims: paper-init
 #    Figure 1 and the resolved bibliography into it.
 paper-init:
 	@test -d $(WORKSPACE)/00_shared || $(WRITER) create-project . --yes
+	@# writer's compile engine needs the workspace inside a git repo (it exits
+	@# 128 otherwise); create-project does not always initialise one.
+	@git -C $(WORKSPACE) rev-parse --show-toplevel >/dev/null 2>&1 || git -C $(WORKSPACE) init -q
 	@cd manuscript && find . -type f -name '*.tex' | while read -r f; do \
 		mkdir -p "../$(WORKSPACE)/$$(dirname "$$f")"; \
 		rm -f "../$(WORKSPACE)/$$f"; cp -f "$$f" "../$(WORKSPACE)/$$f"; \
