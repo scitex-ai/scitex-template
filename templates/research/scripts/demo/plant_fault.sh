@@ -17,6 +17,9 @@
 
 set -euo pipefail
 
+# Run from the project root whatever the caller's cwd (or a BASH_ENV) did.
+cd "$(dirname "$(realpath "$0")")/../.."
+
 PYTHON="${PYTHON:-python3}"
 CLEW="${CLEW:-clew}"
 LIVE_PAPER="${LIVE_PAPER:-scitex-live-paper}"

@@ -697,6 +697,7 @@ scripts/mnist/00_resolve_references_out/*
 
 # Optional build outputs
 container/*.sif
+container/research/
 
 # Override **/*.txt for requirements
 !requirements.txt

@@ -48,9 +48,9 @@ http://127.0.0.1:8765/. Guided tour:
    file scitex-dataset fetched (pinned as a trusted source by
    `make register-source`). Every claim has a deep link,
    `paper.html#claim-<id>`.
-4. **Look at the Methods.** The dataset sizes there are typed by hand and
-   not registered, so they get no verdict: the live paper assesses only
-   registered claims.
+4. **Look for what is not highlighted.** "all 10,000 images of the official
+   test set" in the Results was typed by hand and not registered, so it gets
+   no verdict: the live paper assesses only registered claims.
 5. **Break something**: `make demo-fault` hand-edits the SVM accuracy in
    `metrics.json`, shows that `clew verify --strict` fails, renders the
    faulty live paper to `data/live_paper/site-fault/` (the claims list names

@@ -1,13 +1,9 @@
 %% -*- coding: utf-8 -*-
-%% Every number written as \vclaim{<id>} is a REGISTERED claim: scitex-writer
-%% renders its value from the scitex-clew store, and clew checks it against
-%% the file and JSON pointer declared in config/CLAIMS.yaml. Do not type
-%% result numbers here; register them (scripts/mnist/05_register_claims.py).
-
 \section{Results}
 
 Both classifiers were trained on the same \vclaim{n_train} training images
-and evaluated on the official test set (Figure~\ref{fig:01_mnist_overview}).
+and evaluated on all 10,000 images of the official test set
+(Figure~\ref{fig:01_mnist_overview}).
 Logistic regression reached a test accuracy of \vclaim{logreg_accuracy},
 and the RBF support-vector machine reached \vclaim{svc_accuracy}.
 

@@ -157,8 +157,8 @@ live-paper: live-paper-build
 	@echo "     its minimal graph: claim <- metrics.json <- training run <- arrays"
 	@echo "     <- the MNIST file scitex-dataset fetched (sha256-pinned source)."
 	@echo "     Deep link: http://$(LP_HOST):$(LP_PORT)/paper.html#claim-svc_accuracy"
-	@echo "  3. The dataset sizes in the Methods are not highlighted: they were typed"
-	@echo "     by hand and not registered, so the live paper makes no claim about them."
+	@echo "  3. '10,000 images of the official test set' in the Results is NOT highlighted:"
+	@echo "     it was typed by hand and not registered, so the live paper says nothing about it."
 	@echo "  4. Then run 'make demo-fault' and open data/live_paper/site-fault/paper.html:"
 	@echo "     the changed claims move to the top, and their graph marks where the"
 	@echo "     evidence broke (the CHANGED metrics.json)."
@@ -179,7 +179,7 @@ slice:
 	done
 
 demo-fault:
-	PYTHON=$(PYTHON) CLEW=$(CLEW) LIVE_PAPER=$(LIVE_PAPER) bash scripts/demo/plant_fault.sh
+	PYTHON=$(PYTHON) CLEW=$(CLEW) LIVE_PAPER=$(LIVE_PAPER) bash "$(CURDIR)/scripts/demo/plant_fault.sh"
 
 # ============================================
 # Optional: HPC, container, submission

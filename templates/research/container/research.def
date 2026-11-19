@@ -18,6 +18,9 @@ From: python:3.12-slim
 
 %environment
     export PYTHONUNBUFFERED=1
+    # Apptainer binds $HOME: never let the host's ~/.local site-packages
+    # shadow the image's pinned packages.
+    export PYTHONNOUSERSITE=1
 
 %labels
     Purpose SciTeX research template (MNIST showcase) Python environment
