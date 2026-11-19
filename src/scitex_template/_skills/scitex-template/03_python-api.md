@@ -12,6 +12,9 @@ tags: [scitex-template-python-api, scitex-template, scitex-package]
 ```python
 from scitex_template import clone_template_from_cache, load_registry, find_template
 
+# Populate the target and initialize the cache on a wheel-only installation.
+clone_template_from_cache("research", "./my-proj")
+
 # Enumerate
 for e in load_registry():
     print(e.id, e.version, e.description, e.path)
@@ -20,7 +23,6 @@ for e in load_registry():
 find_template("research")   # TemplateEntry | None
 
 # Populate a target
-clone_template_from_cache("research", "./my-proj")        # raises on unknown id
 clone_template_from_cache("paper", "./paper", branch="main", force_refresh=True)
 ```
 

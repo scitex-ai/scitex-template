@@ -8,7 +8,8 @@ Template management for SciTeX projects.
 from __future__ import annotations
 
 try:
-    from importlib.metadata import version as _v, PackageNotFoundError
+    from importlib.metadata import PackageNotFoundError
+    from importlib.metadata import version as _v
     try:
         __version__ = _v("scitex-template")
     except PackageNotFoundError:
@@ -47,6 +48,7 @@ else:
     init_git_repo = _missing_scitex_git("init_git_repo")
     remove_child_git = _missing_scitex_git("remove_child_git")
 
+from ._cache import clone_template_from_cache
 from ._code._code_templates import (
     CODE_TEMPLATES,
     get_all_templates,
@@ -85,6 +87,7 @@ from ._project.clone_singularity import TEMPLATE_REPO_URL as SINGULARITY_URL
 from ._project.clone_singularity import clone_singularity
 from ._project.clone_writer_directory import TEMPLATE_REPO_URL as PAPER_DIRECTORY_URL
 from ._project.clone_writer_directory import clone_writer_directory
+from .registry import find_template, load_registry
 
 
 def get_template_tree(template_id):
@@ -224,6 +227,9 @@ __all__ = [
     "__version__",
     "clone_template",
     "clone_template_result",
+    "clone_template_from_cache",
+    "find_template",
+    "load_registry",
     "CloneOutcome",
     "clone_module",
     "clone_research",
