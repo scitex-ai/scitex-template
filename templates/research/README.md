@@ -21,7 +21,7 @@ that wrote it, and the **live paper** shows which of those links still hold.
 ```bash
 scitex-template clone research ./my_project     # or: create a project in SciTeX Hub
 cd my_project
-make install                                    # pinned SciTeX packages
+make install                                    # SciTeX package version floors
 scitex-writer containers install texlive -y     # LaTeX toolchain (once per machine)
 make all                                        # the whole showcase
 make live-paper                                 # serve it, with a guided tour
@@ -29,6 +29,14 @@ make live-paper                                 # serve it, with a guided tour
 
 `make all` needs the network once: the MNIST file (11 MB, from the Keras
 mirror, checked against its published SHA-256) and the writer workspace.
+The manuscript build also needs a working `yq` on `PATH`, Apptainer for
+the LaTeX container, and the Writer tools `latexdiff` and GNU `parallel`.
+Install those system tools before running the showcase. Writer 2.44.1
+and Clew 0.35.0 or later provide the claim-store integration used here.
+Before `make all`, set `SCITEX_STORE_DSN` to a project database provisioned
+for you by the deployment (see “Provenance store” below). Record the resolved
+package versions when retaining a run; the requirements specify minimum
+versions, not an environment lock.
 
 ## The live paper
 
