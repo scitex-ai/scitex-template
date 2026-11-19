@@ -1,29 +1,47 @@
-# Timestamp: "2025-11-18 10:48:19 (ywatanabe)"
-# File: ./config/PATH.yaml
+# Every file the MNIST showcase reads or writes, in one place.
+# Every value is an f-string literal (scitex-dev PS-PATH-002); scripts resolve
+# it with eval(CONFIG.PATH.<KEY>). Nothing else in scripts/ names a path.
+#
+# Relative output paths are anchored by scitex-io to the writing script's
+# <script>_out/ directory; `symlink_from_cwd=True` adds the stable link at
+# the path below (run every script from the project root, as `make` does).
+
+LITERATURE:
+  SEED_BIB: f"./config/references_seed.bib"       # hand-curated: titles + DOIs
+  BIB: f"./data/literature/references.bib"        # resolved by scitex-scholar (committed)
+  BIB_RECORD: f"./data/literature/references_record.json"
 
 MNIST:
-  RAW:
-    "./data/mnist/raw/"
-  LOADER:
-    TRAIN:
-      "./data/mnist/train_loader.pkl"
-    TEST:
-      "./data/mnist/test_loader.pkl"
-  FLATTENED:
-    TRAIN:
-      "./data/mnist/train_flattened.npy"
-    TEST:
-      "./data/mnist/test_flattened.npy"
-  LABELS:      
-    TRAIN:
-      "./data/mnist/train_labels.npy"
-    TEST:
-      "./data/mnist/test_labels.npy"
-  FIGURES:
-    "./data/mnist/figures/"
-  MODELS:
-    "./data/mnist/models/"
-  MODEL_SVM:
-    f"{CONFIG.PATH.MNIST.MODELS}/mnist_svm.pkl"
+  RAW_DIR: f"./data/raw/mnist"                     # scitex-dataset cache (checksummed)
+  RAW_NPZ: f"./data/raw/mnist/mnist.npz"
+  DATASET_RECORD: f"./data/mnist/dataset_record.json"
+  X_TRAIN: f"./data/mnist/X_train.npy"
+  Y_TRAIN: f"./data/mnist/y_train.npy"
+  X_TEST: f"./data/mnist/X_test.npy"
+  Y_TEST: f"./data/mnist/y_test.npy"
+  CLASS_COUNTS: f"./data/mnist/class_counts.json"  # written by the notebook variant
 
-# EOF
+RESULTS:
+  PRED_LOGREG: f"./data/results/pred_logreg.npy"
+  PRED_SVC: f"./data/results/pred_svc.npy"
+  METRICS: f"./data/results/metrics.json"
+  CONF_MAT_SVC: f"./data/results/conf_mat_svc.csv"
+  PER_CLASS_RECALL: f"./data/results/per_class_recall.csv"
+  MCNEMAR: f"./data/results/mcnemar.json"
+
+FIGURES:
+  PANEL_DIGITS: f"./data/figures/panel_a_digits.png"
+  PANEL_CONF_MAT: f"./data/figures/panel_b_conf_mat.png"
+  PANEL_RECALL: f"./data/figures/panel_c_recall.png"
+  FIG1: f"./data/figures/fig1_mnist.png"
+
+PAPER:
+  # scitex-writer workspace (created by `make paper-init`); the manuscript
+  # text itself lives in ./manuscript/ and is copied into the workspace.
+  WORKSPACE: f"./.scitex/writer"
+  PDF: f"./.scitex/writer/01_manuscript/manuscript.pdf"
+
+LIVE_PAPER:
+  BUNDLE: f"./data/live_paper/bundle"
+  SITE: f"./data/live_paper/site"
+  EVIDENCE: f"./data/live_paper/bundle/evidence-report.json"

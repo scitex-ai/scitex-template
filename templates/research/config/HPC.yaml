@@ -1,0 +1,10 @@
+# Optional `make hpc`: run the compute-heavy step on a Slurm cluster via
+# scitex-hpc. Host, account and partition are given on the make command line
+# (they are per-user); the resources below are per-project.
+STEP: scripts/mnist/02_train_classifiers.py
+CPUS: 4
+MEM: 8G
+TIME: "00:30:00"
+JOB_NAME: mnist-train
+REMOTE_BASE: ~/proj                # project is synced to <REMOTE_BASE>/<project name>
+REMOTE_VENV: ~/.venvs/scitex-research   # created on the login node from requirements.txt

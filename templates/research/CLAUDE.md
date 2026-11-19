@@ -5,11 +5,14 @@ automated data management, and manuscript writing.
 
 ## Key Conventions
 
-- Use `@stx.session(seed=42)` decorator for all experiment scripts
-- Use `stx.io.save(data, path)` and `stx.io.load(path)` for all file I/O (30+ formats)
-- Scripts go in `scripts/` with numbered prefixes: `01_preprocess.py`, `02_train.py`, etc.
-- Script outputs land in `{script_name}_out/` and are symlinked to `data/` for centralized access
-- Use `symlink_to` parameter in `stx.io.save()` to create data provenance links
+- Every analysis script is a `@scitex_session.session`-decorated `main` (`import scitex_session as sess`)
+- All file I/O through `scitex_io` (`sio.load` / `sio.save(..., symlink_from_cwd=True)`) so clew records it
+- Parameters in `config/*.yaml` (read via `CONFIG`), paths in `config/PATH.yaml`; no numbers in scripts (STX-S008)
+- Scripts go in `scripts/<topic>/` as `NN_<verb>_<object>.py` in execution order
+- Outputs land in `<script>_out/` and are linked into `data/`
+- Every number reported in the manuscript is a registered claim (`config/CLAIMS.yaml` + `\vclaim{id}`)
+- `make verify` (`clew verify --strict`) must pass before a result is called done
+- The MNIST showcase (`make all`, `make live-paper`) is the worked example; see README.md
 
 ## Directory Conventions
 
@@ -44,4 +47,4 @@ scitex template get io         # I/O operations template
 
 - No silent fallbacks. Errors must be visible, not hidden.
 - No placeholder or stub implementations unless explicitly requested.
-- Every script must be reproducible via `@stx.session(seed=42)`.
+- Every script must be reproducible via `@scitex_session.session` with seeds from `config/`.
