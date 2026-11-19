@@ -37,13 +37,17 @@ mirror, checked against its published SHA-256) and the writer workspace.
 using the evidence that scitex-clew exports, and serves it on
 http://127.0.0.1:8765/. Guided tour:
 
-1. **Start at the claims list.** Claims that need inspection come first.
-   After a fresh `make all`, every registered claim is supported.
-2. **Open a highlighted number** in the Results, e.g. the SVM accuracy: its
-   state, the source file and the JSON field it was read from.
-3. **Follow its minimal graph**: claim <- `data/results/metrics.json` <- the
-   training run <- the arrays <- the MNIST file scitex-dataset fetched
-   (pinned as a trusted source by `make register-source`).
+1. **Open `paper.html`**: the manuscript with every registered claim
+   highlighted by its state. The claims navigator lists the claims that need
+   inspection first; after a fresh `make all` there are none.
+2. **Click a highlighted claim**, e.g. the SVM accuracy: the evidence panel
+   shows its state, the stated vs the source value, the source file and the
+   JSON pointer it was read from.
+3. **Follow its minimal graph** in the same panel: claim <-
+   `data/results/metrics.json` <- the training run <- the arrays <- the MNIST
+   file scitex-dataset fetched (pinned as a trusted source by
+   `make register-source`). Every claim has a deep link,
+   `paper.html#claim-<id>`.
 4. **Look at the Methods.** The dataset sizes there are typed by hand and
    not registered, so they get no verdict: the live paper assesses only
    registered claims.

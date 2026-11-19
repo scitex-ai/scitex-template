@@ -124,7 +124,6 @@ def main(
         layout=(1, len(order)),
         gap_mm=CONFIG.FIGURE.COMPOSE.GAP_MM,
         panel_labels=True,
-        caption=CONFIG.FIGURE.COMPOSE.CAPTION,
     )
     sio.save(  # stx-allow: STX-FM019
         fig, P.FIGURES.FIG1, symlink_from_cwd=True, derived_from=order

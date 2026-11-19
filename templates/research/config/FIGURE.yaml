@@ -26,4 +26,3 @@ RECALL:
 
 COMPOSE:
   GAP_MM: 6
-  CAPTION: MNIST classification with two classifiers.

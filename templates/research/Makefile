@@ -109,13 +109,15 @@ claims: paper-init
 	$(PYTHON) $(MNIST_DIR)/05_register_claims.py
 
 # 6. Manuscript (scitex-writer). paper-init creates the writer workspace once
-#    (network) and links the template's manuscript/ text, Figure 1 and the
-#    resolved bibliography into it; the text stays in manuscript/.
+#    (network), copies the manuscript text from manuscript/ into it (the
+#    source of truth is manuscript/: workspace copies are overwritten on every
+#    run; writer needs real files there to locate each \vclaim), and links
+#    Figure 1 and the resolved bibliography into it.
 paper-init:
-	@test -d $(WORKSPACE)/00_shared || $(WRITER) create-project . --git-strategy none
+	@test -d $(WORKSPACE)/00_shared || $(WRITER) create-project . --yes
 	@cd manuscript && find . -type f -name '*.tex' | while read -r f; do \
 		mkdir -p "../$(WORKSPACE)/$$(dirname "$$f")"; \
-		ln -sfn "$$(realpath "$$f")" "../$(WORKSPACE)/$$f"; \
+		rm -f "../$(WORKSPACE)/$$f"; cp -f "$$f" "../$(WORKSPACE)/$$f"; \
 	done
 	@rm -f $(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/0[12]_*example*.tex \
 		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/02_another_example.tex \
@@ -127,7 +129,7 @@ paper-init:
 	@echo "writer workspace ready: $(WORKSPACE)  (manuscript text: manuscript/)"
 
 paper: claims
-	$(WRITER) compile-manuscript .
+	$(WRITER) compile-manuscript -p . --yes
 	@echo "PDF: $(WORKSPACE)/01_manuscript/manuscript.pdf"
 
 # 7. Live paper (scitex-live-paper, evidence from scitex-clew)
@@ -146,16 +148,20 @@ live-paper-build: paper
 
 live-paper: live-paper-build
 	@echo ""
-	@echo "Guided tour of the live paper (http://$(LP_HOST):$(LP_PORT)/):"
-	@echo "  1. Start at the claims list: 'Needs inspection' comes first."
-	@echo "     With a fresh run every registered claim is supported."
-	@echo "  2. Open a highlighted number in the Results (e.g. the SVM accuracy):"
-	@echo "     its state, the source file and the JSON field it was read from."
-	@echo "  3. Follow its minimal graph: claim <- metrics.json <- training run"
-	@echo "     <- the MNIST file scitex-dataset fetched (sha256-pinned)."
-	@echo "  4. The dataset sizes in the Methods have no highlight: they were"
-	@echo "     typed by hand and not registered, so nothing is claimed for them."
-	@echo "  5. Then run 'make demo-fault' to see a broken claim and where it broke."
+	@echo "Guided tour of the live paper:"
+	@echo "  1. Open http://$(LP_HOST):$(LP_PORT)/paper.html -- the manuscript with every"
+	@echo "     registered claim highlighted. The claims navigator lists the claims"
+	@echo "     that need inspection first (after a fresh 'make all': none)."
+	@echo "  2. Click a highlighted claim (e.g. the SVM accuracy): the evidence panel"
+	@echo "     shows its state, stated vs source value, file and JSON pointer, and"
+	@echo "     its minimal graph: claim <- metrics.json <- training run <- arrays"
+	@echo "     <- the MNIST file scitex-dataset fetched (sha256-pinned source)."
+	@echo "     Deep link: http://$(LP_HOST):$(LP_PORT)/paper.html#claim-svc_accuracy"
+	@echo "  3. The dataset sizes in the Methods are not highlighted: they were typed"
+	@echo "     by hand and not registered, so the live paper makes no claim about them."
+	@echo "  4. Then run 'make demo-fault' and open data/live_paper/site-fault/paper.html:"
+	@echo "     the changed claims move to the top, and their graph marks where the"
+	@echo "     evidence broke (the CHANGED metrics.json)."
 	@echo ""
 	cd $(SITE) && $(PYTHON) -m http.server $(LP_PORT) --bind $(LP_HOST)
 
@@ -193,7 +199,7 @@ hpc:
 
 # Apptainer image with this project's Python environment (scitex-container).
 container:
-	scitex-container apptainer build container/research.def container/research.sif
+	$(PYTHON) -c "import scitex_container.apptainer as a; print(a.build(def_path='container/research.def', output_dir='container', image_name='research', force=True, cwd='.'))"
 
 submit:
 	@echo "make submit: placeholder. Submission to the SciTeX agentic journal"
@@ -217,8 +223,9 @@ test:
 # Cleanup
 # ============================================
 clean-outputs:
-	find scripts -type d -name '*_out' ! -name '00_resolve_references_out' -prune -exec rm -rf {} +
-	rm -rf data/mnist data/results data/figures data/live_paper
+	find scripts notebooks -type d -name '*_out' ! -name '00_resolve_references_out' -prune -exec rm -rf {} +
+	find data/mnist data/results -mindepth 1 ! -name .gitkeep -delete
+	rm -rf data/figures data/live_paper
 
 clean-paper:
 	rm -rf $(WORKSPACE)

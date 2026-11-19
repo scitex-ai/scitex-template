@@ -2,7 +2,7 @@ Bootstrap: docker
 From: python:3.12-slim
 
 # Apptainer image with this project's Python environment (`make container`).
-# Built with scitex-container:  scitex-container apptainer build container/research.def container/research.sif
+# Built with scitex-container (`make container`): scitex_container.apptainer.build(def_path=...)
 # Run a step inside it:         apptainer exec container/research.sif python scripts/mnist/02_train_classifiers.py
 #
 # The image holds the pinned Python packages only. LaTeX for the manuscript
@@ -10,11 +10,11 @@ From: python:3.12-slim
 # (`scitex-writer containers install texlive -y`).
 
 %files
-    requirements.txt /opt/project/requirements.txt
+    requirements.txt /opt/requirements.txt
 
 %post
     apt-get update && apt-get install -y --no-install-recommends git make && rm -rf /var/lib/apt/lists/*
-    pip install --no-cache-dir -r /opt/project/requirements.txt
+    pip install --no-cache-dir -r /opt/requirements.txt
 
 %environment
     export PYTHONUNBUFFERED=1

@@ -53,23 +53,25 @@ def main(
     """Register every claim of config/CLAIMS.yaml in the clew store."""
     workspace = CONFIG.PATH.PAPER.WORKSPACE
     loaded = {}
-    for item in CONFIG.CLAIMS.ITEMS:
-        path = source_path(CONFIG, item.SOURCE)
+    for entry in CONFIG.CLAIMS.ITEMS:
+        # list items load as plain dicts (keys as written: upper case)
+        claim_id, pointer = entry["ID"], entry["POINTER"]
+        path = source_path(CONFIG, entry["SOURCE"])
         if path not in loaded:
             loaded[path] = sio.load(path)
-        value = stated_value(resolve_pointer(loaded[path], item.POINTER), item.DIGITS)
+        value = stated_value(resolve_pointer(loaded[path], pointer), entry["DIGITS"])
         result = sw.claim.add(
             workspace,
-            item.ID,
+            claim_id,
             "value",
             {"value": value},
-            context=item.CONTEXT,
+            context=entry["CONTEXT"],
             output_file=path.removeprefix("./"),
-            source_keys={"value": {"pointer": item.POINTER}},
+            source_keys={"value": {"pointer": pointer}},
         )
         if not result.get("success"):
-            raise RuntimeError(f"claim {item.ID!r} was not registered: {result}")
-        logger.success(f"claim {item.ID} = {value}  <- {path}#{item.POINTER}")
+            raise RuntimeError(f"claim {claim_id!r} was not registered: {result}")
+        logger.success(f"claim {claim_id} = {value}  <- {path}#{pointer}")
 
     rendered = sw.claim.render(workspace)
     if not rendered.get("success"):
