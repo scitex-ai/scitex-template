@@ -1,0 +1,26 @@
+Bootstrap: docker
+From: python:3.12-slim
+
+# Apptainer image with this project's Python environment (`make container`).
+# Built with scitex-container (`make container`): scitex_container.apptainer.build(def_path=...)
+# Run a step inside it:         apptainer exec container/research.sif python scripts/mnist/02_train_classifiers.py
+#
+# The image holds the pinned Python packages only. LaTeX for the manuscript
+# comes from scitex-writer's own TeX Live image
+# (`scitex-writer containers install texlive -y`).
+
+%files
+    requirements.txt /opt/requirements.txt
+
+%post
+    apt-get update && apt-get install -y --no-install-recommends git make && rm -rf /var/lib/apt/lists/*
+    pip install --no-cache-dir -r /opt/requirements.txt
+
+%environment
+    export PYTHONUNBUFFERED=1
+    # Apptainer binds $HOME: never let the host's ~/.local site-packages
+    # shadow the image's pinned packages.
+    export PYTHONNOUSERSITE=1
+
+%labels
+    Purpose SciTeX research template (MNIST showcase) Python environment

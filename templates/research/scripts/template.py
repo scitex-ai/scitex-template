@@ -1,30 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-11-18 10:41:15 (ywatanabe)"
-# File: /home/ywatanabe/proj/examples/scitex-research-template/scripts/template.py
+# File: scripts/<topic>/NN_<verb>_<object>.py
+
+"""Top-level docstring (becomes --help)."""
+
+import scitex_session as sess
 
 
-"""Top-level docstring here"""
-
-# Imports
-import scitex as stx
-
-# # Parameters
-# CONFIG = stx.io.load_configs() # For imported files using `./config/*.yaml`
-
-
-# Functions and Classes
-@stx.session
+@sess.session
 def main(
-    # arg1,
-    # kwarg1="value1",
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=sess.INJECTED,
+    plt=sess.INJECTED,
+    COLORS=sess.INJECTED,
+    rngg=sess.INJECTED,
+    logger=sess.INJECTED,
 ):
-    """Help message for `$ python __file__ --help`"""
+    """Read inputs with scitex_io.load, write outputs with scitex_io.save."""
     return 0
 
 

@@ -1,0 +1,3 @@
+# SciTeX dev config: this repo is a research project (not a pip package).
+project-type:
+  - research

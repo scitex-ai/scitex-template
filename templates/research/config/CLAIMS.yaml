@@ -1,0 +1,43 @@
+# Manuscript claims. Each entry is registered by
+# scripts/mnist/05_register_claims.py through scitex-writer into the
+# scitex-clew store, and written in the manuscript as \vclaim{<ID>}.
+#
+#   SOURCE  key of CONFIG.PATH.RESULTS / CONFIG.PATH.MNIST (the file the value
+#           is read from; it must have been written by a recorded run)
+#   POINTER RFC 6901 JSON pointer to the value inside SOURCE (the locator clew
+#           uses to re-read and compare the stated value)
+#   DIGITS  decimals the value is written with in the text (sets the implied
+#           tolerance); 0 = integer
+#
+# Numbers typed into the manuscript without an entry here are NOT checked.
+ITEMS:
+  - ID: n_train
+    CONTEXT: Number of training images drawn from the MNIST training set
+    SOURCE: MNIST.DATASET_RECORD
+    POINTER: /n_train
+    DIGITS: 0
+  - ID: logreg_accuracy
+    CONTEXT: Test accuracy of logistic regression
+    SOURCE: RESULTS.METRICS
+    POINTER: /LOGREG/accuracy
+    DIGITS: 4
+  - ID: svc_accuracy
+    CONTEXT: Test accuracy of the RBF support-vector machine
+    SOURCE: RESULTS.METRICS
+    POINTER: /SVC/accuracy
+    DIGITS: 4
+  - ID: only_svc_correct
+    CONTEXT: Test images classified correctly only by the SVM
+    SOURCE: RESULTS.MCNEMAR
+    POINTER: /only_svc_correct
+    DIGITS: 0
+  - ID: only_logreg_correct
+    CONTEXT: Test images classified correctly only by logistic regression
+    SOURCE: RESULTS.MCNEMAR
+    POINTER: /only_logreg_correct
+    DIGITS: 0
+  - ID: mcnemar_chi2
+    CONTEXT: McNemar chi-square statistic (continuity-corrected), LogReg vs SVM
+    SOURCE: RESULTS.MCNEMAR
+    POINTER: /statistic
+    DIGITS: 1

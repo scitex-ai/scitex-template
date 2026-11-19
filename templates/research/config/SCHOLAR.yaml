@@ -1,0 +1,26 @@
+# Parameters of scripts/mnist/00_resolve_references.py (scitex-scholar).
+# Paths are in config/PATH.yaml (CONFIG.PATH.LITERATURE.*).
+
+# Concurrent API workers. Kept low: public CrossRef answers 429 under load.
+N_WORKERS: 1
+
+# Fields kept in the manuscript bibliography. Volatile, source-generated
+# fields (citation counts, keywords, abstract) are excluded so that
+# references.bib only changes when the bibliographic record changes;
+# citation counts go to the provenance record instead.
+BIB_FIELDS:
+  - title
+  - author
+  - journal
+  - year
+  - volume
+  - number
+  - pages
+  - publisher
+  - doi
+  - eprint
+  - archiveprefix
+
+# Fields recorded per entry in the provenance record (not in the .bib).
+NOTE_FIELDS:
+  - citation_count
