@@ -1,0 +1,7 @@
+# Statistical-test parameters (scitex-stats).
+# McNemar's test compares the two classifiers on the SAME test images:
+# it uses only the images exactly one of them got wrong.
+MCNEMAR:
+  ALPHA: 0.05
+  CONTINUITY_CORRECTION: true
+  DECIMALS: 6             # precision of the stored statistic / p-value

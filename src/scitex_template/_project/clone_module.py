@@ -23,11 +23,9 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-import logging
+import scitex_logging as slogging
 
-getLogger = logging.getLogger
-
-logger = getLogger(__name__)
+logger = slogging.getLogger(__name__)
 
 TEMPLATE_REPO_URL = "https://github.com/ywatanabe1989/scitex-template-cloud-module.git"
 
@@ -223,9 +221,10 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print("Usage: python -m scitex clone_module <project-dir>")
-        print("")
-        print("Creates a SciTeX module template project.")
+        logger.error(
+            "Usage: python -m scitex clone_module <project-dir>\n"
+            "Creates a SciTeX module template project."
+        )
         sys.exit(1)
 
     success = clone_module(args[0])

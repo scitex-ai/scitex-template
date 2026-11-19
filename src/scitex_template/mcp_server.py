@@ -30,6 +30,8 @@ warnings.warn(
 
 import asyncio
 
+import scitex_logging as slogging
+
 # Graceful MCP dependency handling — `mcp` ships in the `mcp` extra.
 from scitex_dev import try_import_optional
 
@@ -56,6 +58,8 @@ MCP_AVAILABLE = all(
     x is not None
     for x in (types, Server, NotificationOptions, InitializationOptions, stdio_server)
 )
+
+log = slogging.getLogger(__name__)
 
 __all__ = ["TemplateServer", "main", "MCP_AVAILABLE"]
 
@@ -189,15 +193,13 @@ def main():
     if not MCP_AVAILABLE:
         import sys
 
-        print("=" * 60)
-        print("MCP Server 'scitex-template' requires the 'mcp' package.")
-        print()
-        print("Install with:")
-        print("  pip install mcp")
-        print()
-        print("Or install scitex with MCP support:")
-        print("  pip install scitex[mcp]")
-        print("=" * 60)
+        log.error(
+            "MCP Server 'scitex-template' requires the 'mcp' package.\n"
+            "Install with:\n"
+            "  pip install scitex-template[mcp]\n"
+            "Or install scitex with MCP support:\n"
+            "  pip install scitex[mcp]"
+        )
         sys.exit(1)
 
     asyncio.run(_run_server())

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (MNIST showcase, 0.2.0)
+- The MNIST example now runs the SciTeX ecosystem end to end: scitex-scholar
+  (references), scitex-dataset (checksummed fetch), scitex-session/io/config/repro,
+  scitex-ml, scitex-stats (McNemar), figrecipe (mm panels composed from recipes),
+  scitex-notebook, scitex-clew (registered claims with locators, `verify --strict`,
+  minimal slices), scitex-writer (`\vclaim`) and scitex-live-paper.
+- `make all`, `make live-paper` (guided tour), `make verify`, `make demo-fault`
+  (planted fault, hash-checked restore); optional `make hpc`, `make container`.
+- Scripts import the standalone packages; torch/torchvision/umap are no longer needed.
+
+### Removed
+- `scripts/mnist/01_download.py` ... `06_register_claims.py`, `main.sh`,
+  `scripts/verify/check_schema.py` and `make solve` (superseded by the showcase).
+
 ### Added
 - Comprehensive README with collapsible sections
 - Documentation for `scitex.io` and `scitex.session` core modules

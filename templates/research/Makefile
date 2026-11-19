@@ -1,370 +1,248 @@
 # ============================================
-# SciTeX Template Research - Makefile
+# SciTeX Research Template - Makefile
 # ============================================
-# Scientific research project workflow automation
-# Location: /Makefile
+# The MNIST showcase runs the SciTeX ecosystem end to end:
 #
-# Key Features:
-# - Script execution and pipeline management
-# - Dependency installation and environment setup
-# - Output cleaning and data management
-# - Code formatting and quality checks
-# - Testing automation
+#   literature -> data -> analysis -> statistics -> figures -> claims
+#              -> manuscript -> live paper
 #
-# Usage:
-#   make help                      # Show this help
-#   make install                   # Install dependencies
-#   make run-mnist                 # Run MNIST example pipeline
-#   make clean                     # Clean outputs
-#   make format                    # Format code
-#   make test                      # Run tests
+#   make all          everything below, offline except the first data fetch
+#   make live-paper   build the live paper and serve it (guided tour)
+#   make verify       clew verify --strict + the minimal graph of each claim
+#   make demo-fault   plant a fault, watch the live paper flag it, restore
+#
+# Provenance store: scitex-clew records runs in the SciTeX PostgreSQL store
+# (SCITEX_STORE_DSN, else the per-host default). See README "Provenance store".
 
 .PHONY: \
-	help \
-	install \
-	install-dev \
-	setup \
-	setup-writer \
-	run-mnist \
-	run-mnist-download \
-	run-mnist-plot-digits \
-	run-mnist-plot-umap \
-	run-mnist-clf-svm \
-	run-mnist-conf-mat \
-	solve \
-	verify-claims \
-	clean-clew \
-	clean \
-	clean-mnist \
-	clean-outputs \
-	clean-data \
-	clean-logs \
-	clean-all \
-	clean-python \
-	clean-writer \
-	test \
-	test-verbose \
-	test-sync \
-	format \
-	format-python \
-	format-shell \
-	lint \
-	lint-python \
-	check \
-	info \
-	tree \
-	verify \
-	show-config
+	help install install-dev \
+	all run refs fetch register-source train stats figures notebook claims \
+	paper-init paper live-paper-build live-paper verify slice demo-fault \
+	hpc container submit \
+	lint format test clean clean-outputs clean-paper clean-all info tree
 
 .DEFAULT_GOAL := help
+# The pipeline steps are ordered; never run them concurrently (even with -j).
+.NOTPARALLEL:
 
-# ============================================
-# Configuration
-# ============================================
-PYTHON := python3
-PIP := pip3
-SCRIPTS_DIR := scripts
-MNIST_DIR := $(SCRIPTS_DIR)/mnist
-CONFIG_DIR := config
-DATA_DIR := data
-TESTS_DIR := tests
+PYTHON     ?= python3
+CLEW       ?= clew
+WRITER     ?= scitex-writer
+LIVE_PAPER ?= scitex-live-paper
+LINTER     ?= scitex-dev linter
+MNIST_DIR  := scripts/mnist
+WORKSPACE  := .scitex/writer
+BUNDLE     := data/live_paper/bundle
+SITE       := data/live_paper/site
+LP_HOST    ?= 127.0.0.1
+LP_PORT    ?= 8765
+CLAIM_IDS   = $$($(PYTHON) -c "import yaml;print(' '.join(i['ID'] for i in yaml.safe_load(open('config/CLAIMS.yaml'))['ITEMS']))")
 
-# ============================================
-# Help
-# ============================================
 help:
 	@echo ""
-	@echo "############################################################"
-	@echo "#      SciTeX Template Research - Makefile                 #"
-	@echo "############################################################"
+	@echo "SciTeX research template - MNIST showcase"
 	@echo ""
-	@echo "Setup & Installation:"
-	@echo "  make install                       # Install Python dependencies"
-	@echo "  make install-dev                   # Install dev dependencies (testing, linting)"
-	@echo "  make setup                         # Complete setup (install + verify)"
-	@echo "  make setup-writer                  # Clone writer template project (example_paper)"
+	@echo "  make install           Install the pinned SciTeX packages (requirements.txt)"
+	@echo "  make all               Run the whole showcase end to end (about 2 min on a CPU)"
+	@echo "  make live-paper        Build the live paper and serve it on http://$(LP_HOST):$(LP_PORT)/"
+	@echo "  make verify            clew verify --strict, then the minimal graph of each claim"
+	@echo "  make demo-fault        Plant a fault, render the live paper of it, restore (hash-checked)"
 	@echo ""
-	@echo "Running Scripts:"
-	@echo "  make run-mnist                     # Run complete MNIST pipeline"
-	@echo "  make run-mnist-download            # Download MNIST data"
-	@echo "  make run-mnist-plot-digits         # Plot MNIST digits"
-	@echo "  make run-mnist-plot-umap           # Create UMAP visualization"
-	@echo "  make run-mnist-clf-svm             # Train SVM classifier"
-	@echo "  make run-mnist-conf-mat            # Plot confusion matrix"
-	@echo ""
-	@echo "Cleaning:"
-	@echo "  make clean                         # Clean script outputs"
-	@echo "  make clean-mnist                   # Clean MNIST outputs only"
-	@echo "  make clean-outputs                 # Clean all *_out directories"
-	@echo "  make clean-data                    # Clean generated data files"
-	@echo "  make clean-logs                    # Clean log files"
-	@echo "  make clean-writer                  # Remove writer projects (use with caution!)"
-	@echo "  make clean-all                     # Clean everything (outputs + data + cache)"
-	@echo "  make clean-python                  # Clean Python cache files"
-	@echo ""
-	@echo "Code Quality:"
-	@echo "  make format                        # Format all code (Python + Shell)"
-	@echo "  make format-python                 # Format Python with ruff"
-	@echo "  make format-shell                  # Format shell with shfmt + shellcheck"
-	@echo "  make lint                          # Lint code with ruff"
-	@echo "  make check                         # Run format + lint + test"
-	@echo ""
-	@echo "Testing:"
-	@echo "  make test                          # Run all tests"
-	@echo "  make test-verbose                  # Run tests with verbose output"
-	@echo "  make test-sync                     # Sync test structure with scripts"
-	@echo ""
-	@echo "Information:"
-	@echo "  make info                          # Show project information"
-	@echo "  make tree                          # Show project structure"
-	@echo "  make verify                        # Verify installation and config"
-	@echo "  make show-config                   # Display configuration files (requires yq)"
+	@echo "  Steps:  refs (online, optional) | fetch | register-source | train | stats"
+	@echo "          figures | notebook | claims | paper-init | paper | live-paper-build"
+	@echo "  Optional: hpc (Slurm via scitex-hpc) | container (Apptainer) | submit (placeholder)"
+	@echo "  Quality:  lint | test | format"
+	@echo "  Cleanup:  clean-outputs | clean-paper | clean-all"
 	@echo ""
 
 # ============================================
-# Installation & Setup
+# Installation
 # ============================================
 install:
-	@echo "Installing Python dependencies..."
-	@if [ -f requirements.txt ]; then \
-		$(PIP) install -r requirements.txt; \
-		echo "Dependencies installed"; \
-	else \
-		echo "requirements.txt not found"; \
-		exit 1; \
-	fi
+	$(PYTHON) -m pip install -r requirements.txt
 
-install-dev:
-	@echo "Installing development dependencies..."
-	@$(PIP) install pytest pytest-cov ruff black isort mypy
-	@echo "Development dependencies installed"
+install-dev: install
+	$(PYTHON) -m pip install pytest ruff
 
-setup: install
-	@echo "Setting up project..."
-	@mkdir -p $(DATA_DIR)
-	@mkdir -p $(DATA_DIR)/mnist/figures
-	@mkdir -p $(DATA_DIR)/mnist/models
-	@mkdir -p $(DATA_DIR)/mnist/raw
-	@echo "Project setup complete"
-	@$(MAKE) verify
+# ============================================
+# The showcase, end to end
+# ============================================
+all: run claims paper live-paper-build verify
 	@echo ""
-	@echo "To create a writer project, run:"
-	@echo "  make setup-writer"
+	@echo "Done. Next: make live-paper   (then follow the guided tour it prints)"
+
+run: fetch register-source train stats figures notebook
+
+# 0. Literature (ONLINE, optional): resolve + enrich the bibliography with
+#    scitex-scholar. Its result is committed, so `make all` does not need it.
+refs:
+	$(PYTHON) $(MNIST_DIR)/00_resolve_references.py
+
+# 1. Data: scitex-dataset fetch (sha256-checked, cached, recorded)
+fetch:
+	$(PYTHON) $(MNIST_DIR)/01_fetch_mnist.py
+
+# Pin the downloaded file as a trusted source: claims are then green only if
+# their provenance chain reaches it (clew's registered-source gate).
+register-source:
+	$(CLEW) register-source --yes data/raw/mnist/mnist.npz
+
+# 2-4. Analysis (scitex-ml), statistics (scitex-stats), figures (figrecipe)
+train:
+	$(PYTHON) $(MNIST_DIR)/02_train_classifiers.py
+
+stats:
+	$(PYTHON) $(MNIST_DIR)/03_compare_classifiers.py
+
+figures:
+	$(PYTHON) $(MNIST_DIR)/04_plot_figure.py
+
+# Notebook variant of one step (scitex-notebook): executed top to bottom,
+# recorded like a script, then its cell DAG is checked.
+notebook:
+	$(CLEW) execute-notebook notebooks/01_count_classes.ipynb --cwd .
+	scitex-notebook check-notebook notebooks/01_count_classes.ipynb
+	scitex-notebook verify-notebook notebooks/01_count_classes.ipynb
+
+# 5. Claims: register every number of config/CLAIMS.yaml (writer -> clew)
+claims: paper-init
+	$(PYTHON) $(MNIST_DIR)/05_register_claims.py
+
+# 6. Manuscript (scitex-writer). paper-init creates the writer workspace once
+#    (network), copies the manuscript text from manuscript/ into it (the
+#    source of truth is manuscript/: workspace copies are overwritten on every
+#    run; writer needs real files there to locate each \vclaim), and links
+#    Figure 1 and the resolved bibliography into it.
+paper-init:
+	@test -d $(WORKSPACE)/00_shared || $(WRITER) create-project . --yes
+	@# writer's compile engine needs the workspace inside a git repo (it exits
+	@# 128 otherwise); create-project does not always initialise one.
+	@git -C $(WORKSPACE) rev-parse --show-toplevel >/dev/null 2>&1 || git -C $(WORKSPACE) init -q
+	@cd manuscript && find . -type f -name '*.tex' | while read -r f; do \
+		mkdir -p "../$(WORKSPACE)/$$(dirname "$$f")"; \
+		rm -f "../$(WORKSPACE)/$$f"; cp -f "$$f" "../$(WORKSPACE)/$$f"; \
+	done
+	@rm -f $(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/0[12]_*example*.tex \
+		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/02_another_example.tex \
+		$(WORKSPACE)/01_manuscript/contents/tables/caption_and_media/01_example_table.*
+	@ln -sfn "$$(realpath data/figures/fig1_mnist.png)" \
+		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/01_mnist_overview.png
+	@ln -sfn "$$(realpath data/literature/references.bib)" \
+		$(WORKSPACE)/00_shared/bib_files/references.bib
+	@echo "writer workspace ready: $(WORKSPACE)  (manuscript text: manuscript/)"
+
+paper: claims
+	$(WRITER) compile-manuscript -p . --yes
+	@echo "PDF: $(WORKSPACE)/01_manuscript/manuscript.pdf"
+
+# 7. Live paper (scitex-live-paper, evidence from scitex-clew)
+live-paper-build: paper
+	@rm -rf $(BUNDLE) $(SITE)
+	@mkdir -p $(BUNDLE)/figz
+	cp -f $(WORKSPACE)/01_manuscript/manuscript.pdf $(BUNDLE)/manuscript.pdf
+	cp -f data/figures/fig1_mnist.png $(BUNDLE)/figz/fig1_mnist.png
+	$(CLEW) export-claims --path $(BUNDLE)/claims.json --no-read-only
+	$(CLEW) export-evidence --out $(BUNDLE)/evidence-report.json
+	$(LIVE_PAPER) validate $(BUNDLE)
+	$(LIVE_PAPER) render $(BUNDLE) --out $(SITE) \
+		--evidence-report $(BUNDLE)/evidence-report.json \
+		--title "MNIST showcase" --project-label "$$(basename "$$PWD")"
+	@echo "live paper: $(SITE)/index.html"
+
+live-paper: live-paper-build
 	@echo ""
+	@echo "Guided tour of the live paper:"
+	@echo "  1. Open http://$(LP_HOST):$(LP_PORT)/paper.html -- the manuscript with every"
+	@echo "     registered claim highlighted. The claims navigator lists the claims"
+	@echo "     that need inspection first (after a fresh 'make all': none)."
+	@echo "  2. Click a highlighted claim (e.g. the SVM accuracy): the evidence panel"
+	@echo "     shows its state, stated vs source value, file and JSON pointer, and"
+	@echo "     its minimal graph: claim <- metrics.json <- training run <- arrays"
+	@echo "     <- the MNIST file scitex-dataset fetched (sha256-pinned source)."
+	@echo "     Deep link: http://$(LP_HOST):$(LP_PORT)/paper.html#claim-svc_accuracy"
+	@echo "  3. '10,000 images of the official test set' in the Results is NOT highlighted:"
+	@echo "     it was typed by hand and not registered, so the live paper says nothing about it."
+	@echo "  4. Then run 'make demo-fault' and open data/live_paper/site-fault/paper.html:"
+	@echo "     the changed claims move to the top, and their graph marks where the"
+	@echo "     evidence broke (the CHANGED metrics.json)."
+	@echo ""
+	cd $(SITE) && $(PYTHON) -m http.server $(LP_PORT) --bind $(LP_HOST)
 
-
+# ============================================
+# Verification
+# ============================================
 verify:
-	$(MAKE) verify-claims
+	$(CLEW) verify --strict
+	@$(MAKE) --no-print-directory slice
+
+slice:
+	@for id in $(CLAIM_IDS); do \
+		echo "== minimal graph of claim $$id"; \
+		$(CLEW) slice $$id || exit 1; \
+	done
+
+demo-fault:
+	PYTHON=$(PYTHON) CLEW=$(CLEW) LIVE_PAPER=$(LIVE_PAPER) bash "$(CURDIR)/scripts/demo/plant_fault.sh"
 
 # ============================================
-# Running MNIST Scripts
+# Optional: HPC, container, submission
 # ============================================
-run-mnist: run-mnist-download run-mnist-plot-digits run-mnist-plot-umap run-mnist-clf-svm run-mnist-conf-mat
-	@echo "MNIST pipeline complete."
+# Run the compute-heavy step (02_train_classifiers.py) on a Slurm cluster
+# through scitex-hpc. See README "Optional: HPC" -- the remote run is not yet
+# recorded by clew, so `make verify` reports the synced outputs as having no
+# lineage until clew can import a remote run.
+HPC_HOST ?= spartan
+HPC_ACCOUNT ?=
+HPC_PARTITION ?=
+hpc:
+	@test -n "$(HPC_ACCOUNT)" -a -n "$(HPC_PARTITION)" || \
+		{ echo "set HPC_ACCOUNT and HPC_PARTITION (e.g. make hpc HPC_ACCOUNT=punim0000 HPC_PARTITION=sapphire)"; exit 2; }
+	$(PYTHON) scripts/hpc/run_on_slurm.py --host $(HPC_HOST) \
+		--account $(HPC_ACCOUNT) --partition $(HPC_PARTITION)
 
-run-mnist-download:
-	$(PYTHON) $(MNIST_DIR)/01_download.py
+# Apptainer image with this project's Python environment (scitex-container).
+container:
+	$(PYTHON) -c "import scitex_container.apptainer as a; print(a.build(def_path='container/research.def', output_dir='container', image_name='research', force=True, cwd='.'))"
 
-run-mnist-plot-digits:
-	$(PYTHON) $(MNIST_DIR)/02_plot_digits.py
-
-run-mnist-plot-umap:
-	$(PYTHON) $(MNIST_DIR)/03_plot_umap_space.py
-
-run-mnist-clf-svm:
-	$(PYTHON) $(MNIST_DIR)/04_clf_svm.py
-
-run-mnist-conf-mat:
-	$(PYTHON) $(MNIST_DIR)/05_plot_conf_mat.py
-
-# --- Clew DAG terminus (agent target) -----------------------------------
-# `make solve` runs the real Clew DAG end-to-end:
-#   01_download.py   -> data/mnist/{*_flattened,*_labels}.npy (MNIST source)
-#   04_clf_svm.py    -> data/mnist/classification_report.csv (subsample-trained
-#                        SVM; set CONFIG.MNIST.SVM_TRAIN_SUBSET to control size)
-#   06_register_claims.py -> data/results/claims.json + scitex_clew.add_claim
-# The decorative stages (02_plot_digits, 03_plot_umap_space, 05_plot_conf_mat)
-# are NOT part of the validity-gate DAG; run them separately via
-# `make run-mnist` for the full pipeline including figures.
-solve: clean-clew
-	@test -L data/mnist/train_flattened.npy || $(PYTHON) $(MNIST_DIR)/01_download.py
-	$(PYTHON) $(MNIST_DIR)/04_clf_svm.py
-	$(PYTHON) $(MNIST_DIR)/06_register_claims.py
-
-# `make verify` is plain-Python (out-of-band; NOT in the agent's Clew DAG).
-verify-claims:
-	$(PYTHON) scripts/verify/check_schema.py
-
-clean-clew:
-	@rm -rf .scitex/clew/runtime 2>/dev/null || true
+submit:
+	@echo "make submit: placeholder. Submission to the SciTeX agentic journal"
+	@echo "(reviewers read the live paper) is under development; see README."
 
 # ============================================
-# Cleaning
+# Quality
 # ============================================
-clean:
-	@$(MGMT_SCRIPTS)/clean.sh
+lint:
+	$(LINTER) validate-files scripts
+	$(LINTER) validate-files tests
+	ruff check scripts tests
 
-clean-mnist:
-	$(MAKE) clean-data clean-outputs
+format:
+	ruff format scripts tests
 
-clean-outputs:
-	find scripts -type d -name '*_out' -prune -exec rm -rf {} + 2>/dev/null || true
-
-clean-data:
-	rm -rf data/mnist 2>/dev/null || true
-
-clean-logs:
-	find . -name '*.log' -type f -delete 2>/dev/null || true
-
-clean-all:
-	$(MAKE) clean-outputs clean-data clean-logs clean-python clean-clew
-
-clean-python:
-	find . -type d -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null || true; find . -name '*.pyc' -delete 2>/dev/null || true
-
-
-# ============================================
-# Testing
-# ============================================
 test:
-	@echo "Running tests..."
-	@if command -v pytest >/dev/null 2>&1; then \
-		pytest $(TESTS_DIR) -q; \
-	else \
-		echo "pytest not installed. Run: make install-dev"; \
-		exit 1; \
-	fi
-
-test-verbose:
-	@echo "Running tests (verbose)..."
-	@if command -v pytest >/dev/null 2>&1; then \
-		pytest $(TESTS_DIR) -v; \
-	else \
-		echo "pytest not installed. Run: make install-dev"; \
-		exit 1; \
-	fi
-
-test-sync:
-	@echo "Synchronizing test structure with scripts..."
-	@$(TESTS_DIR)/sync_tests_with_scripts.sh
-	@echo "Test synchronization complete"
+	$(PYTHON) -m pytest tests -q
 
 # ============================================
-# Code Quality
+# Cleanup
 # ============================================
-format: format-python format-shell
-	@echo ""
-	@echo "All formatting and linting complete!"
+clean-outputs:
+	find scripts notebooks -type d -name '*_out' ! -name '00_resolve_references_out' -prune -exec rm -rf {} +
+	find data/mnist data/results -mindepth 1 ! -name .gitkeep -delete
+	rm -rf data/figures data/live_paper
 
-format-python:
-	@echo "Formatting Python code with ruff..."
-	@if command -v ruff >/dev/null 2>&1; then \
-		ruff format $(SCRIPTS_DIR) $(TESTS_DIR) --quiet || echo "Ruff formatting completed with warnings"; \
-		echo "Python formatting complete"; \
-	else \
-		echo "Ruff not found. Install with: pip install ruff"; \
-		exit 1; \
-	fi
+clean-paper:
+	rm -rf $(WORKSPACE)
 
-format-shell:
-	@echo "Formatting and linting shell scripts..."
-	@if command -v shfmt >/dev/null 2>&1; then \
-		find $(SCRIPTS_DIR) $(MGMT_SCRIPTS) -name "*.sh" \
-			! -path "*/node_modules/*" \
-			! -path "*/.venv/*" \
-			-exec shfmt -w -i 4 -bn -ci -sr {} + \
-			2>&1 || echo "shfmt formatting completed with warnings"; \
-		echo "Shell formatting complete!"; \
-	else \
-		echo "shfmt not found. Install with: go install mvdan.cc/sh/v3/cmd/shfmt@latest"; \
-		echo "Skipping shell formatting..."; \
-	fi
-	@if command -v shellcheck >/dev/null 2>&1; then \
-		find $(SCRIPTS_DIR) $(MGMT_SCRIPTS) -name "*.sh" \
-			! -path "*/node_modules/*" \
-			! -path "*/.venv/*" \
-			-exec shellcheck --severity=error {} + \
-			2>&1 || echo "ShellCheck found errors"; \
-		echo "Shell linting complete!"; \
-	else \
-		echo "shellcheck not found. Install with: sudo apt-get install shellcheck"; \
-		echo "Skipping shell linting..."; \
-	fi
+clean-all: clean-outputs clean-paper
+	rm -rf data/raw .scitex/clew/runtime
 
-lint: lint-python
-
-lint-python:
-	@echo "Linting Python code with ruff..."
-	@if command -v ruff >/dev/null 2>&1; then \
-		ruff check $(SCRIPTS_DIR) $(TESTS_DIR) --quiet || echo "Ruff found issues"; \
-		echo "Linting complete"; \
-	else \
-		echo "Ruff not found. Install with: pip install ruff"; \
-		exit 1; \
-	fi
-
-check: format lint test
-	@echo ""
-	@echo "All checks passed!"
-
-# ============================================
-# Information & Diagnostics
-# ============================================
 info:
-	@echo "Project Information:"
-	@echo ""
-	@echo "  Project: SciTeX Template Research"
-	@echo "  Python: $$($(PYTHON) --version 2>&1)"
-	@echo "  Scripts: $$(find $(SCRIPTS_DIR) -name "*.py" | wc -l) Python files"
-	@echo "  Config: $$(ls -1 $(CONFIG_DIR)/*.yaml 2>/dev/null | wc -l) YAML files"
-	@echo ""
-	@echo "  MNIST Scripts:"
-	@echo "    - $$(ls -1 $(MNIST_DIR)/*.py 2>/dev/null | wc -l) scripts"
-	@echo "    - $$(ls -1d $(MNIST_DIR)/*_out 2>/dev/null | wc -l) output directories"
-	@echo ""
-	@if [ -d $(DATA_DIR)/mnist/figures ]; then \
-		echo "  Generated Figures: $$(ls -1 $(DATA_DIR)/mnist/figures/*.jpg 2>/dev/null | wc -l)"; \
-	fi
-	@if [ -d $(DATA_DIR)/mnist/models ]; then \
-		echo "  Saved Models: $$(ls -1 $(DATA_DIR)/mnist/models/*.pkl 2>/dev/null | wc -l)"; \
-	fi
+	@echo "Project: $$(basename "$$PWD")"
+	@echo "Python:  $$($(PYTHON) --version 2>&1)"
+	@echo "Scripts: $$(ls $(MNIST_DIR)/*.py | wc -l) in $(MNIST_DIR)"
+	@echo "Claims:  $(CLAIM_IDS)"
 
 tree:
-	@echo "Project Structure:"
-	@if command -v tree >/dev/null 2>&1; then \
-		tree -L 3 -I '__pycache__|*.pyc|.git|.venv|*.egg-info|.pytest_cache|.ruff_cache|.mypy_cache' -C; \
-	else \
-		echo "tree command not found. Install with: sudo apt-get install tree"; \
-		ls -R; \
-	fi
-
-show-config:
-	@echo "Configuration Files:"
-	@echo ""
-	@if command -v yq >/dev/null 2>&1; then \
-		for cfg in $(CONFIG_DIR)/*.yaml; do \
-			if [ -f "$$cfg" ]; then \
-				echo "$$cfg:"; \
-				yq -C '.' "$$cfg" 2>/dev/null || cat "$$cfg"; \
-				echo ""; \
-			fi; \
-		done; \
-	else \
-		echo "yq not installed. Showing raw YAML files:"; \
-		echo "(Install yq for colored output: sudo apt-get install yq or brew install yq)"; \
-		echo ""; \
-		for cfg in $(CONFIG_DIR)/*.yaml; do \
-			if [ -f "$$cfg" ]; then \
-				echo "$$cfg:"; \
-				cat "$$cfg"; \
-				echo ""; \
-			fi; \
-		done; \
-	fi
-
-# ============================================
-# Utility Targets
-# ============================================
-.SILENT: help
+	@tree -L 3 -I '__pycache__|*_out|.git|.venv' 2>/dev/null || ls -R
 
 # EOF

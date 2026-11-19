@@ -19,10 +19,9 @@ except ImportError:  # pragma: no cover — only on ancient Pythons
 
 from pathlib import Path
 
-# scitex_git is an optional dep (install via `scitex-template[legacy]`,
-# alongside `pip install scitex`) — re-export when available, otherwise
-# expose stubs that raise a clear ImportError if called. Keeps the
-# standalone install import-clean.
+# scitex_git is an optional dep (install the umbrella via `pip install scitex`)
+# — re-export when available, otherwise expose stubs that raise a clear
+# ImportError if called. Keeps the standalone install import-clean.
 from scitex_dev import try_import_optional
 
 _scitex_git = try_import_optional("scitex_git", pkg="scitex-git")
@@ -37,7 +36,7 @@ else:
         def _stub(*_a, **_k):
             raise ImportError(
                 f"{name} requires the scitex umbrella. "
-                "Install with: pip install scitex-template[legacy]"
+                "Install with: pip install scitex"
             )
 
         _stub.__name__ = name
@@ -113,7 +112,7 @@ def get_template_tree(template_id):
     try:
         from scitex_scholar.ensure_workspace import SCHOLAR_SUBDIRS  # type: ignore[import-not-found]
     except ImportError:
-        # scitex.scholar is optional (scitex-template[legacy]) — fall back
+        # scitex.scholar is optional (pip install scitex) — fall back
         # to a hardcoded list matching the scholar workspace convention.
         SCHOLAR_SUBDIRS = ["bib_files", "library", "prompts"]
 

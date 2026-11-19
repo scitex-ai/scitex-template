@@ -76,4 +76,4 @@ MCP tools: `template_list`, `template_info`, `template_clone`,
   (honors `SCITEX_DIR`).
 - **Downstream-clean per `01_arch_02`** — zero runtime dep on the scitex
   umbrella for the cache fast-path; legacy remote-clone uses `scitex.git`
-  via `[legacy]` extra.
+  (install the umbrella via `pip install scitex`).

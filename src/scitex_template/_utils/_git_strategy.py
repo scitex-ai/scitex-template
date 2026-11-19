@@ -25,10 +25,8 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
-import logging
-
-# scitex (umbrella) is an optional dep (install alongside
-# scitex-template[legacy]). Callers that reach apply_git_strategy()
+# scitex (umbrella) is an optional dep (install via `pip install scitex`).
+# Callers that reach apply_git_strategy()
 # need scitex.git; the cache fast-path does not.
 from scitex_dev import try_import_optional
 
@@ -39,7 +37,7 @@ scitex = try_import_optional("scitex", pkg="scitex")
 if scitex is not None:  # pragma: no cover
     try_import_optional("scitex.git", pkg="scitex")
 
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 from ._logging_helpers import log_group
 

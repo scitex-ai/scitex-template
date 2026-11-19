@@ -25,10 +25,8 @@ import tempfile
 from pathlib import Path
 from typing import List, Optional
 
-import logging
-
-# scitex (umbrella) is an optional dep (install alongside
-# scitex-template[legacy]). The cache fast-path for registered templates
+# scitex (umbrella) is an optional dep (install via `pip install scitex`).
+# The cache fast-path for registered templates
 # doesn't need it at all. The remote-clone fallback does — when
 # unavailable, that path raises a clear error via _require_scitex_git()
 # below.
@@ -39,7 +37,7 @@ if scitex is not None:  # pragma: no cover
     try_import_optional("scitex.git", pkg="scitex")
 
 
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 from .._utils._copy import copy_template
 from .._utils._customize import update_references

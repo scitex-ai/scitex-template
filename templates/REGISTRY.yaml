@@ -24,8 +24,8 @@ templates:
     path: templates/singularity
 
   - id: research
-    description: Full research project with writer, scholar, MNIST pipeline example
-    version: "0.1.0"
+    description: MNIST showcase from literature and data to verified claims and a live paper
+    version: "0.2.0"
     path: templates/research
 
   - id: paper
