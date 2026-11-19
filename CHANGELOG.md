@@ -6,6 +6,8 @@ All notable changes to `scitex-template` are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.7.4] – 2026-11-20
+
 ### Fixed
 - Export the documented `clone_template_from_cache`, `load_registry` and
   `find_template` functions from the package root. The installed standalone
