@@ -27,16 +27,16 @@ subsequent clone copies from that local cache.
 ```python
 from scitex_template import clone_template_from_cache, load_registry
 
+clone_template_from_cache("research", "./my-experiment")
+
 for entry in load_registry():
     print(entry.id, entry.version, entry.description)
-
-clone_template_from_cache("research", "./my-experiment")
 ```
 
 ## Next
 
-- [02_python-api.md](02_python-api.md) — Full Python surface
-- [03_cli-reference.md](03_cli-reference.md) — Every CLI subcommand + flag
-- [04_mcp-tools.md](04_mcp-tools.md) — Agent integration
+- [03_python-api.md](03_python-api.md) — Full Python surface
+- [04_cli-reference.md](04_cli-reference.md) — Every CLI subcommand + flag
+- [05_mcp-tools.md](05_mcp-tools.md) — Agent integration
 - [10_project-templates.md](10_project-templates.md) — Per-template details
 - [11_code-templates.md](11_code-templates.md) — Ready-to-use scitex code snippets
