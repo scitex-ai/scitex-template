@@ -4,6 +4,19 @@ All notable changes to `scitex-template` are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses
 [SemVer](https://semver.org/).
 
+## [0.7.2] – 2026-11-20
+
+### Added
+- Research template 0.2.0: an MNIST showcase from literature and data to
+  statistics, figures, registered claims, manuscript and live paper. Includes
+  strict verification, minimal slices and a fault demo with hash-checked restore.
+
+### Fixed
+- Include the audited logging and dependency declarations already on develop,
+  preserving main's cloner and provenance behavior. Diagnostics use
+  scitex-logging, optional MCP imports report the correct installation remedy,
+  and the empty legacy extra is removed.
+
 ## [0.7.1] – 2026-09-02
 
 ### Fixed
