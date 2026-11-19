@@ -5,6 +5,7 @@
   <a href="https://pypi.org/project/scitex-template/"><img src="https://img.shields.io/pypi/v/scitex-template?label=pypi" alt="pypi"></a>
   <a href="https://pypi.org/project/scitex-template/"><img src="https://img.shields.io/pypi/pyversions/scitex-template?label=python" alt="python"></a>
   <a href="https://github.com/ywatanabe1989/scitex-template/actions/workflows/rtd-sphinx-build-on-ubuntu-latest.yml"><img src="https://img.shields.io/github/actions/workflow/status/ywatanabe1989/scitex-template/rtd-sphinx-build-on-ubuntu-latest.yml?branch=develop&label=docs" alt="docs"></a>
+  <a href='https://scitex-template.readthedocs.io/en/latest/'><img src='https://img.shields.io/readthedocs/scitex-template?label=docs' alt='Read the Docs'></a>
 </p>
 <p align="center">
   <a href="https://github.com/ywatanabe1989/scitex-template/actions/workflows/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml"><img src="https://img.shields.io/github/actions/workflow/status/ywatanabe1989/scitex-template/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml?branch=develop&label=tests" alt="tests"></a>
@@ -16,7 +17,7 @@
 
 <p align="center">
   <a href="https://scitex.ai">
-    <img src="docs/scitex-logo-blue-cropped.png" alt="SciTeX" width="400">
+    <img src="docs/scitex-logo-blue-cropped.png" alt="SciTeX logo" width="400">
   </a>
 </p>
 
@@ -31,17 +32,22 @@
 | # | Problem | Solution |
 |---|---------|----------|
 | 1 | **Six template repos evolving independently** — minimal scitex-* package, research project, cloud-module plugin, pip project, LaTeX manuscript, singularity container | **One vendored monorepo + cloner** — `pip install scitex-template` ships every `clone_*` function, plus a code-snippet library for scitex idioms (session decorator, io save/load, plt subplots) |
-| 2 | **Cloner code buried in `scitex-python`** — release cadence didn't match the templates' | **Standalone cloner** — independent versioning, lazy umbrella imports, MCP server that exposes the same ops to agents |
+| 2 | **Cloner code** buried in `scitex-python` — release cadence didn't match the templates' | **Standalone cloner** — independent versioning, lazy umbrella imports, MCP server that exposes the same ops to agents |
 
-## Installation
+## Quick Start
 
 ```bash
-pip install scitex-template              # core (lazy imports for scitex.git / scitex.logging / scitex.scholar)
-pip install scitex-template[mcp]         # MCP server deps (fastmcp)
-pip install scitex-template[dev]         # pytest + coverage
+pip install scitex-template
+scitex-template list-templates
+scitex-template clone research ./my-experiment
 ```
 
-The umbrella route also works — `pip install scitex[template]` pulls this package transitively.
+```python
+from scitex_template import clone_research, get_code_template
+
+clone_research(target="my-experiment", project_name="my-experiment")
+print(get_code_template("session"))
+```
 
 ## Demo
 
@@ -65,40 +71,47 @@ graph LR
     CLI --> Out2["copy-paste idioms"]
 ```
 
+<sub><b>Figure 1.</b> Template sources (vendored repos + snippet library) and the two consumption paths: cloner CLI and snippet CLI.</sub>
+
+## Installation
+
+```bash
+uv pip install "scitex-template[all]"
+```
+
+<details>
+<summary>Per-module extras</summary>
+
+```bash
+pip install scitex-template         # core (lazy imports for scitex.git / scitex.logging / scitex.scholar)
+pip install scitex-template[mcp]    # MCP server deps (fastmcp)
+pip install scitex-template[dev]    # pytest + coverage
+pip install scitex-template[docs]   # sphinx docs
+```
+
+The umbrella route also works — `pip install scitex[template]` pulls this package transitively.
+
+</details>
+
 ## Architecture
 
+```mermaid
+flowchart LR
+    Cache["template cache<br/>~/.scitex/template/cache"] --> Clone["clone_project()"]
+    Clone --> Hit{"template registered?"}
+    Hit -->|yes| Fast["cache fast-path<br/>recursive copy + name substitution"]
+    Hit -->|no| Remote["remote-clone fallback<br/>git clone + keep essential dirs"]
+    Fast --> Custom["customize_template()"]
+    Remote --> Custom
+    Custom --> Git["apply_git_strategy()<br/>child / parent / origin / none"]
+    Git --> Out["fresh project dir"]
 ```
-scitex_template/
-├── templates/                ← 6 vendored template repos (kept in sync)
-│   ├── scitex-pkg/           ← minimal scitex-* package skeleton
-│   ├── research-project/     ← @stx.session-driven analysis layout
-│   ├── cloud-module-plugin/  ← scitex-cloud plugin scaffold
-│   ├── pip-project/          ← bare-bones PyPI package
-│   ├── latex-manuscript/     ← scitex-writer-compatible paper
-│   └── singularity/          ← apptainer container recipe
-├── snippets/                 ← copy-paste idioms (session, io, plt, ...)
-├── _cli/                     ← `scitex-template clone` / list / get
-└── _mcp/                     ← MCP server exposing the same ops to agents
-```
+
+<sub><b>Figure 2.</b> Clone flow: cache lookup, fast-path vs remote fallback, customization, then git initialization.</sub>
 
 Each template ships as plain files; cloning is a recursive copy with
 optional `{name}` substitution, no Cookiecutter-style runtime
 templating engine. The MCP server re-exports the CLI surface 1:1.
-
-## Quick Start
-
-```bash
-pip install scitex-template
-scitex-template list-templates
-scitex-template clone research ./my-experiment
-```
-
-```python
-from scitex_template import clone_research, get_code_template
-
-clone_research(target="my-experiment", project_name="my-experiment")
-print(get_code_template("session"))
-```
 
 ## 3 Interfaces
 
@@ -174,6 +187,8 @@ running Python themselves.
 | `singularity` | [singularity_template](https://github.com/ywatanabe1989/singularity_template) |
 | `paper` | [paper-template](https://github.com/ywatanabe1989/paper-template) |
 
+<sub><b>Table 1.</b> External template repositories cloned by `scitex-template`, keyed by template id.</sub>
+
 A future revision may vendor these as `templates/<id>/` subdirs in this repo so the cloner and the templates ship in lockstep.
 
 ## Dependency notes
@@ -202,5 +217,5 @@ the umbrella with `pip install scitex[template]` to use as
 ---
 
 <p align="center">
-  <a href="https://scitex.ai" target="_blank"><img src="docs/assets/images/scitex-icon-navy-inverted.png" alt="SciTeX" width="40"/></a>
+  <a href="https://scitex.ai" target="_blank"><img src="docs/scitex-icon-navy-inverted.png" alt="SciTeX" width="40"/></a>
 </p>

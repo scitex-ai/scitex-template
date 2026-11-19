@@ -6,9 +6,7 @@
 from pathlib import Path
 from typing import Dict, List, Union
 
-import logging
-
-getLogger = logging.getLogger
+from scitex_logging import getLogger
 
 logger = getLogger(__name__)
 

@@ -22,7 +22,11 @@ Contains:
 import sys
 from typing import List, Optional
 
+import scitex_logging as slogging
+
 from ._clone_project import clone_project
+
+log = slogging.getLogger(__name__)
 
 TEMPLATE_REPO_URL = "https://github.com/ywatanabe1989/scitex-writer.git"
 
@@ -102,14 +106,14 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print("Usage: python -m scitex clone_research_minimal <project-dir>")
-        print("")
-        print("Arguments:")
-        print("  project-dir   Path to project directory (will be created)")
-        print("                Can be a simple name like 'my_project' or a full path")
-        print("")
-        print("Example:")
-        print("  python -m scitex clone_research_minimal my_research_project")
+        log.error(
+            "Usage: python -m scitex clone_research_minimal <project-dir>\n"
+            "Arguments:\n"
+            "  project-dir   Path to project directory (will be created)\n"
+            "                Can be a simple name like 'my_project' or a full path\n"
+            "Example:\n"
+            "  python -m scitex clone_research_minimal my_research_project"
+        )
         sys.exit(1)
 
     project_dir = args[0]
