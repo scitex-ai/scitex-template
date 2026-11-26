@@ -6,6 +6,20 @@ All notable changes to `scitex-template` are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.7.5] – 2026-11-26
+
+### Fixed
+- A failed cache refresh no longer serves the stale cached template silently
+  (#81). `ensure_cache` refreshes with `git fetch --depth 1` + `reset --hard
+  FETCH_HEAD` + `clean -ffdx` (works on a shallow clone and switches branches),
+  checks every return code, and raises `CacheRefreshError` naming the cached
+  commit, its date and age. `scitex-template clone` exits 3 with that message;
+  `clone_project` no longer falls back to a remote clone on a refresh failure.
+
+### Added
+- `offline=True` / `scitex-template clone --offline`: the explicit opt-in to use
+  the existing cache without refreshing it; it warns with the cached commit.
+
 ## [0.7.4] – 2026-11-20
 
 ### Fixed

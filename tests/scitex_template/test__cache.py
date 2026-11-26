@@ -10,7 +10,7 @@ restore on teardown — no fixture-magic, no
 """
 
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import pytest
 
@@ -216,81 +216,4 @@ class TestCloneWritesManifest:
         assert self._manifest(target)["schema"] == "scitex-template/manifest@v1"
 
 
-# ---------------------------------------------------------------------------
-# ensure_cache — pull path with hand-rolled subprocess fake
-# ---------------------------------------------------------------------------
-
-
-class _FakeCompletedProcess:
-    def __init__(self) -> None:
-        self.returncode = 0
-        self.stderr = ""
-
-
-class _RecordingSubprocessRun:
-    """Records every ``subprocess.run`` invocation; returns success."""
-
-    def __init__(self) -> None:
-        self.calls: List[List[str]] = []
-
-    def __call__(self, cmd, **kw):
-        self.calls.append(list(cmd))
-        return _FakeCompletedProcess()
-
-
-class TestEnsureCachePullPath:
-    """When ``.git`` exists, ``ensure_cache`` runs ``git pull`` instead of clone."""
-
-    def test_returns_existing_cache_path(self, tmp_path):
-        # Arrange
-        cache = tmp_path / "cache"
-        (cache / ".git").mkdir(parents=True)
-        runner = _RecordingSubprocessRun()
-        restores = [
-            _swap_attr(_cache, "CACHE_ROOT", cache),
-            _swap_attr(_cache.subprocess, "run", runner),
-        ]
-        try:
-            # Act
-            result = _cache.ensure_cache()
-            # Assert
-            assert result == cache
-        finally:
-            for restore in reversed(restores):
-                restore()
-
-    def test_first_subprocess_call_runs_git_with_C_at_cache_root(self, tmp_path):
-        # Arrange
-        cache = tmp_path / "cache"
-        (cache / ".git").mkdir(parents=True)
-        runner = _RecordingSubprocessRun()
-        restores = [
-            _swap_attr(_cache, "CACHE_ROOT", cache),
-            _swap_attr(_cache.subprocess, "run", runner),
-        ]
-        try:
-            # Act
-            _cache.ensure_cache()
-            # Assert
-            assert runner.calls[0][:3] == ["git", "-C", str(cache)]
-        finally:
-            for restore in reversed(restores):
-                restore()
-
-    def test_first_subprocess_call_includes_pull_subcommand(self, tmp_path):
-        # Arrange
-        cache = tmp_path / "cache"
-        (cache / ".git").mkdir(parents=True)
-        runner = _RecordingSubprocessRun()
-        restores = [
-            _swap_attr(_cache, "CACHE_ROOT", cache),
-            _swap_attr(_cache.subprocess, "run", runner),
-        ]
-        try:
-            # Act
-            _cache.ensure_cache()
-            # Assert
-            assert "pull" in runner.calls[0]
-        finally:
-            for restore in reversed(restores):
-                restore()
+# ensure_cache refresh behaviour (real git, no fakes): test__cache_refresh.py
