@@ -167,14 +167,21 @@ def clone_project(
         # always tracks the monorepo's main branch).
         registry_id = _MONOREPO_REGISTRY_IDS.get(template_name)
         if registry_id is not None and branch is None and tag is None:
-            try:
-                from .._cache import clone_template_from_cache
+            from .._cache import CacheRefreshError, clone_template_from_cache
 
+            try:
                 clone_template_from_cache(registry_id, target_path)
                 log_final(f"Cloned {registry_id} from monorepo cache → {target_path}")
                 if include_dirs:
                     _filter_to_include_dirs(target_path, include_dirs)
                 return True
+            except CacheRefreshError as e:
+                # A stale cache must never be served silently, and the legacy
+                # remote clone below is not a substitute for it (issue #81).
+                logger.error(str(e))
+                if target_path.exists():
+                    shutil.rmtree(target_path)
+                return False
             except Exception as e:
                 logger.info(
                     f"Monorepo cache path failed ({e}); falling back to remote clone of {template_url}"

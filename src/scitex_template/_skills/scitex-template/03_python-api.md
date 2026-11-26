@@ -92,7 +92,8 @@ See [14_scholar-writer-integration.md](14_scholar-writer-integration.md).
 ```python
 from scitex_template._cache import ensure_cache, CACHE_ROOT, MONOREPO_URL
 
-ensure_cache()                 # idempotent; pulls existing checkout
+ensure_cache()                 # refresh to branch tip; raises CacheRefreshError on failure
+ensure_cache(offline=True)     # opt-in: use the existing cache as-is (warns with its commit)
 ensure_cache(force_refresh=True)  # wipe + re-clone
 print(CACHE_ROOT)              # ~/.scitex/template/cache/
 ```

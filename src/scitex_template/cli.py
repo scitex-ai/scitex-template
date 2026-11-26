@@ -188,6 +188,12 @@ def info_cmd(ctx: click.Context, template_id: str, as_json: bool) -> None:
     show_default=True,
     help="Branch of the scitex-template monorepo to track in the cache.",
 )
+@click.option(
+    "--offline",
+    is_flag=True,
+    help="Use the existing cache without refreshing it (no network). "
+    "Without this flag a failed refresh is an error, never a stale copy.",
+)
 @click.option("--dry-run", is_flag=True, help="Print clone plan without writing.")
 @click.option(
     "-y", "--yes", is_flag=True, help="Suppress interactive confirmation (assume yes)."
@@ -197,6 +203,7 @@ def clone_cmd(
     target: Path,
     force_refresh: bool,
     branch: str,
+    offline: bool,
     dry_run: bool,
     yes: bool,
 ) -> None:
@@ -207,19 +214,27 @@ def clone_cmd(
       $ scitex-template clone minimal ./my-paper
       $ scitex-template clone research ./my-project --branch develop
       $ scitex-template clone app ./my-app --dry-run
+      $ scitex-template clone research ./my-project --offline
     """
     if dry_run:
         click.echo(
             f"DRY RUN — would clone template '{template_id}' to {target} "
-            f"(branch={branch}, force_refresh={force_refresh})"
+            f"(branch={branch}, force_refresh={force_refresh}, offline={offline})"
         )
         return
-    from ._cache import clone_template_from_cache
+    from ._cache import CacheRefreshError, clone_template_from_cache
 
     try:
         out = clone_template_from_cache(
-            template_id, target, branch=branch, force_refresh=force_refresh
+            template_id,
+            target,
+            branch=branch,
+            force_refresh=force_refresh,
+            offline=offline,
         )
+    except CacheRefreshError as e:
+        click.echo(f"error: {e}", err=True)
+        sys.exit(3)
     except KeyError as e:
         click.echo(str(e), err=True)
         sys.exit(1)
