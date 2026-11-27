@@ -23,6 +23,12 @@ All notable changes to `scitex-template` are documented here. Format follows
   quick start. Existing clone and registry checks exercise these public imports.
 - Correct the quick-start links to the Python, CLI and MCP reference pages.
 
+### Changed
+- Subprocess coverage is now configured declaratively in pyproject.toml via
+  coverage.py's `patch = ["subprocess"]`; `tests/conftest.py` no longer
+  installs a `.pth` hook into site-packages or overwrites `COVERAGE_PROCESS_START` /
+  `COVERAGE_FILE`.
+
 ## [0.7.1] – 2026-09-02
 
 ### Fixed
