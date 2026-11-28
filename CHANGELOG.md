@@ -6,6 +6,23 @@ All notable changes to `scitex-template` are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.7.6] – 2026-11-28
+
+### Changed
+- Research template: the manuscript text is committed in the writer workspace
+  `.scitex/writer/` (alias link `manuscript/`), so the SciTeX Hub's Writer opens
+  a new research project and `make paper-init` only installs the writer engine
+  around the text (scitex-writer >= 2.46.0), never overwriting edits. Figure 1
+  and the bibliography are committed relative links. `customize_template`
+  titles a manuscript in `.scitex/writer/00_shared/` (#84, #88).
+### Changed
+- Subprocess coverage is now configured declaratively in pyproject.toml via
+  coverage.py's `patch = ["subprocess"]`; `tests/conftest.py` no longer
+  installs a `.pth` hook into site-packages or overwrites `COVERAGE_PROCESS_START` /
+  `COVERAGE_FILE`.
+
+## [0.7.5] – 2026-11-26
+
 ### Fixed
 - A failed cache refresh no longer serves the stale cached template silently
   (#81). `ensure_cache` refreshes with `git fetch --depth 1` + `reset --hard
@@ -17,17 +34,36 @@ All notable changes to `scitex-template` are documented here. Format follows
 ### Added
 - `offline=True` / `scitex-template clone --offline`: the explicit opt-in to use
   the existing cache without refreshing it; it warns with the cached commit.
+
+## [0.7.4] – 2026-11-20
+
+### Fixed
 - Export the documented `clone_template_from_cache`, `load_registry` and
   `find_template` functions from the package root. The installed standalone
   cache-clone path is now available through the Python imports shown in the
   quick start. Existing clone and registry checks exercise these public imports.
 - Correct the quick-start links to the Python, CLI and MCP reference pages.
 
-### Changed
-- Subprocess coverage is now configured declaratively in pyproject.toml via
-  coverage.py's `patch = ["subprocess"]`; `tests/conftest.py` no longer
-  installs a `.pth` hook into site-packages or overwrites `COVERAGE_PROCESS_START` /
-  `COVERAGE_FILE`.
+## [0.7.3] – 2026-11-20
+
+### Fixed
+- Use the canonical hosted, CI-gated release workflow instead of the legacy
+  Spartan-only wrapper, which required an unavailable `/data/gpfs` path on
+  fleet runners. Version 0.7.2 stopped before building or publishing; its tag
+  remains unchanged. The MNIST research showcase is unchanged.
+
+## [0.7.2] – 2026-11-20
+
+### Added
+- Research template 0.2.0: an MNIST showcase from literature and data to
+  statistics, figures, registered claims, manuscript and live paper. Includes
+  strict verification, minimal slices and a fault demo with hash-checked restore.
+
+### Fixed
+- Include the audited logging and dependency declarations already on develop,
+  preserving main's cloner and provenance behavior. Diagnostics use
+  scitex-logging, optional MCP imports report the correct installation remedy,
+  and the empty legacy extra is removed.
 
 ## [0.7.1] – 2026-09-02
 
