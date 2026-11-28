@@ -36,7 +36,8 @@ ipykernel>=6
 scitex-clew>=0.35.0
 # Manuscript and live paper
 # 2.44.0: claims stored in scitex-clew with locators (\vclaim, value-vs-source)
-scitex-writer>=2.44.1
+# 2.46.0: installs its engine around a manuscript shipped in .scitex/writer
+scitex-writer>=2.46.0
 scitex-live-paper>=0.5.0
 # Quality gate (`make lint`)
 scitex-dev>=0.64.1

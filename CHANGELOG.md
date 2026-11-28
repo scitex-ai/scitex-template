@@ -6,6 +6,21 @@ All notable changes to `scitex-template` are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.7.6] – 2026-11-28
+
+### Changed
+- Research template: the manuscript text is committed in the writer workspace
+  `.scitex/writer/` (alias link `manuscript/`), so the SciTeX Hub's Writer opens
+  a new research project and `make paper-init` only installs the writer engine
+  around the text (scitex-writer >= 2.46.0), never overwriting edits. Figure 1
+  and the bibliography are committed relative links. `customize_template`
+  titles a manuscript in `.scitex/writer/00_shared/` (#84, #88).
+### Changed
+- Subprocess coverage is now configured declaratively in pyproject.toml via
+  coverage.py's `patch = ["subprocess"]`; `tests/conftest.py` no longer
+  installs a `.pth` hook into site-packages or overwrites `COVERAGE_PROCESS_START` /
+  `COVERAGE_FILE`.
+
 ## [0.7.5] – 2026-11-26
 
 ### Fixed

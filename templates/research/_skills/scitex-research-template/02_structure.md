@@ -11,11 +11,11 @@ my_project/
 │   ├── hpc/             # optional Slurm dispatch (make hpc)
 │   └── template.py      # starting point for a new script
 ├── notebooks/           # notebook variant of one step (make notebook)
-├── manuscript/          # the paper's text; linked into .scitex/writer/ by make paper-init
+├── manuscript -> .scitex/writer   # alias of the writer workspace holding the paper's text
 ├── data/                # links to script outputs (scripts/**/<script>_out/)
 ├── container/           # optional Apptainer definition (make container)
 ├── tests/scripts/       # tests mirroring scripts/
-├── .scitex/             # dev config (committed); clew runtime + writer workspace (not committed)
+├── .scitex/             # dev config + manuscript text in writer/ (committed); clew state + writer engine (not committed)
 └── Makefile             # all / live-paper / verify / demo-fault / lint / test
 ```
 

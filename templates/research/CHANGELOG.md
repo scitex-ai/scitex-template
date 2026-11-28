@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (manuscript location)
+- The manuscript text is committed in the writer workspace `.scitex/writer/`,
+  with `manuscript/` kept as an alias link. The SciTeX Hub editor, your editor
+  and `make paper` now read and write the same files; `make paper-init` no
+  longer copies text over the workspace, so it never discards edits. It only
+  installs the writer engine around the text (scitex-writer 2.46.0 or later).
+- Figure 1 and the resolved bibliography are committed relative links, so a
+  fresh checkout initialises before the analysis has produced them.
+- `make clean-paper` removes the installed engine and build outputs only.
+
 ### Changed (MNIST showcase, 0.2.0)
 - The MNIST example now runs the SciTeX ecosystem end to end: scitex-scholar
   (references), scitex-dataset (checksummed fetch), scitex-session/io/config/repro,
