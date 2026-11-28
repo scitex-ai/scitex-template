@@ -132,6 +132,7 @@ def _update_readme(path: Path, meta: Dict) -> None:
 def _update_title_tex(path: Path, meta: Dict) -> None:
     """Write project name to title.tex if found."""
     for candidate in [
+        path / ".scitex" / "writer" / "00_shared" / "title.tex",
         path / "00_shared" / "title.tex",
         path / "paper" / "manuscript" / "src" / "title.tex",
         path / "scitex" / "writer" / "00_shared" / "title.tex",
@@ -148,6 +149,7 @@ def _update_authors_tex(path: Path, meta: Dict) -> None:
         return
 
     for candidate in [
+        path / ".scitex" / "writer" / "00_shared" / "authors.tex",
         path / "00_shared" / "authors.tex",
         path / "paper" / "manuscript" / "src" / "authors.tex",
         path / "scitex" / "writer" / "00_shared" / "authors.tex",

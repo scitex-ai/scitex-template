@@ -36,8 +36,8 @@ FIGURES:
   FIG1: f"./data/figures/fig1_mnist.png"
 
 PAPER:
-  # scitex-writer workspace (created by `make paper-init`); the manuscript
-  # text itself lives in ./manuscript/ and is copied into the workspace.
+  # scitex-writer workspace. The manuscript text is committed here (alias
+  # ./manuscript); `make paper-init` installs the writer engine around it.
   WORKSPACE: f"./.scitex/writer"
   PDF: f"./.scitex/writer/01_manuscript/manuscript.pdf"
 
