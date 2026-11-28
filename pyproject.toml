@@ -54,6 +54,7 @@ dependencies = [
 # of this.
 
 [project.optional-dependencies]
+writer = ["scitex-writer>=2.44.1"]
 mcp = [
     "mcp>=1.0.0",
 ]
@@ -84,6 +85,7 @@ docs = [
 # Not solved by renaming them `_dev`/`_docs`: PEP 508/685 forbid leading
 # underscores in extra names and setuptools/hatchling/pip/uv all reject them.
 all = [
+    "scitex-template[writer]",
     "scitex-template[mcp]",
     "scitex-template[dev]",
     "scitex-template[docs]",

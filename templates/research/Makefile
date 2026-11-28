@@ -108,28 +108,9 @@ notebook:
 claims: paper-init
 	$(PYTHON) $(MNIST_DIR)/05_register_claims.py
 
-# 6. Manuscript (scitex-writer). paper-init creates the writer workspace once
-#    (network), copies the manuscript text from manuscript/ into it (the
-#    source of truth is manuscript/: workspace copies are overwritten on every
-#    run; writer needs real files there to locate each \vclaim), and links
-#    Figure 1 and the resolved bibliography into it.
+# 6. Complete the Writer runtime around the version-controlled manuscript.
 paper-init:
-	@test -d $(WORKSPACE)/00_shared || $(WRITER) create-project . --yes
-	@# writer's compile engine needs the workspace inside a git repo (it exits
-	@# 128 otherwise); create-project does not always initialise one.
-	@git -C $(WORKSPACE) rev-parse --show-toplevel >/dev/null 2>&1 || git -C $(WORKSPACE) init -q
-	@cd manuscript && find . -type f -name '*.tex' | while read -r f; do \
-		mkdir -p "../$(WORKSPACE)/$$(dirname "$$f")"; \
-		rm -f "../$(WORKSPACE)/$$f"; cp -f "$$f" "../$(WORKSPACE)/$$f"; \
-	done
-	@rm -f $(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/0[12]_*example*.tex \
-		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/02_another_example.tex \
-		$(WORKSPACE)/01_manuscript/contents/tables/caption_and_media/01_example_table.*
-	@ln -srfn data/figures/fig1_mnist.png \
-		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/01_mnist_overview.png
-	@ln -srfn data/literature/references.bib \
-		$(WORKSPACE)/00_shared/bib_files/references.bib
-	@echo "writer workspace ready: $(WORKSPACE)  (manuscript text: manuscript/)"
+	$(PYTHON) -m scitex_template.research_writer .
 
 paper: claims
 	$(WRITER) compile-manuscript -p . --yes
@@ -231,7 +212,7 @@ clean-outputs:
 	rm -rf data/figures data/live_paper
 
 clean-paper:
-	rm -rf $(WORKSPACE)
+	rm -f $(WORKSPACE)/01_manuscript/manuscript.pdf $(WORKSPACE)/02_supplementary/supplementary.pdf
 
 clean-all: clean-outputs clean-paper
 	rm -rf data/raw .scitex/clew/runtime

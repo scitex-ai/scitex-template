@@ -31,6 +31,9 @@ def clone_research(
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
     tag: Optional[str] = None,
+    initialize_writer: bool = False,
+    writer_branch: Optional[str] = None,
+    writer_tag: Optional[str] = None,
     **kwargs,
 ) -> bool:
     """
@@ -63,7 +66,7 @@ def clone_research(
     >>> clone_research("my_project", branch="develop")
     >>> clone_research("my_project", tag="v1.0.0")
     """
-    return clone_project(
+    cloned = clone_project(
         project_dir,
         TEMPLATE_REPO_URL,
         "scitex-research-template",
@@ -71,6 +74,15 @@ def clone_research(
         branch,
         tag,
     )
+    if cloned and initialize_writer:
+        from pathlib import Path
+
+        from ..research_writer import initialize_research_writer
+
+        initialize_research_writer(
+            Path(project_dir), branch=writer_branch, tag=writer_tag
+        )
+    return cloned
 
 
 def main(args: list = None) -> None:

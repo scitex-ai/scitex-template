@@ -85,7 +85,7 @@ is what makes it checkable.
 | `figures` | Three panels in mm (SCITEX style), composed from their recipes | figrecipe |
 | `notebook` | The same contract in a notebook, executed and verified | scitex-notebook |
 | `claims` | Register every number of `config/CLAIMS.yaml` with its locator | scitex-writer -> scitex-clew |
-| `paper` | Compile `manuscript/` (linked into the writer workspace) to PDF | scitex-writer |
+| `paper` | Compile the tracked manuscript to PDF | scitex-writer |
 | `live-paper-build` | Bundle + clew evidence report + static site in `data/live_paper/site/` | scitex-live-paper |
 | `verify` | `clew verify --strict`, then `clew slice <claim>` for each claim | scitex-clew |
 | `lint` | SciTeX lint rules (research project) + ruff | scitex-dev |
@@ -102,7 +102,7 @@ in `config/PATH.yaml`.
 config/            parameters (MNIST, STATS, FIGURE, CLAIMS, SCHOLAR, HPC) and PATH.yaml
 scripts/mnist/     00_resolve_references ... 05_register_claims (one step each)
 notebooks/         notebook variant of one step
-manuscript/        the paper's text (linked into the writer workspace by `make paper-init`)
+manuscript/        alias of .scitex/writer/; edit the same tracked sections in Git and Writer
 data/              stable links to script outputs (scripts/**/<script>_out/)
 scripts/demo/      the planted-fault demo
 scripts/hpc/       optional Slurm dispatch

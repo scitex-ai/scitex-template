@@ -37,7 +37,7 @@ FIGURES:
 
 PAPER:
   # scitex-writer workspace (created by `make paper-init`); the manuscript
-  # text itself lives in ./manuscript/ and is copied into the workspace.
+  # text itself lives in .scitex/writer/; ./manuscript/ points to that workspace.
   WORKSPACE: f"./.scitex/writer"
   PDF: f"./.scitex/writer/01_manuscript/manuscript.pdf"
 
