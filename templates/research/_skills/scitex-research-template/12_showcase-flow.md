@@ -15,7 +15,7 @@ The example project runs the SciTeX ecosystem end to end. Each step is one
 | Figures | `figures` | `scripts/mnist/04_plot_figure.py` | figrecipe (mm panels, compose from recipes) |
 | Notebook variant | `notebook` | `notebooks/01_count_classes.ipynb` | scitex-notebook, `clew execute-notebook` |
 | Claims | `claims` | `scripts/mnist/05_register_claims.py` + `config/CLAIMS.yaml` | scitex-writer -> scitex-clew |
-| Manuscript | `paper` | `manuscript/` linked into `.scitex/writer/` | scitex-writer |
+| Manuscript | `paper` | tracked sections in `.scitex/writer/` (alias `manuscript/`) | scitex-writer |
 | Live paper | `live-paper` | `scitex-live-paper render` with clew's evidence | scitex-live-paper |
 | Gate | `verify` | `clew verify --strict`, `clew slice <claim>` | scitex-clew |
 | Demo | `demo-fault` | `scripts/demo/plant_fault.sh` | clew + live-paper |
