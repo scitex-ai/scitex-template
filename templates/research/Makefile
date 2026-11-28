@@ -108,28 +108,20 @@ notebook:
 claims: paper-init
 	$(PYTHON) $(MNIST_DIR)/05_register_claims.py
 
-# 6. Manuscript (scitex-writer). paper-init creates the writer workspace once
-#    (network), copies the manuscript text from manuscript/ into it (the
-#    source of truth is manuscript/: workspace copies are overwritten on every
-#    run; writer needs real files there to locate each \vclaim), and links
-#    Figure 1 and the resolved bibliography into it.
+# 6. Manuscript (scitex-writer). The manuscript text is committed in the
+#    writer workspace itself ($(WORKSPACE), alias manuscript/), so there is
+#    one copy of it: what the SciTeX Hub editor and your editor change is what
+#    compiles. Figure 1 and the resolved bibliography are committed relative
+#    links into data/ (they resolve once `make figures` / `make refs` ran).
+#    paper-init installs the writer engine (scripts, styles, base.tex) around
+#    that text. It only ADDS what is missing, so it is safe to re-run on an
+#    edited manuscript; the first run fetches the engine (network).
 paper-init:
-	@test -d $(WORKSPACE)/00_shared || $(WRITER) create-project . --yes
+	@$(WRITER) create-project . --yes >/dev/null
 	@# writer's compile engine needs the workspace inside a git repo (it exits
-	@# 128 otherwise); create-project does not always initialise one.
+	@# 128 otherwise); a copy made without git has none.
 	@git -C $(WORKSPACE) rev-parse --show-toplevel >/dev/null 2>&1 || git -C $(WORKSPACE) init -q
-	@cd manuscript && find . -type f -name '*.tex' | while read -r f; do \
-		mkdir -p "../$(WORKSPACE)/$$(dirname "$$f")"; \
-		rm -f "../$(WORKSPACE)/$$f"; cp -f "$$f" "../$(WORKSPACE)/$$f"; \
-	done
-	@rm -f $(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/0[12]_*example*.tex \
-		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/02_another_example.tex \
-		$(WORKSPACE)/01_manuscript/contents/tables/caption_and_media/01_example_table.*
-	@ln -sfn "$$(realpath data/figures/fig1_mnist.png)" \
-		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/01_mnist_overview.png
-	@ln -sfn "$$(realpath data/literature/references.bib)" \
-		$(WORKSPACE)/00_shared/bib_files/references.bib
-	@echo "writer workspace ready: $(WORKSPACE)  (manuscript text: manuscript/)"
+	@echo "writer workspace ready: $(WORKSPACE)  (alias: manuscript/)"
 
 paper: claims
 	$(WRITER) compile-manuscript -p . --yes
@@ -230,8 +222,10 @@ clean-outputs:
 	find data/mnist data/results -mindepth 1 ! -name .gitkeep -delete
 	rm -rf data/figures data/live_paper
 
+# Removes the installed writer engine and build outputs (every git-ignored
+# path in the workspace). The committed manuscript text is never touched.
 clean-paper:
-	rm -rf $(WORKSPACE)
+	git clean -fdX -- $(WORKSPACE)
 
 clean-all: clean-outputs clean-paper
 	rm -rf data/raw .scitex/clew/runtime
