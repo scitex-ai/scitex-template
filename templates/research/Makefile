@@ -125,9 +125,9 @@ paper-init:
 	@rm -f $(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/0[12]_*example*.tex \
 		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/02_another_example.tex \
 		$(WORKSPACE)/01_manuscript/contents/tables/caption_and_media/01_example_table.*
-	@ln -sfn "$$(realpath data/figures/fig1_mnist.png)" \
+	@ln -srfn data/figures/fig1_mnist.png \
 		$(WORKSPACE)/01_manuscript/contents/figures/caption_and_media/01_mnist_overview.png
-	@ln -sfn "$$(realpath data/literature/references.bib)" \
+	@ln -srfn data/literature/references.bib \
 		$(WORKSPACE)/00_shared/bib_files/references.bib
 	@echo "writer workspace ready: $(WORKSPACE)  (manuscript text: manuscript/)"
 
